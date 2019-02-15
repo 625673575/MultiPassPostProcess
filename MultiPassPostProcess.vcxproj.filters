@@ -27,5 +27,8 @@
     <None Include="Data\Glitch.ps.hlsl">
       <Filter>Data</Filter>
     </None>
+    <None Include="Data\Kuwahara.ps.hlsl">
+      <Filter>Data</Filter>
+    </None>
   </ItemGroup>
 </Project>
