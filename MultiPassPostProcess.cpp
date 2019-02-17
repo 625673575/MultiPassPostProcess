@@ -40,93 +40,26 @@ void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     if (mEnableGaussianBlur)
     {
         mpGaussianBlur->renderUI(pGui, "Blur Settings");
-        pGui->addCheckBox("Grayscale", mEnableGrayscale);
     }
-    pGui->addCheckBox("Sharp", mEnableSharp);
-    if (mEnableSharp)
-    {
-        pGui->addFloatVar("Contrast", mdSharpContrast, 0.1f, 10.0f);
-        pGui->addFloat2Var("Saturation", mdSharpSaturation, 0.0f, 1.0f);
-        pGui->addIntVar("Light Num", mSharpLightNum, 0, LIGHT_COUNT);
-        if (mdSharpLight.size() != mSharpLightNum) {
-            mdSharpLight.resize(mSharpLightNum);
-            if (mSharpLightNum == 1) {
-                mdSharpLight[0].intensity = LIGHT_COUNT;
-            }
-            else {
-                std::for_each(mdSharpLight.begin(), mdSharpLight.end(), [this](SLight& x) -> void {if (x.intensity == 10.0f / (mSharpLightNum - 1) || x.intensity == 1.0f || x.intensity == 0.0f) x.intensity = 10.0f / mSharpLightNum; });
-            }
-        }
-        for (int32_t i = 0; i < mSharpLightNum; ++i) {
-            pGui->addRgbColor(std::to_string(i).data(), mdSharpLight[i].color);
-            pGui->addFloatSlider(std::to_string(i).data(), mdSharpLight[i].intensity, 1.0f, 10.0f);
-        }
-        pGui->addCheckBox("Count FS invocations", mdCountPixelShaderInvocations);
-
+    for (auto& v : postProcessor) {
+        v->onGuiRender();
     }
 
-    pGui->addCheckBox("FilmGrain", mEnableFilmGrain);
-    if (mEnableFilmGrain) {
-        pGui->addFloatSlider("Strength", mdFilmGrainStrength, 1, 100);
-    }
-    pGui->addCheckBox("Glitch", mEnableGlitch);
-    if (mEnableGlitch) {
-        pGui->addFloatSlider("Strength", mdGlitchStrength, 0.01f, 1.0f);
-    }
-    pGui->addCheckBox("Kuwahara", mEnableKuwahara);
-    if (mEnableKuwahara) {
-        pGui->addIntSlider("Radius", mdKuwaharaRadius, 2, 16);
-    }
 }
-
 void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext)
 {
-    {
-        mpGaussianBlur = GaussianBlur::create(5);
-        mpBlit = FullScreenPass::create("Blit.ps.hlsl");
-        mpLuminance = FullScreenPass::create("Luminance.ps.hlsl");
-        mpSharp = FullScreenPass::create("Sharp.ps.hlsl");
-        mpFilmGrain = FullScreenPass::create("FilmGrain.ps.hlsl");
-        mpGlitch = FullScreenPass::create("Glitch.ps.hlsl");
-        mpKuwahara = FullScreenPass::create("Kuwahara.ps.hlsl");
-    }
-    {
-        mpProgVars = GraphicsVars::create(mpBlit->getProgram()->getReflector());
-        mpSharpVars = GraphicsVars::create(mpSharp->getProgram()->getReflector());
-        mpFilmGrainVars = GraphicsVars::create(mpFilmGrain->getProgram()->getReflector());
-        mpGlitchVars = GraphicsVars::create(mpGlitch->getProgram()->getReflector());
-        mpKuwaharaVars = GraphicsVars::create(mpKuwahara->getProgram()->getReflector());
-    }
-    for (uint32_t i = 0; i < mpFilmGrainVars->getParameterBlockCount(); i++) {
+    mpGaussianBlur = GaussianBlur::create(5);
+    mpBlit = FullScreenPass::create("Blit.ps.hlsl");
+    mpProgVars = GraphicsVars::create(mpBlit->getProgram()->getReflector());
 
-        auto block = mpFilmGrainVars->getParameterBlock(i);
-        auto layout = block->getReflection()->getDescriptorSetLayouts();
-    }
-    {
-        //Buffer<float>定义
-        constexpr auto sizeofBuffer = sizeof(mdSharpSaturation) / sizeof(glm::vec1);
-        mpSharpSaturationBuffer = TypedBuffer<float>::create(sizeofBuffer);
-        mpSharpVars->setTypedBuffer("gSaturation", mpSharpSaturationBuffer);
+    postProcessor.emplace_back(new PostProcessMixer());
+    postProcessor.emplace_back(new PostProcessVignette());
+    postProcessor.emplace_back(new PostProcessGlitch());
+    postProcessor.emplace_back(new PostProcessSharp());
+    postProcessor.emplace_back(new PostProcessFilmGrain());
 
-        //StructureBuffer定义
-        mpSharpLightBuffer = StructuredBuffer::create(mpSharp->getProgram(), "gLight", 10);
-        mpSharpVars->setStructuredBuffer("gLight", mpSharpLightBuffer);
-
-        uint32_t z = 0;
-        mpInvocationsBuffer = Buffer::create(sizeof(uint32_t), Buffer::BindFlags::UnorderedAccess, Buffer::CpuAccess::Read, &z);
-        mpSharpVars->setRawBuffer("gInvocationBuffer", mpInvocationsBuffer);
-    }
-    {
-        mdSharpContrast = 1.0f;
-        mdSharpSaturation = glm::vec2(0.0f, 1.0f);
-        mSharpLightNum = 1;
-        mdSharpLight.resize(mSharpLightNum);
-        for (auto &v : mdSharpLight) {
-            v.intensity = float(LIGHT_COUNT) / mSharpLightNum;
-        }
-        mdFilmGrainStrength = 24;
-        mdGlitchStrength = 0.05f;
-        mdKuwaharaRadius = 4;
+    for (auto& v : postProcessor) {
+        v->loadProgram(pSample, pRenderContext, pSample->getGui());
     }
 }
 
@@ -147,7 +80,7 @@ void MultiPassPostProcess::loadImageFromFile(SampleCallbacks* pSample, std::stri
 
     Fbo::Desc fboDesc;
     fboDesc.setColorTarget(0, mpImage->getFormat());
-    mpTempFB = FboHelper::create2D(mpImage->getWidth(), mpImage->getHeight(), fboDesc);
+    mpTempFB = FboHelper::create2D(mpImage->getWidth(), mpImage->getHeight()/2, fboDesc);
 
     pSample->resizeSwapChain(mpImage->getWidth(), mpImage->getHeight());
 }
@@ -171,15 +104,13 @@ void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext
 
     if (mpImage)
     {
-        mEnableGrayscale = mEnableGaussianBlur && mEnableGrayscale;
-
         pContext->setGraphicsVars(mpProgVars);
 
         if (mEnableGaussianBlur)
         {
             mpGaussianBlur->execute(pContext, mpImage, mpTempFB);
             mpProgVars->setTexture("gTexture", mpTempFB->getColorTexture(0));
-            const FullScreenPass* pFinalPass = mEnableGrayscale ? mpLuminance.get() : mpBlit.get();
+            const FullScreenPass* pFinalPass = mpBlit.get();
             pFinalPass->execute(pContext);
         }
         else {
@@ -187,65 +118,10 @@ void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext
             mpBlit->execute(pContext);
         }
 
-        if (mEnableSharp) {
-
-            pContext->setGraphicsVars(mpSharpVars);
-            mpSharpVars->setTexture("gTexture", pContext->getGraphicsState()->getFbo()->getColorTexture(0));
-
-            mpSharpSaturationBuffer[0] = mdSharpSaturation.x;
-            mpSharpSaturationBuffer[1] = mdSharpSaturation.y;
-            mpSharpSaturationBuffer->uploadToGPU();
-
-            mpSharpVars["SharpParamCB"]["contrast"] = mdSharpContrast;
-            mpSharpVars["SharpParamCB"]["invocation"] = mdCountPixelShaderInvocations;
-            for (int32_t i = 0; i < mSharpLightNum; ++i) {
-                mpSharpLightBuffer[i]["color"] = mdSharpLight[i].color;
-                mpSharpLightBuffer[i]["intensity"] = mdSharpLight[i].intensity;
-            }
-            mpSharp->execute(pContext);
-
-            if (mdCountPixelShaderInvocations)
-            {
-                // RWByteAddressBuffer
-                uint32_t* pData = (uint32_t*)mpInvocationsBuffer->map(Buffer::MapType::Read);
-                std::string msg = "PS was invoked " + std::to_string(*pData) + " times";
-                pSample->renderText(msg, vec2(300, 100));
-                mpInvocationsBuffer->unmap();
-
-                //// RWStructuredBuffer UAV Counter
-                //pData = (uint32_t*)mpRWBuffer->getUAVCounter()->map(Buffer::MapType::Read);
-                //msg = "UAV Counter counted " + std::to_string(*pData) + " times";
-                //pSample->renderText(msg, vec2(600, 120));
-                //mpRWBuffer->getUAVCounter()->unmap();
-
-                pContext->clearUAV(mpInvocationsBuffer->getUAV().get(), uvec4(0));
-                //pContext->clearUAVCounter(mpRWBuffer, 0);
-            }
+        for (auto& v : postProcessor) {
+            v->onFrameRender();
         }
 
-        if (mEnableFilmGrain) {
-            pContext->setGraphicsVars(mpFilmGrainVars);
-            mpFilmGrainVars->setTexture("gTexture", pContext->getGraphicsState()->getFbo()->getColorTexture(0));
-            mpFilmGrainVars["FilmGrainCB"]["iGlobalTime"] = pSample->getCurrentTime();
-            mpFilmGrainVars["FilmGrainCB"]["strength"] = mdFilmGrainStrength;
-            mpFilmGrain->execute(pContext);
-        }
-
-        if (mEnableGlitch) {
-            pContext->setGraphicsVars(mpGlitchVars);
-            mpGlitchVars->setTexture("gTexture", pContext->getGraphicsState()->getFbo()->getColorTexture(0));
-            mpGlitchVars["GlitchCB"]["iGlobalTime"] = pSample->getCurrentTime();
-            mpGlitchVars["GlitchCB"]["strength"] = mdGlitchStrength;
-            mpGlitch->execute(pContext);
-        }
-
-        if (mEnableKuwahara) {
-            pContext->setGraphicsVars(mpKuwaharaVars);
-            mpKuwaharaVars->setTexture("gTexture", pContext->getGraphicsState()->getFbo()->getColorTexture(0));
-            mpKuwaharaVars["KuwaharaCB"]["iResolution"] = vec2(mpImage->getWidth(), mpImage->getHeight());
-            mpKuwaharaVars["KuwaharaCB"]["radius"] = mdKuwaharaRadius;
-            mpKuwahara->execute(pContext);
-        }
     }
 }
 
@@ -261,9 +137,6 @@ bool MultiPassPostProcess::onKeyEvent(SampleCallbacks* pSample, const KeyboardEv
         {
         case KeyboardEvent::Key::L:
             loadImage(pSample);
-            return true;
-        case KeyboardEvent::Key::G:
-            mEnableGrayscale = true;
             return true;
         case KeyboardEvent::Key::B:
             mEnableGaussianBlur = true;
@@ -285,11 +158,7 @@ void MultiPassPostProcess::onInitializeTesting(SampleCallbacks* pSample)
     if (argList.argExists("gaussianblur"))
     {
         mEnableGaussianBlur = true;
-        if (argList.argExists("grayscale"))
-        {
-            mEnableGrayscale = true;
-        }
-}
+    }
 }
 
 #ifdef _WIN32

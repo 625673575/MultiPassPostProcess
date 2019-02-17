@@ -12,9 +12,24 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MultiPassPostProcess.cpp" />
+    <ClCompile Include="PostProcessBase.cpp" />
+    <ClCompile Include="PostProcessFilmGrain.cpp" />
+    <ClCompile Include="PostProcessGlitch.cpp" />
+    <ClCompile Include="PostProcessMixer.cpp" />
+    <ClCompile Include="PostProcessSharp.cpp" />
+    <ClCompile Include="PostProcessToneMapping.cpp" />
+    <ClCompile Include="PostProcessVignette.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MultiPassPostProcess.h" />
+    <ClInclude Include="PostProcessBase.h" />
+    <ClInclude Include="PostProcessFilmGrain.h" />
+    <ClInclude Include="PostProcessGlitch.h" />
+    <ClInclude Include="PostProcessMixer.h" />
+    <ClInclude Include="PostProcessSharp.h" />
+    <ClInclude Include="PostProcessToneMapping.h" />
+    <ClInclude Include="PostProcessVignette.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Framework\Source\Falcor.vcxproj">
@@ -23,7 +38,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Blit.ps.hlsl" />
-    <None Include="Data\Luminance.ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Sharp.ps.hlsl">
@@ -41,9 +55,28 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Data\Kuwahara.ps.hlsl">
+    <None Include="Data\ToneMapping.func.hlsl">
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MultiPassPostProcess.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\Common.func.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Data\Vignette.ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\Mixer.ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Data\ColorGrading.func.hlsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{282AAB9B-2150-447C-9C27-62C38C23761E}</ProjectGuid>

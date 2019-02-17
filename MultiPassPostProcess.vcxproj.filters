@@ -2,9 +2,24 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="MultiPassPostProcess.cpp" />
+    <ClCompile Include="PostProcessBase.cpp" />
+    <ClCompile Include="PostProcessGlitch.cpp" />
+    <ClCompile Include="PostProcessFilmGrain.cpp" />
+    <ClCompile Include="PostProcessSharp.cpp" />
+    <ClCompile Include="PostProcessToneMapping.cpp" />
+    <ClCompile Include="PostProcessVignette.cpp" />
+    <ClCompile Include="PostProcessMixer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MultiPassPostProcess.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="PostProcessBase.h" />
+    <ClInclude Include="PostProcessGlitch.h" />
+    <ClInclude Include="PostProcessFilmGrain.h" />
+    <ClInclude Include="PostProcessSharp.h" />
+    <ClInclude Include="PostProcessToneMapping.h" />
+    <ClInclude Include="PostProcessVignette.h" />
+    <ClInclude Include="PostProcessMixer.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Data">
@@ -13,9 +28,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Blit.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\Luminance.ps.hlsl">
       <Filter>Data</Filter>
     </None>
     <None Include="Data\Sharp.ps.hlsl">
@@ -27,8 +39,19 @@
     <None Include="Data\Glitch.ps.hlsl">
       <Filter>Data</Filter>
     </None>
-    <None Include="Data\Kuwahara.ps.hlsl">
+    <None Include="Data\ToneMapping.func.hlsl">
       <Filter>Data</Filter>
     </None>
+    <None Include="Data\Common.func.hlsl" />
+    <None Include="Data\Vignette.ps.hlsl" />
+    <None Include="Data\Mixer.ps.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MultiPassPostProcess.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Data\ColorGrading.func.hlsl">
+      <Filter>Data</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

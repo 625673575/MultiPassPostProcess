@@ -27,7 +27,11 @@
 ***************************************************************************/
 #pragma once
 #include "Falcor.h"
-
+#include "PostProcessMixer.h"
+#include "PostProcessVignette.h"
+#include "PostProcessSharp.h"
+#include "PostProcessGlitch.h"
+#include "PostProcessFilmGrain.h"
 using namespace Falcor;
 
 class MultiPassPostProcess : public Renderer
@@ -53,37 +57,12 @@ private:
     //VideoDecoder::UniquePtr mpVideoDecoder;
     GaussianBlur::UniquePtr mpGaussianBlur;
     FullScreenPass::UniquePtr mpBlit;
-    FullScreenPass::UniquePtr mpLuminance;
-    FullScreenPass::UniquePtr mpSharp;
-    FullScreenPass::UniquePtr mpFilmGrain;
-    FullScreenPass::UniquePtr mpGlitch;
-    FullScreenPass::UniquePtr mpKuwahara;
 
+    std::vector<PostProcessBase::UniquePtr> postProcessor;
+  
     GraphicsVars::SharedPtr mpProgVars;
-    GraphicsVars::SharedPtr mpSharpVars;
-    GraphicsVars::SharedPtr mpFilmGrainVars;
-    GraphicsVars::SharedPtr mpGlitchVars;
-    GraphicsVars::SharedPtr mpKuwaharaVars;
-    float mdSharpContrast;
-    glm::vec2 mdSharpSaturation;
-    int32_t mSharpLightNum;
-    std::vector<SLight> mdSharpLight;
-    float mdFilmGrainStrength;
-    float mdGlitchStrength;
-    int mdKuwaharaRadius;
-
-    TypedBuffer<float>::SharedPtr mpSharpSaturationBuffer;
-    StructuredBuffer::SharedPtr mpSharpLightBuffer;
-    Buffer::SharedPtr mpInvocationsBuffer;
-
-    bool mdCountPixelShaderInvocations = false;
+    
     bool mEnableGaussianBlur = false;
-    bool mEnableGrayscale = false;
-    bool mEnableSharp = false;
-    bool mEnableFilmGrain = false;
-    bool mEnableGlitch = false;
-    bool mEnableKuwahara = false;
-
 
     void loadImage(SampleCallbacks* pSample);
     void loadImageFromFile(SampleCallbacks* pSample, std::string filename);
