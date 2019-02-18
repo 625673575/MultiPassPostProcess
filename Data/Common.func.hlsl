@@ -92,7 +92,7 @@ inline half4 Pow4(half4 x)
 }
 #endif
 
-// Returns the largest vector of v1 and v2
+// Returns the largest floattor of v1 and v2
 inline half2 MaxV(half2 v1, half2 v2)
 {
     return dot(v1, v1) < dot(v2, v2) ? v2 : v1;
@@ -123,15 +123,6 @@ inline half4 SafeHDR(half4 c)
 {
     return min(c, HALF_MAX);
 }
-
-// Compatibility function
-#if (SHADER_TARGET < 50 && !defined(SHADER_API_PSSL))
-float rcp(float value)
-{
-    return 1.0 / value;
-}
-#endif
-
 // Tonemapper from http://gpuopen.com/optimized-reversible-tonemapper-for-resolve/
 float4 FastToneMap(in float4 color)
 {
@@ -154,4 +145,46 @@ float GradientNoise(float2 uv)
     uv = floor(uv * float2(1920, 1080));
     float f = dot(float2(0.06711056, 0.00583715), uv);
     return frac(52.9829189 * frac(f));
+}
+
+float rand2d(float2 co)
+{
+    return frac(sin(dot(co.xy, float2(12.9898, 78.233))) * 43758.5453);
+}
+
+float rand(float n)
+{
+    return frac(sin(n) * 43758.5453123);
+}
+
+float noise(float p)
+{
+    float fl = floor(p);
+    float fc = frac(p);
+    return lerp(rand(fl), rand(fl + 1.0), fc);
+}
+
+float mod(float x, float y)
+{
+    return x - y * floor(x / y);
+}
+
+float map(float val, float amin, float amax, float bmin, float bmax)
+{
+    float n = (val - amin) / (amax - amin);
+    float m = bmin + n * (bmax - bmin);
+    return m;
+}
+
+float snoise(float p)
+{
+    return map(noise(p), 0.0, 1.0, -1.0, 1.0);
+}
+
+float threshold(float val, float cut)
+{
+    float v = clamp(abs(val) - cut, 0.0, 1.0);
+    v = sign(val) * v;
+    float scale = 1.0 / (1.0 - cut);
+    return v * scale;
 }

@@ -45,6 +45,17 @@ void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
         v->onGuiRender();
     }
 
+    static ivec4 rect(200, 400, 500, 100);
+    pGui->pushWindow("ShaderToy", rect.x, rect.y, rect.z, rect.w, false, true, true, false);
+    pGui->addText("Keyboard Shortcuts");
+    //pGui->addTooltip(help, true);
+
+    for (auto& v : shaderToy) {
+        v->onGuiRender();
+    }
+
+    pGui->popWindow();
+
 }
 void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext)
 {
@@ -57,8 +68,16 @@ void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRend
     postProcessor.emplace_back(new PostProcessGlitch());
     postProcessor.emplace_back(new PostProcessSharp());
     postProcessor.emplace_back(new PostProcessFilmGrain());
+    postProcessor.emplace_back(new PostProcessBugTV());
+
+    shaderToy.emplace_back(new ShaderToyImplementation("Topologica"));
+    shaderToy.emplace_back(new ShaderToyImplementation("Heart3D"));
+    shaderToy.emplace_back(new ShaderToyImplementation("OceanStructure"));
 
     for (auto& v : postProcessor) {
+        v->loadProgram(pSample, pRenderContext, pSample->getGui());
+    }
+    for (auto& v : shaderToy) {
         v->loadProgram(pSample, pRenderContext, pSample->getGui());
     }
 }
@@ -80,7 +99,7 @@ void MultiPassPostProcess::loadImageFromFile(SampleCallbacks* pSample, std::stri
 
     Fbo::Desc fboDesc;
     fboDesc.setColorTarget(0, mpImage->getFormat());
-    mpTempFB = FboHelper::create2D(mpImage->getWidth(), mpImage->getHeight()/2, fboDesc);
+    mpTempFB = FboHelper::create2D(mpImage->getWidth(), mpImage->getHeight() / 2, fboDesc);
 
     pSample->resizeSwapChain(mpImage->getWidth(), mpImage->getHeight());
 }
@@ -102,7 +121,15 @@ void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext
     const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
     pContext->clearFbo(pTargetFbo.get(), clearColor, 0, 0, FboAttachmentType::Color);
 
-    if (mpImage)
+    bool hasShaderToy = false;
+    for (auto& v : shaderToy) {
+        if (v->enable()) {
+            hasShaderToy = true;
+            v->onFrameRender();
+            return;
+        }
+    }
+    if (!hasShaderToy && mpImage)
     {
         pContext->setGraphicsVars(mpProgVars);
 
@@ -143,6 +170,12 @@ bool MultiPassPostProcess::onKeyEvent(SampleCallbacks* pSample, const KeyboardEv
             return true;
         }
     }
+    return false;
+}
+
+bool MultiPassPostProcess::onMouseEvent(SampleCallbacks * pSample, const MouseEvent & mouseEvent)
+{
+    PostProcessBase::SetMouseState(glm::vec3(mouseEvent.pos, mouseEvent.type));
     return false;
 }
 

@@ -13,8 +13,11 @@ protected:
     RenderContext* pContext;
     Gui* pGui;
     Texture::SharedPtr pTexture;
+    Sampler::SharedPtr pLineWarpSampler;
+    Sampler::SharedPtr pLineBoardSampler;
+    static vec3 vMouseState;
 public:
-using UniquePtr = std::unique_ptr<PostProcessBase>;
+    using UniquePtr = std::unique_ptr<PostProcessBase>;
     using ShaderPass = FullScreenPass::UniquePtr;
     using ShaderVar = GraphicsVars::SharedPtr;
     using ShaderTex = Texture::SharedPtr;
@@ -25,28 +28,15 @@ protected:
     virtual void gui() {}
 public:
     virtual void loadProgram(SampleCallbacks* pSample, RenderContext* pContext, Gui* pGui);
-    void onGuiRender() {
-        pGui->addCheckBox(name.c_str(), bEnable);
-        if (bEnable) { gui(); }
-    }
-    void onFrameRender() {
-        if (bEnable)execute();
-    }
+    void onGuiRender();
+    void onFrameRender();
 
-    void SetTexture(const Texture::SharedPtr& t) {
-        pTexture = t;
-    }
-    void loadImage(std::function<void(const std::string& filename)> f)
-    {
-        std::string filename;
-        FileDialogFilterVec filters = { {"bmp"}, {"jpg"}, {"dds"}, {"png"}, {"tiff"}, {"tif"}, {"tga"},{"gif"} };
-        if (openFileDialog(filters, filename))
-        {
-            f(filename);
-        }
-    }
+    void SetTexture(const Texture::SharedPtr& t) { pTexture = t; }
+    static void SetMouseState(vec3 t) { vMouseState = t; }
+    void loadImage(std::function<void(const std::string& filename)> f);
 
     bool enable() { return bEnable; }
     vec2 getResolution() { return { pSample->getWindow()->getClientAreaWidth(),pSample->getWindow()->getClientAreaWidth() }; }
+    vec3 getMousePos() { return { pSample->getWindow()->getClientAreaWidth()*vMouseState.x,pSample->getWindow()->getClientAreaWidth()*vMouseState.y,vMouseState.z }; }
 };
 

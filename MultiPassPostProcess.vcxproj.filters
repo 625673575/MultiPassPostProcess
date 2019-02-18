@@ -9,6 +9,8 @@
     <ClCompile Include="PostProcessToneMapping.cpp" />
     <ClCompile Include="PostProcessVignette.cpp" />
     <ClCompile Include="PostProcessMixer.cpp" />
+    <ClCompile Include="PostProcessBugTV.cpp" />
+    <ClCompile Include="ShaderToyImplementation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MultiPassPostProcess.h" />
@@ -20,6 +22,8 @@
     <ClInclude Include="PostProcessToneMapping.h" />
     <ClInclude Include="PostProcessVignette.h" />
     <ClInclude Include="PostProcessMixer.h" />
+    <ClInclude Include="PostProcessBugTV.h" />
+    <ClInclude Include="ShaderToyImplementation.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Data">
@@ -42,16 +46,35 @@
     <None Include="Data\ToneMapping.func.hlsl">
       <Filter>Data</Filter>
     </None>
-    <None Include="Data\Common.func.hlsl" />
-    <None Include="Data\Vignette.ps.hlsl" />
-    <None Include="Data\Mixer.ps.hlsl" />
+    <None Include="Data\Common.func.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\Mixer.ps.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\ColorGrading.func.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\BugTV.ps.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\Topologica.ps.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\GlslContainer.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\Vignette.ps.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\Heart3D.ps.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\OceanStructure.ps.hlsl">
+      <Filter>Data</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MultiPassPostProcess.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Data\ColorGrading.func.hlsl">
-      <Filter>Data</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>

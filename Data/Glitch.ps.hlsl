@@ -12,26 +12,16 @@ float mod(float x, float y)
 {
     return x - y * floor(x / y);
 }
-float sat(float t)
-{
-    return clamp(t, 0.0, 1.0);
-}
-
-float2 sat(float2 t)
-{
-    return clamp(t, 0.0, 1.0);
-}
-
 //remaps inteval [a;b] to [0;1]
 float remap(float t, float a, float b)
 {
-    return sat((t - a) / (b - a));
+    return saturate((t - a) / (b - a));
 }
 
 //note: /\ t=[0;0.5;1], y=[0;1;0]
 float linterp(float t)
 {
-    return sat(1.0 - abs(2.0 * t - 1.0));
+    return saturate(1.0 - abs(2.0 * t - 1.0));
 }
 
 float3 spectrum_offset(float t)
@@ -67,18 +57,18 @@ float4 calcColor(float2 uv)
 
     float GLITCH = strength;
     
-    float gnm = sat(GLITCH);
+    float gnm = saturate(GLITCH);
     float rnd0 = rand(mytrunc(float2(time, time), 6.0));
-    float r0 = sat((1.0 - gnm) * 0.7 + rnd0);
+    float r0 = saturate((1.0 - gnm) * 0.7 + rnd0);
     float rnd1 = rand(float2(mytrunc(uv.x, 10.0 * r0), time)); //horz
 	//float r1 = 1.0f - sat( (1.0f-gnm)*0.5f + rnd1 );
     float r1 = 0.5 - 0.5 * gnm + rnd1;
     r1 = 1.0 - max(0.0, ((r1 < 1.0) ? r1 : 0.9999999)); //note: weird ass bug on old drivers
     float rnd2 = rand(float2(mytrunc(uv.y, 40.0 * r1), time)); //vert
-    float r2 = sat(rnd2);
+    float r2 = saturate(rnd2);
 
     float rnd3 = rand(float2(mytrunc(uv.y, 10.0 * r0), time));
-    float r3 = (1.0 - sat(rnd3 + 0.8)) - 0.1;
+    float r3 = (1.0 - saturate(rnd3 + 0.8)) - 0.1;
 
     float pxrnd = rand(uv + time);
 
@@ -95,7 +85,7 @@ float4 calcColor(float2 uv)
     for (int i = 0; i < NUM_SAMPLES; ++i)
     {
         float t = float(i) * RCP_NUM_SAMPLES_F;
-        uv.x = sat(uv.x + ofs * t);
+        uv.x = saturate(uv.x + ofs * t);
         float4 samplecol = gTexture.Sample(gSampler, uv);
         float3 s = spectrum_offset(t);
         samplecol.rgb = samplecol.rgb * s;

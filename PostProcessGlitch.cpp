@@ -1,16 +1,5 @@
 #include "PostProcessGlitch.h"
 
-
-
-PostProcessGlitch::PostProcessGlitch():dGlitchStrength(0.05f)
-{
-}
-
-
-PostProcessGlitch::~PostProcessGlitch()
-{
-}
-
 void PostProcessGlitch::execute()
 {
     pContext->setGraphicsVars(vGlitch);
@@ -25,6 +14,7 @@ void PostProcessGlitch::loadProgram(SampleCallbacks* pSample, RenderContext* pCo
     PostProcessBase::loadProgram(pSample, pContext, pGui);
     name = "Glitch";
     SET_PROGRAM_VARS(Glitch, "Glitch.ps.hlsl");
+    dGlitchStrength=0.05f;
 }
 
 void PostProcessGlitch::gui()

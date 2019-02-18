@@ -32,6 +32,9 @@
 #include "PostProcessSharp.h"
 #include "PostProcessGlitch.h"
 #include "PostProcessFilmGrain.h"
+#include "PostProcessBugTV.h"
+#include "ShaderToyImplementation.h"
+
 using namespace Falcor;
 
 class MultiPassPostProcess : public Renderer
@@ -50,6 +53,7 @@ public:
     void onFrameRender(SampleCallbacks* pSample, RenderContext* pRenderContext, const Fbo::SharedPtr& pTargetFbo) override;
     void onShutdown(SampleCallbacks* pSample) override;
     bool onKeyEvent(SampleCallbacks* pSample, const KeyboardEvent& keyEvent) override;
+    bool onMouseEvent(SampleCallbacks* pSample, const MouseEvent& mouseEvent) override;
     void onGuiRender(SampleCallbacks* pSample, Gui* pGui) override;
 private:
     Texture::SharedPtr mpImage;
@@ -59,6 +63,7 @@ private:
     FullScreenPass::UniquePtr mpBlit;
 
     std::vector<PostProcessBase::UniquePtr> postProcessor;
+    std::vector<PostProcessBase::UniquePtr> shaderToy;
   
     GraphicsVars::SharedPtr mpProgVars;
     

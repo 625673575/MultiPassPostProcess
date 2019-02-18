@@ -13,16 +13,19 @@
   <ItemGroup>
     <ClCompile Include="MultiPassPostProcess.cpp" />
     <ClCompile Include="PostProcessBase.cpp" />
+    <ClCompile Include="PostProcessBugTV.cpp" />
     <ClCompile Include="PostProcessFilmGrain.cpp" />
     <ClCompile Include="PostProcessGlitch.cpp" />
     <ClCompile Include="PostProcessMixer.cpp" />
     <ClCompile Include="PostProcessSharp.cpp" />
     <ClCompile Include="PostProcessToneMapping.cpp" />
     <ClCompile Include="PostProcessVignette.cpp" />
+    <ClCompile Include="ShaderToyImplementation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MultiPassPostProcess.h" />
     <ClInclude Include="PostProcessBase.h" />
+    <ClInclude Include="PostProcessBugTV.h" />
     <ClInclude Include="PostProcessFilmGrain.h" />
     <ClInclude Include="PostProcessGlitch.h" />
     <ClInclude Include="PostProcessMixer.h" />
@@ -30,6 +33,7 @@
     <ClInclude Include="PostProcessToneMapping.h" />
     <ClInclude Include="PostProcessVignette.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="ShaderToyImplementation.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Framework\Source\Falcor.vcxproj">
@@ -76,7 +80,32 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Data\ColorGrading.func.hlsl" />
+    <None Include="Data\ColorGrading.func.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\BugTV.ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\GlslContainer.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Data\Topologica.ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\Heart3D.ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\OceanStructure.ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{282AAB9B-2150-447C-9C27-62C38C23761E}</ProjectGuid>
