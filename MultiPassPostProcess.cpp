@@ -26,6 +26,13 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************/
 #include "MultiPassPostProcess.h"
+
+Texture::SharedPtr MultiPassPostProcess::pTextureNoise = nullptr;
+Texture::SharedPtr MultiPassPostProcess::pTextureStar = nullptr;
+Texture::SharedPtr MultiPassPostProcess::pTextureGirl = nullptr;
+Texture::SharedPtr MultiPassPostProcess::pTextureWoodFloor = nullptr;
+std::vector<Texture::SharedPtr> MultiPassPostProcess::gRencentFrames = std::vector<Texture::SharedPtr>();
+
 void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 {
     if (pGui->addButton("Load Image"))
@@ -47,7 +54,6 @@ void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 
     static ivec4 rect(200, 400, 500, 100);
     pGui->pushWindow("ShaderToy", rect.x, rect.y, rect.z, rect.w, false, true, true, false);
-    pGui->addText("Keyboard Shortcuts");
     //pGui->addTooltip(help, true);
 
     for (auto& v : shaderToy) {
@@ -56,9 +62,25 @@ void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 
     pGui->popWindow();
 
+    static ivec4 frameRect(200, 900, 600, 100);
+    pGui->pushWindow("History Frames", frameRect.x, frameRect.y, frameRect.z, frameRect.w, false, true, true, false);
+    //pGui->addText("History Frames");
+    //pGui->addTooltip(help, true);
+
+    for (auto& v : gRencentFrames) {
+        pGui->addImage("", v);
+    }
+
+    pGui->popWindow();
+
 }
 void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext)
 {
+    pTextureNoise = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\noise1024.png", false, true);
+    pTextureStar = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\star.jpg", false, true);
+    pTextureGirl = createTextureFromFile("c:\\Users\\Liu\\Pictures\\mnv.jpg", false, true);
+    pTextureWoodFloor = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\wood_floor.jpg", false, true);
+
     mpGaussianBlur = GaussianBlur::create(5);
     mpBlit = FullScreenPass::create("Blit.ps.hlsl");
     mpProgVars = GraphicsVars::create(mpBlit->getProgram()->getReflector());
@@ -77,10 +99,14 @@ void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRend
     shaderToy.emplace_back(new ShaderToyImplementation("Topologica"));
     std::vector<std::string> volcanic_name{ "VolcanicBuffer0", "Volcanic" };
     auto toy_volcanic = new ShaderToyImplementation(volcanic_name);
-    toy_volcanic->setTexture(0, "iChannel0", "c:\\Users\\Liu\\Pictures\\mnv.jpg");
-    toy_volcanic->setTexture(0, "iChannel1", "c:\\Users\\Liu\\Pictures\\mnv.jpg");
+    toy_volcanic->setTexture(0, "iChannel0", pTextureWoodFloor);
+    toy_volcanic->setTexture(0, "iChannel1", pTextureNoise);
     shaderToy.emplace_back(toy_volcanic);
-    
+
+    auto toy_pirates = new ShaderToyImplementation("Pirates");
+    toy_pirates->setTexture(0, "iChannel0", pTextureWoodFloor);
+    toy_pirates->setTexture(0, "iChannel1", pTextureNoise);
+    shaderToy.emplace_back(toy_pirates);
 
     for (auto& v : postProcessor) {
         v->loadProgram(pSample, pRenderContext, pSample->getGui());
@@ -158,7 +184,17 @@ void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext
         for (auto& v : postProcessor) {
             v->onFrameRender();
         }
+    }
 
+    if (!pSample->isTimeFrozen()) {
+        Texture::SharedPtr& a = pContext->getGraphicsState()->getFbo()->getColorTexture(0);
+        auto newFrame = Texture::create2D(a->getWidth(), a->getHeight(), a->getFormat(), a->getArraySize(), 1);
+        gpDevice->getRenderContext()->copyResource(newFrame.get(), a.get());
+
+        gRencentFrames.push_back(newFrame);
+        if (gRencentFrames.size() > HISTORY_FRAME_COUNT) {
+            gRencentFrames.erase(gRencentFrames.begin());
+        }
     }
 }
 

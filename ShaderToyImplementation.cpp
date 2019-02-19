@@ -32,6 +32,12 @@ void ShaderToyImplementation::setTexture(int passIndex, const std::string & buff
     pass.tParams.emplace_back(imageFile.c_str(), bufferName.c_str(), tPtr);
 }
 
+void ShaderToyImplementation::setTexture(int passIndex, const std::string & bufferName, Texture::SharedPtr & imageFile)
+{
+    auto& pass = passes[passIndex].second;
+    pass.tParams.emplace_back(imageFile->getName().c_str(), bufferName.c_str(), imageFile);
+}
+
 void ShaderToyImplementation::execute()
 {
     int i = 0;

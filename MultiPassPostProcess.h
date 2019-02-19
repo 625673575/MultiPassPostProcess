@@ -48,6 +48,7 @@ class MultiPassPostProcess : public Renderer
         }
     };
    static const int LIGHT_COUNT = 10;
+   static const int HISTORY_FRAME_COUNT = 5;
 public:
     void onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext) override;
     void onFrameRender(SampleCallbacks* pSample, RenderContext* pRenderContext, const Fbo::SharedPtr& pTargetFbo) override;
@@ -75,4 +76,10 @@ private:
     
     //testing 
     void onInitializeTesting(SampleCallbacks* pSample) override;
+public:
+    static Texture::SharedPtr pTextureNoise;
+    static Texture::SharedPtr pTextureStar;
+    static Texture::SharedPtr pTextureWoodFloor;
+    static Texture::SharedPtr pTextureGirl;
+    static std::vector<Texture::SharedPtr> gRencentFrames;
 };

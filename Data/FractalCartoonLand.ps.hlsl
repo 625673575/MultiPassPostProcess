@@ -10,7 +10,7 @@
 
 // update: Nyan Cat cameo, thanks to code from mu6k: https://www.shadertoy.com/view/4dXGWH
 
-
+//#define BORDER
 #ifndef CLUBBER
 static const vec4 iMusic[4] = { vec4(1.0), vec4(1.0), vec4(1.0), vec4(1.0) };
 static const float iTransition = 1.0;
@@ -58,7 +58,7 @@ vec4 formula(vec4 p)
     p.xz = abs(p.xz + 1.) - abs(p.xz - 1.2 + MUSICMOD1) - p.xz;
     p.y -= .25;
     mat2 v = rot(radians(35.));
-    p.xy =mul(p.xy, v);
+    p.xy = mul(v, p.xy);
     p = p * 2. / clamp(dot(p.xyz, p.xyz), .2, min(1.05, 0.95 + MUSICMOD2));
     return p;
 }
@@ -178,11 +178,11 @@ vec3 move(inout vec3 dir)
     vec3 advec = normalize(adv - go);
     float an = adv.x - go.x;
     an *= min(1., abs(adv.z - go.z)) * sign(adv.z - go.z) * .7;
-    dir.xy = mul(dir.xy, mat2(cos(an), sin(an), -sin(an), cos(an)));
+    dir.xy = mul( mat2(cos(an), sin(an), -sin(an), cos(an)),dir.xy);
     an = advec.y * 1.7;
-    dir.yz = mul(dir.yz, mat2(cos(an), sin(an), -sin(an), cos(an)));
+    dir.yz = mul(mat2(cos(an), sin(an), -sin(an), cos(an)), dir.yz);
     an = atan(advec.x, advec.z);
-    dir.xz = mul(dir.xz, mat2(cos(an), sin(an), -sin(an), cos(an)));
+    dir.xz = mul(mat2(cos(an), sin(an), -sin(an), cos(an)), dir.xz);
     return go;
 }
 
@@ -192,8 +192,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     vec2 oriuv = uv;
     uv.y *= iResolution.y / iResolution.x;
     vec2 mouse = (iMouse.xy / iResolution.xy - .5) * 3.;
-    if (iMouse.z < 1.)
-        mouse = vec2(0., -0.05);
+    //if (iMouse.z < 1.)
+    //    mouse = vec2(0., -0.05);
     float fov = .9 - max(0., .7 - iTime * .3);
     vec3 dir = normalize(vec3(uv * fov, 1.));
     vec3 from = origin + move(dir);
@@ -206,6 +206,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 float4 main(float2 uv : TEXCOORD) : SV_TARGET0
 {
     float4 color;
+    uv.y = 1 - uv.y;
     mainImage(color,uv*iResolution);
     return color;
 

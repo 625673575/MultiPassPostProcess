@@ -10,6 +10,7 @@ public:
     ~ShaderToyImplementation() = default;
     virtual void loadProgram(SampleCallbacks* pSample, RenderContext* pContext, Gui* pGui)override;
     void setTexture(int passIndex, const std::string& bufferName, const std::string& imageFile);
+    void setTexture(int passIndex, const std::string& bufferName, Texture::SharedPtr& imageFile);
 
 protected:
     virtual void execute()override;

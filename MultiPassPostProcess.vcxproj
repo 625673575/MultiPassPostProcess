@@ -127,6 +127,11 @@
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\Pirates.ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{282AAB9B-2150-447C-9C27-62C38C23761E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
