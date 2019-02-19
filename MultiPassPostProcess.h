@@ -63,7 +63,7 @@ private:
     FullScreenPass::UniquePtr mpBlit;
 
     std::vector<PostProcessBase::UniquePtr> postProcessor;
-    std::vector<PostProcessBase::UniquePtr> shaderToy;
+    std::vector<ShaderToyImplementation::UniquePtr> shaderToy;
   
     GraphicsVars::SharedPtr mpProgVars;
     

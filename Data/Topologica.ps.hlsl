@@ -73,7 +73,7 @@ float Density(vec3 p)
     return final * 0.0001;
 }
 
-void mainImage(out vec4 fragColor, in vec2 fragCoord)
+float4 mainImage(in vec2 fragCoord)
 {
 	// ---------------- First, set up the camera rays for ray marching ----------------
     vec2 uv = fragCoord.xy * 2.0 - 1.0; // - 0.5;
@@ -121,12 +121,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     vec3 finalColor = vec3(0.01, 0.1, 1.0) * density * 0.2;
 
 	// output the final color with sqrt for "gamma correction"
-    fragColor = vec4(sqrt(clamp(finalColor, 0.0, 1.0)), 1.0);
+    return vec4(sqrt(clamp(finalColor, 0.0, 1.0)), 1.0);
 }
 
 float4 main(float2 uv  : TEXCOORD) : SV_TARGET0
 {
-    float4 color;
-    mainImage(color, uv);
-    return color;
+    return mainImage(uv);
 }

@@ -7,7 +7,7 @@ using namespace Falcor;
 class PostProcessBase
 {
 protected:
-    std::string name;
+    std::string sName;
     bool bEnable;
     SampleCallbacks* pSample;
     RenderContext* pContext;
@@ -36,6 +36,7 @@ public:
     void loadImage(std::function<void(const std::string& filename)> f);
 
     bool enable() { return bEnable; }
+    const std::string& name() { return sName; }
     vec2 getResolution() { return { pSample->getWindow()->getClientAreaWidth(),pSample->getWindow()->getClientAreaWidth() }; }
     vec3 getMousePos() { return { pSample->getWindow()->getClientAreaWidth()*vMouseState.x,pSample->getWindow()->getClientAreaWidth()*vMouseState.y,vMouseState.z }; }
 };

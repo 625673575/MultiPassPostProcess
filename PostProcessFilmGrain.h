@@ -4,8 +4,8 @@ class PostProcessFilmGrain :
     public PostProcessBase
 {
 public:
-    PostProcessFilmGrain();
-    ~PostProcessFilmGrain();
+    PostProcessFilmGrain() = default;
+    ~PostProcessFilmGrain() = default;
     virtual void loadProgram(SampleCallbacks* pSample, RenderContext* pContext, Gui* pGui)override;
 protected:
     virtual void execute()override;

@@ -73,8 +73,20 @@
     <None Include="Data\OceanStructure.ps.hlsl">
       <Filter>Data</Filter>
     </None>
+    <None Include="Data\Volcanic.ps.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\VolcanicBuffer0.ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MultiPassPostProcess.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Data\Toy.ps.hlsl">
+      <Filter>Data</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\FractalCartoonLand.hlsl">
+      <Filter>Data</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

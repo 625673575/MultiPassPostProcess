@@ -12,7 +12,7 @@ void PostProcessGlitch::execute()
 void PostProcessGlitch::loadProgram(SampleCallbacks* pSample, RenderContext* pContext, Gui* pGui)
 {
     PostProcessBase::loadProgram(pSample, pContext, pGui);
-    name = "Glitch";
+    sName = "Glitch";
     SET_PROGRAM_VARS(Glitch, "Glitch.ps.hlsl");
     dGlitchStrength=0.05f;
 }

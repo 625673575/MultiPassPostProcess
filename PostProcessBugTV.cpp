@@ -3,7 +3,7 @@
 void PostProcessBugTV::loadProgram(SampleCallbacks * pSample, RenderContext * pContext, Gui * pGui)
 {
     PostProcessBase::loadProgram(pSample, pContext, pGui);
-    name = "BugTV";
+    sName = "BugTV";
     SET_PROGRAM_VARS(BugTV, "BugTV.ps.hlsl");
     dFrequency = 11.0f;
     dShaderDefines = { {"CURVE",true},{"SCANS",true},{"FLICKS",true},{"GRAINS",true},{"YBUG",true},{"DIRTY",true},{"STRIP",true},{"COLOR",true},{"BLINK",true},{"VIG",true}, };

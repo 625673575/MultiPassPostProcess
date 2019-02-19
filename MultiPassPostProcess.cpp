@@ -70,9 +70,17 @@ void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRend
     postProcessor.emplace_back(new PostProcessFilmGrain());
     postProcessor.emplace_back(new PostProcessBugTV());
 
-    shaderToy.emplace_back(new ShaderToyImplementation("Topologica"));
+    shaderToy.emplace_back(new ShaderToyImplementation("Toy"));
     shaderToy.emplace_back(new ShaderToyImplementation("Heart3D"));
     shaderToy.emplace_back(new ShaderToyImplementation("OceanStructure"));
+    shaderToy.emplace_back(new ShaderToyImplementation("FractalCartoonLand"));
+    shaderToy.emplace_back(new ShaderToyImplementation("Topologica"));
+    std::vector<std::string> volcanic_name{ "VolcanicBuffer0", "Volcanic" };
+    auto toy_volcanic = new ShaderToyImplementation(volcanic_name);
+    toy_volcanic->setTexture(0, "iChannel0", "c:\\Users\\Liu\\Pictures\\mnv.jpg");
+    toy_volcanic->setTexture(0, "iChannel1", "c:\\Users\\Liu\\Pictures\\mnv.jpg");
+    shaderToy.emplace_back(toy_volcanic);
+    
 
     for (auto& v : postProcessor) {
         v->loadProgram(pSample, pRenderContext, pSample->getGui());
@@ -122,26 +130,28 @@ void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext
     pContext->clearFbo(pTargetFbo.get(), clearColor, 0, 0, FboAttachmentType::Color);
 
     bool hasShaderToy = false;
+
     for (auto& v : shaderToy) {
         if (v->enable()) {
-            hasShaderToy = true;
             v->onFrameRender();
-            return;
+            hasShaderToy = true;
         }
     }
-    if (!hasShaderToy && mpImage)
+    if (hasShaderToy || mpImage)
     {
+        Texture::SharedPtr& pSrcTex = hasShaderToy ? pContext->getGraphicsState()->getFbo()->getColorTexture(0) : mpImage;
+
         pContext->setGraphicsVars(mpProgVars);
 
         if (mEnableGaussianBlur)
         {
-            mpGaussianBlur->execute(pContext, mpImage, mpTempFB);
+            mpGaussianBlur->execute(pContext, pSrcTex, mpTempFB);
             mpProgVars->setTexture("gTexture", mpTempFB->getColorTexture(0));
             const FullScreenPass* pFinalPass = mpBlit.get();
             pFinalPass->execute(pContext);
         }
         else {
-            mpProgVars->setTexture("gTexture", mpImage);
+            mpProgVars->setTexture("gTexture", pSrcTex);
             mpBlit->execute(pContext);
         }
 

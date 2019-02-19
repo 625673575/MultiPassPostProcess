@@ -1,7 +1,7 @@
 #pragma once
 #include "PostProcessBase.h"
 class PostProcessSharp :
-	public PostProcessBase
+    public PostProcessBase
 {
     struct SLight {
         glm::vec3 color;
@@ -13,8 +13,8 @@ class PostProcessSharp :
     };
     static const int LIGHT_COUNT = 10;
 public:
-	PostProcessSharp();
-	~PostProcessSharp();
+    PostProcessSharp() = default;
+    ~PostProcessSharp() = default;
     virtual void loadProgram(SampleCallbacks* pSample, RenderContext* pContext, Gui* pGui)override;
 protected:
     virtual void execute()override;

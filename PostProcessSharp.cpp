@@ -1,20 +1,9 @@
 #include "PostProcessSharp.h"
 
-
-
-PostProcessSharp::PostProcessSharp()
-{
-}
-
-
-PostProcessSharp::~PostProcessSharp()
-{
-}
-
 void PostProcessSharp::loadProgram(SampleCallbacks * pSample, RenderContext * pContext, Gui * pGui)
 {
     PostProcessBase::loadProgram(pSample, pContext, pGui);
-    name="Sharp";
+    sName="Sharp";
     SET_PROGRAM_VARS(Sharp, "Sharp.ps.hlsl");
 
     //Buffer<float>定义

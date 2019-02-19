@@ -1,21 +1,11 @@
 #include "PostProcessFilmGrain.h"
 
-
-
-PostProcessFilmGrain::PostProcessFilmGrain():dFilmGrainStrength(24)
-{
-}
-
-
-PostProcessFilmGrain::~PostProcessFilmGrain()
-{
-}
-
 void PostProcessFilmGrain::loadProgram(SampleCallbacks * pSample, RenderContext * pContext, Gui * pGui)
 {
     PostProcessBase::loadProgram(pSample, pContext, pGui);
-    name = "FilmGrain";
+    sName = "FilmGrain";
     SET_PROGRAM_VARS(FilmGrain, "FilmGrain.ps.hlsl");
+    dFilmGrainStrength = 24;
 }
 
 void PostProcessFilmGrain::execute()

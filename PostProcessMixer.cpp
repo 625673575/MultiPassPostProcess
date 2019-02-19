@@ -3,7 +3,7 @@
 void PostProcessMixer::loadProgram(SampleCallbacks * pSample, RenderContext * pContext, Gui * pGui)
 {
     PostProcessBase::loadProgram(pSample, pContext, pGui);
-    name = "Mixer";
+    sName = "Mixer";
     SET_PROGRAM_VARS(Mixer, "Mixer.ps.hlsl");
     dImageCount = 0;
 

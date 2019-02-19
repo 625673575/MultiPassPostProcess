@@ -20,7 +20,7 @@ void PostProcessBase::loadProgram(SampleCallbacks * Sample, RenderContext * Cont
 
 void PostProcessBase::onGuiRender()
 {
-    pGui->addCheckBox(name.c_str(), bEnable);
+    pGui->addCheckBox(sName.c_str(), bEnable);
     if (bEnable) { gui(); }
 }
 

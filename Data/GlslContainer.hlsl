@@ -11,10 +11,14 @@ typedef float4x4 mat4;
 
 cbuffer ToyCB : register(b0)
 {
+    SamplerState gSampler;
     float2 iResolution;
-    float  iTime;
+    float iTime;
     float3 iMouse;
+    float4 iColor;
+    float4 iExtra;
 };
+Buffer<float4> iVec4Buffer;
 
 float mod(float x, float y)
 {

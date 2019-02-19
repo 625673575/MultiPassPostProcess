@@ -3,7 +3,7 @@
 void PostProcessVignette::loadProgram(SampleCallbacks * pSample, RenderContext * pContext, Gui * pGui)
 {
     PostProcessBase::loadProgram(pSample, pContext, pGui);
-    name = "Vignette";
+    sName = "Vignette";
     SET_PROGRAM_VARS(Vignette, "Vignette.ps.hlsl");
 
     dVignette_Center = vec2(0.5f, 0.5f);
