@@ -28,6 +28,7 @@
 #include "MultiPassPostProcess.h"
 
 Texture::SharedPtr MultiPassPostProcess::pTextureNoise = nullptr;
+Texture::SharedPtr MultiPassPostProcess::pTextureNoiseRGB = nullptr;
 Texture::SharedPtr MultiPassPostProcess::pTextureStar = nullptr;
 Texture::SharedPtr MultiPassPostProcess::pTextureGirl = nullptr;
 Texture::SharedPtr MultiPassPostProcess::pTextureWoodFloor = nullptr;
@@ -62,7 +63,7 @@ void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 
     pGui->popWindow();
 
-    static ivec4 frameRect(200, 900, 600, 100);
+    static ivec4 frameRect(300, 900, 800, 100);
     pGui->pushWindow("History Frames", frameRect.x, frameRect.y, frameRect.z, frameRect.w, false, true, true, false);
     //pGui->addText("History Frames");
     //pGui->addTooltip(help, true);
@@ -73,10 +74,12 @@ void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 
     pGui->popWindow();
 
+    modelViewer->onGuiRender(pSample, pGui);
 }
 void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext)
 {
     pTextureNoise = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\noise1024.png", false, true);
+    pTextureNoiseRGB = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\noisergb.jpg", false, true);
     pTextureStar = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\star.jpg", false, true);
     pTextureGirl = createTextureFromFile("c:\\Users\\Liu\\Pictures\\mnv.jpg", false, true);
     pTextureWoodFloor = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\wood_floor.jpg", false, true);
@@ -97,10 +100,14 @@ void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRend
     shaderToy.emplace_back(new ShaderToyImplementation("OceanStructure"));
     shaderToy.emplace_back(new ShaderToyImplementation("FractalCartoonLand"));
     shaderToy.emplace_back(new ShaderToyImplementation("Topologica"));
+    auto mars = new ShaderToyImplementation("Seascape");
+    mars->setTexture(0, "iChannel0", pTextureNoise);
+    shaderToy.emplace_back(mars);
     std::vector<std::string> volcanic_name{ "VolcanicBuffer0", "Volcanic" };
     auto toy_volcanic = new ShaderToyImplementation(volcanic_name);
-    toy_volcanic->setTexture(0, "iChannel0", pTextureWoodFloor);
+    toy_volcanic->setTexture(0, "iChannel0", pTextureGirl);
     toy_volcanic->setTexture(0, "iChannel1", pTextureNoise);
+    toy_volcanic->setTexture(0, "iChannel2", pTextureWoodFloor);
     shaderToy.emplace_back(toy_volcanic);
 
     auto toy_pirates = new ShaderToyImplementation("Pirates");
@@ -114,6 +121,8 @@ void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRend
     for (auto& v : shaderToy) {
         v->loadProgram(pSample, pRenderContext, pSample->getGui());
     }
+    modelViewer = std::make_unique<ModelViewer>();
+    modelViewer->onLoad(pSample, pRenderContext);
 }
 
 void MultiPassPostProcess::loadImage(SampleCallbacks* pSample)
@@ -155,17 +164,22 @@ void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext
     const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
     pContext->clearFbo(pTargetFbo.get(), clearColor, 0, 0, FboAttachmentType::Color);
 
-    bool hasShaderToy = false;
+    bool hasImage = false;
 
     for (auto& v : shaderToy) {
         if (v->enable()) {
             v->onFrameRender();
-            hasShaderToy = true;
+            hasImage = true;
         }
     }
-    if (hasShaderToy || mpImage)
+    if (!hasImage && modelViewer->hasModel()) {
+        modelViewer->onFrameRender(pSample, pContext, pTargetFbo);
+        hasImage = true;
+    }
+
+    if (hasImage || mpImage)
     {
-        Texture::SharedPtr& pSrcTex = hasShaderToy ? pContext->getGraphicsState()->getFbo()->getColorTexture(0) : mpImage;
+        Texture::SharedPtr& pSrcTex = hasImage ? pContext->getGraphicsState()->getFbo()->getColorTexture(0) : mpImage;
 
         pContext->setGraphicsVars(mpProgVars);
 
@@ -216,12 +230,14 @@ bool MultiPassPostProcess::onKeyEvent(SampleCallbacks* pSample, const KeyboardEv
             return true;
         }
     }
+    modelViewer->onKeyEvent(pSample, keyEvent);
     return false;
 }
 
 bool MultiPassPostProcess::onMouseEvent(SampleCallbacks * pSample, const MouseEvent & mouseEvent)
 {
     PostProcessBase::SetMouseState(glm::vec3(mouseEvent.pos, mouseEvent.type));
+    modelViewer->onMouseEvent(pSample, mouseEvent);
     return false;
 }
 

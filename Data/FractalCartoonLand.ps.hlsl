@@ -178,11 +178,11 @@ vec3 move(inout vec3 dir)
     vec3 advec = normalize(adv - go);
     float an = adv.x - go.x;
     an *= min(1., abs(adv.z - go.z)) * sign(adv.z - go.z) * .7;
-    dir.xy = mul( mat2(cos(an), sin(an), -sin(an), cos(an)),dir.xy);
+    dir.xy = mul(dir.xy, mat2(cos(an), sin(an), -sin(an), cos(an)));
     an = advec.y * 1.7;
-    dir.yz = mul(mat2(cos(an), sin(an), -sin(an), cos(an)), dir.yz);
+    dir.yz = mul(dir.yz,mat2(cos(an), sin(an), -sin(an), cos(an)));
     an = atan(advec.x, advec.z);
-    dir.xz = mul(mat2(cos(an), sin(an), -sin(an), cos(an)), dir.xz);
+    dir.xz = mul(dir.xz, mat2(cos(an), sin(an), -sin(an), cos(an)));
     return go;
 }
 

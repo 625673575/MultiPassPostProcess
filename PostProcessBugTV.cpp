@@ -12,7 +12,7 @@ void PostProcessBugTV::loadProgram(SampleCallbacks * pSample, RenderContext * pC
 
 void PostProcessBugTV::execute()
 {
-    pContext->getGraphicsState()->setScissors(0, GraphicsState::Scissor(250, 100, 600, 800));
+    pContext->getGraphicsState()->setScissors(0, GraphicsState::Scissor(250, 100, 600, 500));
     pContext->setGraphicsVars(vBugTV);
     vBugTV->setTexture("gTexture", pContext->getGraphicsState()->getFbo()->getColorTexture(0));
     vBugTV->setSampler("gSampler", pLineBoardSampler);

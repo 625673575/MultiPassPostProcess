@@ -367,6 +367,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 float4 main(float2 uv : TEXCOORD) : SV_TARGET0
 {
     float4 color;
+    uv.y = 1 - uv.y;
     mainImage(color, uv * iResolution);
     return color;
 }

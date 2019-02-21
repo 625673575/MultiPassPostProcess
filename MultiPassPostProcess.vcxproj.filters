@@ -11,6 +11,7 @@
     <ClCompile Include="PostProcessMixer.cpp" />
     <ClCompile Include="PostProcessBugTV.cpp" />
     <ClCompile Include="ShaderToyImplementation.cpp" />
+    <ClCompile Include="ModelViewer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MultiPassPostProcess.h" />
@@ -24,6 +25,7 @@
     <ClInclude Include="PostProcessMixer.h" />
     <ClInclude Include="PostProcessBugTV.h" />
     <ClInclude Include="ShaderToyImplementation.h" />
+    <ClInclude Include="ModelViewer.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Data">
@@ -76,12 +78,22 @@
     <None Include="Data\Volcanic.ps.hlsl">
       <Filter>Data</Filter>
     </None>
-    <None Include="Data\VolcanicBuffer0.ps.hlsl" />
-    <None Include="Data\Toy.ps.hlsl" />
     <None Include="Data\Pirates.ps.hlsl">
       <Filter>Data</Filter>
     </None>
     <None Include="Data\FractalCartoonLand.ps.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\VolcanicBuffer0.ps.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\Toy.ps.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\Seascape.ps.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\ModelViewer.ps.hlsl">
       <Filter>Data</Filter>
     </None>
   </ItemGroup>

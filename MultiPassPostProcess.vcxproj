@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ModelViewer.cpp" />
     <ClCompile Include="MultiPassPostProcess.cpp" />
     <ClCompile Include="PostProcessBase.cpp" />
     <ClCompile Include="PostProcessBugTV.cpp" />
@@ -23,6 +24,7 @@
     <ClCompile Include="ShaderToyImplementation.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ModelViewer.h" />
     <ClInclude Include="MultiPassPostProcess.h" />
     <ClInclude Include="PostProcessBase.h" />
     <ClInclude Include="PostProcessBugTV.h" />
@@ -129,6 +131,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Pirates.ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\Seascape.ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\ModelViewer.ps.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

@@ -34,6 +34,7 @@
 #include "PostProcessFilmGrain.h"
 #include "PostProcessBugTV.h"
 #include "ShaderToyImplementation.h"
+#include "ModelViewer.h"
 
 using namespace Falcor;
 
@@ -65,6 +66,7 @@ private:
 
     std::vector<PostProcessBase::UniquePtr> postProcessor;
     std::vector<ShaderToyImplementation::UniquePtr> shaderToy;
+    ModelViewer::UniquePtr modelViewer;
   
     GraphicsVars::SharedPtr mpProgVars;
     
@@ -78,6 +80,7 @@ private:
     void onInitializeTesting(SampleCallbacks* pSample) override;
 public:
     static Texture::SharedPtr pTextureNoise;
+    static Texture::SharedPtr pTextureNoiseRGB;
     static Texture::SharedPtr pTextureStar;
     static Texture::SharedPtr pTextureWoodFloor;
     static Texture::SharedPtr pTextureGirl;
