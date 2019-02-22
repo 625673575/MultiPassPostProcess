@@ -33,6 +33,8 @@
 #include "PostProcessGlitch.h"
 #include "PostProcessFilmGrain.h"
 #include "PostProcessBugTV.h"
+#include "PostProcessMotionBlur.h"
+#include "PostProcessLut.h"
 #include "ShaderToyImplementation.h"
 #include "ModelViewer.h"
 
@@ -49,7 +51,6 @@ class MultiPassPostProcess : public Renderer
         }
     };
    static const int LIGHT_COUNT = 10;
-   static const int HISTORY_FRAME_COUNT = 5;
 public:
     void onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext) override;
     void onFrameRender(SampleCallbacks* pSample, RenderContext* pRenderContext, const Fbo::SharedPtr& pTargetFbo) override;
@@ -58,7 +59,6 @@ public:
     bool onMouseEvent(SampleCallbacks* pSample, const MouseEvent& mouseEvent) override;
     void onGuiRender(SampleCallbacks* pSample, Gui* pGui) override;
 private:
-    Texture::SharedPtr mpImage;
     Fbo::SharedPtr mpTempFB;
     //VideoDecoder::UniquePtr mpVideoDecoder;
     GaussianBlur::UniquePtr mpGaussianBlur;
@@ -84,5 +84,5 @@ public:
     static Texture::SharedPtr pTextureStar;
     static Texture::SharedPtr pTextureWoodFloor;
     static Texture::SharedPtr pTextureGirl;
-    static std::vector<Texture::SharedPtr> gRencentFrames;
+    static Texture::SharedPtr pTextureSelectedFromFile;
 };

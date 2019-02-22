@@ -20,6 +20,8 @@ void PostProcessBugTV::execute()
     vBugTV["BugTVCB"]["Frequency"] = dFrequency;
     vBugTV["BugTVCB"]["iResolution"] = getResolution();
     pBugTV->execute(pContext);
+    auto viewportDesc = pContext->getGraphicsState()->getViewport(0);
+    pContext->getGraphicsState()->setScissors(0, GraphicsState::Scissor(uint32_t(viewportDesc.originX), uint32_t(viewportDesc.originY), uint32_t(viewportDesc.originX + viewportDesc.width), uint32_t(viewportDesc.height + viewportDesc.originY)));
 }
 
 void PostProcessBugTV::gui()

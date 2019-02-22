@@ -39,5 +39,4 @@ void PostProcessMixer::gui()
         pGui->addFloatSlider("ratio", dRatio[i], 0, 1);
         pRatioBuffer[i] = dRatio[i];
     }
-    
 }

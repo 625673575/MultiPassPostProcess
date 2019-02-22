@@ -1,6 +1,8 @@
 #include "PostProcessBase.h"
 
-vec3 PostProcessBase::vMouseState=vec3();
+vec3 PostProcessBase::vMouseState = vec3();
+std::vector<Texture::SharedPtr> PostProcessBase::gRencentFrames = std::vector<Texture::SharedPtr>();
+
 
 void PostProcessBase::loadProgram(SampleCallbacks * Sample, RenderContext * Context, Gui * Gui)
 {
@@ -27,6 +29,14 @@ void PostProcessBase::onGuiRender()
 void PostProcessBase::onFrameRender()
 {
     if (bEnable)execute();
+}
+
+Texture::SharedPtr PostProcessBase::getRecentFrame(uint index)
+{
+    if (index == 0 || index >= gRencentFrames.size()) {
+        return pContext->getGraphicsState()->getFbo()->getColorTexture(0);
+    }
+    return gRencentFrames[HISTORY_FRAME_COUNT - 1 - index];
 }
 
 void PostProcessBase::loadImage(std::function<void(const std::string&filename)> f)

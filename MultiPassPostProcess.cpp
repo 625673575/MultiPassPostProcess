@@ -32,7 +32,7 @@ Texture::SharedPtr MultiPassPostProcess::pTextureNoiseRGB = nullptr;
 Texture::SharedPtr MultiPassPostProcess::pTextureStar = nullptr;
 Texture::SharedPtr MultiPassPostProcess::pTextureGirl = nullptr;
 Texture::SharedPtr MultiPassPostProcess::pTextureWoodFloor = nullptr;
-std::vector<Texture::SharedPtr> MultiPassPostProcess::gRencentFrames = std::vector<Texture::SharedPtr>();
+Texture::SharedPtr MultiPassPostProcess::pTextureSelectedFromFile = nullptr;
 
 void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 {
@@ -53,7 +53,7 @@ void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
         v->onGuiRender();
     }
 
-    static ivec4 rect(200, 400, 500, 100);
+    static ivec4 rect(200, 400, 20, 400);
     pGui->pushWindow("ShaderToy", rect.x, rect.y, rect.z, rect.w, false, true, true, false);
     //pGui->addTooltip(help, true);
 
@@ -63,12 +63,12 @@ void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 
     pGui->popWindow();
 
-    static ivec4 frameRect(300, 900, 800, 100);
+    static ivec4 frameRect(300, 900, 1300, 40);
     pGui->pushWindow("History Frames", frameRect.x, frameRect.y, frameRect.z, frameRect.w, false, true, true, false);
     //pGui->addText("History Frames");
     //pGui->addTooltip(help, true);
 
-    for (auto& v : gRencentFrames) {
+    for (auto& v : PostProcessBase::gRencentFrames) {
         pGui->addImage("", v);
     }
 
@@ -94,6 +94,8 @@ void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRend
     postProcessor.emplace_back(new PostProcessSharp());
     postProcessor.emplace_back(new PostProcessFilmGrain());
     postProcessor.emplace_back(new PostProcessBugTV());
+    postProcessor.emplace_back(new PostProcessMotionBlur());
+    postProcessor.emplace_back(new PostProcessLut());
 
     shaderToy.emplace_back(new ShaderToyImplementation("Toy"));
     shaderToy.emplace_back(new ShaderToyImplementation("Heart3D"));
@@ -138,13 +140,13 @@ void MultiPassPostProcess::loadImage(SampleCallbacks* pSample)
 void MultiPassPostProcess::loadImageFromFile(SampleCallbacks* pSample, std::string filename)
 {
     auto fboFormat = pSample->getCurrentFbo()->getColorTexture(0)->getFormat();
-    mpImage = createTextureFromFile(filename, false, isSrgbFormat(fboFormat));
+    pTextureSelectedFromFile = createTextureFromFile(filename, false, isSrgbFormat(fboFormat));
 
     Fbo::Desc fboDesc;
-    fboDesc.setColorTarget(0, mpImage->getFormat());
-    mpTempFB = FboHelper::create2D(mpImage->getWidth(), mpImage->getHeight() / 2, fboDesc);
+    fboDesc.setColorTarget(0, pTextureSelectedFromFile->getFormat());
+    mpTempFB = FboHelper::create2D(pTextureSelectedFromFile->getWidth(), pTextureSelectedFromFile->getHeight() / 2, fboDesc);
 
-    pSample->resizeSwapChain(mpImage->getWidth(), mpImage->getHeight());
+    pSample->resizeSwapChain(pTextureSelectedFromFile->getWidth(), pTextureSelectedFromFile->getHeight());
 }
 
 void MultiPassPostProcess::loadVideoFromFile(SampleCallbacks * pSample)
@@ -177,9 +179,9 @@ void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext
         hasImage = true;
     }
 
-    if (hasImage || mpImage)
+    if (hasImage || pTextureSelectedFromFile)
     {
-        Texture::SharedPtr& pSrcTex = hasImage ? pContext->getGraphicsState()->getFbo()->getColorTexture(0) : mpImage;
+        Texture::SharedPtr& pSrcTex = hasImage ? pContext->getGraphicsState()->getFbo()->getColorTexture(0) : pTextureSelectedFromFile;
 
         pContext->setGraphicsVars(mpProgVars);
 
@@ -205,9 +207,9 @@ void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext
         auto newFrame = Texture::create2D(a->getWidth(), a->getHeight(), a->getFormat(), a->getArraySize(), 1);
         gpDevice->getRenderContext()->copyResource(newFrame.get(), a.get());
 
-        gRencentFrames.push_back(newFrame);
-        if (gRencentFrames.size() > HISTORY_FRAME_COUNT) {
-            gRencentFrames.erase(gRencentFrames.begin());
+        PostProcessBase::gRencentFrames.push_back(newFrame);
+        if (PostProcessBase::gRencentFrames.size() > PostProcessBase::HISTORY_FRAME_COUNT) {
+            PostProcessBase::gRencentFrames.erase(PostProcessBase::gRencentFrames.begin());
         }
     }
 }

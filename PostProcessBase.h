@@ -17,6 +17,9 @@ protected:
     Sampler::SharedPtr pLineBoardSampler;
     static vec3 vMouseState;
 public:
+    static std::vector<Texture::SharedPtr> gRencentFrames;
+    static const int HISTORY_FRAME_COUNT = 5;
+public:
     using UniquePtr = std::unique_ptr<PostProcessBase>;
     using ShaderPass = FullScreenPass::UniquePtr;
     using ShaderVar = GraphicsVars::SharedPtr;
@@ -30,7 +33,7 @@ public:
     virtual void loadProgram(SampleCallbacks* pSample, RenderContext* pContext, Gui* pGui);
     void onGuiRender();
     void onFrameRender();
-
+    Texture::SharedPtr getRecentFrame(uint index = 0);
     void SetTexture(const Texture::SharedPtr& t) { pTexture = t; }
     static void SetMouseState(vec3 t) { vMouseState = t; }
     void loadImage(std::function<void(const std::string& filename)> f);

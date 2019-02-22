@@ -12,6 +12,8 @@
     <ClCompile Include="PostProcessBugTV.cpp" />
     <ClCompile Include="ShaderToyImplementation.cpp" />
     <ClCompile Include="ModelViewer.cpp" />
+    <ClCompile Include="PostProcessMotionBlur.cpp" />
+    <ClCompile Include="PostProcessLut.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MultiPassPostProcess.h" />
@@ -26,6 +28,8 @@
     <ClInclude Include="PostProcessBugTV.h" />
     <ClInclude Include="ShaderToyImplementation.h" />
     <ClInclude Include="ModelViewer.h" />
+    <ClInclude Include="PostProcessMotionBlur.h" />
+    <ClInclude Include="PostProcessLut.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Data">
@@ -94,6 +98,12 @@
       <Filter>Data</Filter>
     </None>
     <None Include="Data\ModelViewer.ps.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\MotionBlur.ps.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\Lut.ps.hlsl">
       <Filter>Data</Filter>
     </None>
   </ItemGroup>

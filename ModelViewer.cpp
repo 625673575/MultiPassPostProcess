@@ -1,8 +1,8 @@
 #include "ModelViewer.h"
+#include "MultiPassPostProcess.h"
 
 
-
-ModelViewer::ModelViewer()
+ModelViewer::ModelViewer():mAmbientIntensity(1.0f),mNearZ(0.1f),mFarZ(1000.0f)
 {
 }
 
@@ -77,10 +77,11 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
             PROFILE("animate");
             v.mpModel->animate(pSample->getCurrentTime());
         }
-
+        mpProgramVars["PerFrameCB"]["gAmbient"] = mAmbientIntensity;
         // Set render state
         if (mDrawWireframe)
         {
+            mpProgramVars["PerFrameCB"]["gConstColor"] = true;
             mpGraphicsState->setRasterizerState(mpWireframeRS);
             mpGraphicsState->setDepthStencilState(mpNoDepthDS);
         }
@@ -90,14 +91,14 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
             mpGraphicsState->setDepthStencilState(mpDepthTestDS);
 
             ConstantBuffer* pCB = mpProgramVars["PerFrameCB"].get();
-            //mpDirLight->setIntoProgramVars(mpProgramVars.get(), pCB, "gDirLight");
-            //mpPointLight->setIntoProgramVars(mpProgramVars.get(), pCB, "gPointLight");
+            mpProgramVars->setTexture("gAlbedo",MultiPassPostProcess::pTextureSelectedFromFile);
+            mpProgramVars["PerFrameCB"]["gConstColor"] = false;
+            mpDirLight->setIntoProgramVars(mpProgramVars.get(), pCB, "gDirLight");
+            mpPointLight->setIntoProgramVars(mpProgramVars.get(), pCB, "gPointLight");
         }
 
         v.mpModel->bindSamplerToMaterials(v.mUseTriLinearFiltering ? mpLinearSampler : mpPointSampler);
 
-
-        mpProgramVars["PerFrameCB"]["color"] = mAmbientIntensity;
         mpGraphicsState->setProgram(v.mpProgram);
         pRenderContext->setGraphicsState(v.mpGraphicsState);
         pRenderContext->setGraphicsVars(v.mpProgramVars);
@@ -209,6 +210,11 @@ ModelResource ModelViewer::loadModelFromFile(const std::string& filename, Resour
     flags |= isSrgbFormat(fboFormat) ? Model::LoadFlags::None : Model::LoadFlags::AssumeLinearSpaceTextures;
     r.mModelString = filename;
     r.mpModel = Model::createFromFile(filename.c_str(), flags);
+    if (r.mpModel == nullptr)
+    {
+        msgBox("Could not load model");
+        return r;
+    }
     r.mUseTriLinearFiltering = useLinearFilter;
     r.mAnimate = animation;
 
@@ -217,7 +223,6 @@ ModelResource ModelViewer::loadModelFromFile(const std::string& filename, Resour
     mpPointLight->setWorldPosition(glm::vec3(0, lightHeight, 0));
     timer.update();
 
-    resetCamera();
     mActiveAnimationID = kBindPoseAnimationID;
 
     r.mpModel->bindSamplerToMaterials(r.mUseTriLinearFiltering ? mpLinearSampler : mpPointSampler);
@@ -230,6 +235,7 @@ void ModelViewer::loadModel(ResourceFormat fboFormat)
     if (openFileDialog(Model::kFileExtensionFilters, Filename))
     {
         models.emplace_back(loadModelFromFile(Filename, fboFormat));
+        resetCamera();
     }
 }
 

@@ -17,7 +17,9 @@
     <ClCompile Include="PostProcessBugTV.cpp" />
     <ClCompile Include="PostProcessFilmGrain.cpp" />
     <ClCompile Include="PostProcessGlitch.cpp" />
+    <ClCompile Include="PostProcessLut.cpp" />
     <ClCompile Include="PostProcessMixer.cpp" />
+    <ClCompile Include="PostProcessMotionBlur.cpp" />
     <ClCompile Include="PostProcessSharp.cpp" />
     <ClCompile Include="PostProcessToneMapping.cpp" />
     <ClCompile Include="PostProcessVignette.cpp" />
@@ -30,7 +32,9 @@
     <ClInclude Include="PostProcessBugTV.h" />
     <ClInclude Include="PostProcessFilmGrain.h" />
     <ClInclude Include="PostProcessGlitch.h" />
+    <ClInclude Include="PostProcessLut.h" />
     <ClInclude Include="PostProcessMixer.h" />
+    <ClInclude Include="PostProcessMotionBlur.h" />
     <ClInclude Include="PostProcessSharp.h" />
     <ClInclude Include="PostProcessToneMapping.h" />
     <ClInclude Include="PostProcessVignette.h" />
@@ -141,6 +145,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\ModelViewer.ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\MotionBlur.ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\Lut.ps.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
