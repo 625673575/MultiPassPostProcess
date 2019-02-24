@@ -32,7 +32,7 @@ void PostProcessSharp::loadProgram(SampleCallbacks * pSample, RenderContext * pC
 void PostProcessSharp::execute()
 {
     pContext->setGraphicsVars(vSharp);
-    vSharp->setTexture("gTexture", pContext->getGraphicsState()->getFbo()->getColorTexture(0));
+    vSharp->setTexture("gTexture", getRecentFrame());
 
     mpSharpSaturationBuffer[0] = mdSharpSaturation.x;
     mpSharpSaturationBuffer[1] = mdSharpSaturation.y;

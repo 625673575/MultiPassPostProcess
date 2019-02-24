@@ -1,31 +1,7 @@
 #pragma once
 #include "Falcor.h"
+#include "ModelResource.h"
 using namespace Falcor;
-
-struct ModelResource {
-    std::string mModelString;
-    Model::SharedPtr mpModel = nullptr;
-    GraphicsProgram::SharedPtr mpProgram = nullptr;
-    GraphicsVars::SharedPtr mpProgramVars = nullptr;
-    GraphicsState::SharedPtr mpGraphicsState = nullptr;
-    bool mAnimate = false;
-    bool mUseTriLinearFiltering = false;
-    std::function<void(Gui*)> mGuiFunc;
-    std::string getModelString(bool isAfterCull, float loadTime)
-    {
-        std::string mModelString = isAfterCull ? "Mesh culling" : "Loading";
-        mModelString += " took " + std::to_string(loadTime) + " seconds.\n";
-        mModelString += "Model has " + std::to_string(mpModel->getVertexCount()) + " vertices, ";
-        mModelString += std::to_string(mpModel->getIndexCount()) + " indices, ";
-        mModelString += std::to_string(mpModel->getPrimitiveCount()) + " primitives, ";
-        mModelString += std::to_string(mpModel->getMeshCount()) + " meshes, ";
-        mModelString += std::to_string(mpModel->getInstanceCount()) + " mesh instances, ";
-        mModelString += std::to_string(mpModel->getMaterialCount()) + " materials, ";
-        mModelString += std::to_string(mpModel->getTextureCount()) + " textures, ";
-        mModelString += std::to_string(mpModel->getBufferCount()) + " buffers.\n";
-        return mModelString;
-    }
-};
 class ModelViewer
 {
 public:

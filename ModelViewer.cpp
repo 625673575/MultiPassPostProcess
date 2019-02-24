@@ -1,8 +1,8 @@
 #include "ModelViewer.h"
 #include "MultiPassPostProcess.h"
+#include "SceneRendererExtend.h"
 
-
-ModelViewer::ModelViewer():mAmbientIntensity(1.0f),mNearZ(0.1f),mFarZ(1000.0f)
+ModelViewer::ModelViewer() :mAmbientIntensity(1.0f), mNearZ(0.1f), mFarZ(1000.0f)
 {
 }
 
@@ -58,16 +58,15 @@ void ModelViewer::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext
 
 void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRenderContext, const Fbo::SharedPtr& pTargetFbo)
 {
+    Scene::SharedPtr pScene = Scene::create();
+    SceneRendererExtend::SharedPtr pSceneRenderer = SceneRendererExtend::create(pScene);
+
     const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
     pRenderContext->clearFbo(pTargetFbo.get(), clearColor, 1.0f, 0, FboAttachmentType::All);
     mpGraphicsState->setFbo(pTargetFbo);
 
     for (auto& v : models)
     {
-        if (v.mpProgram == nullptr) v.mpProgram = mpProgram;
-        if (v.mpProgramVars == nullptr)v.mpProgramVars = mpProgramVars;
-        if (v.mpGraphicsState == nullptr)v.mpGraphicsState = mpGraphicsState;
-
         mpCamera->setDepthRange(mNearZ, mFarZ);
         getActiveCameraController().update();
 
@@ -91,7 +90,7 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
             mpGraphicsState->setDepthStencilState(mpDepthTestDS);
 
             ConstantBuffer* pCB = mpProgramVars["PerFrameCB"].get();
-            mpProgramVars->setTexture("gAlbedo",MultiPassPostProcess::pTextureSelectedFromFile);
+            mpProgramVars->setTexture("gAlbedo", MultiPassPostProcess::pTextureSelectedFromFile);
             mpProgramVars["PerFrameCB"]["gConstColor"] = false;
             mpDirLight->setIntoProgramVars(mpProgramVars.get(), pCB, "gDirLight");
             mpPointLight->setIntoProgramVars(mpProgramVars.get(), pCB, "gPointLight");
@@ -99,12 +98,23 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
 
         v.mpModel->bindSamplerToMaterials(v.mUseTriLinearFiltering ? mpLinearSampler : mpPointSampler);
 
-        mpGraphicsState->setProgram(v.mpProgram);
-        pRenderContext->setGraphicsState(v.mpGraphicsState);
-        pRenderContext->setGraphicsVars(v.mpProgramVars);
-        ModelRenderer::render(pRenderContext, v.mpModel, mpCamera.get());
-    }
+        static auto baseColor = createTextureFromFile("d:\\Falcor\\Media\\flamer\\Textures\\DefaultMaterial_albedo.jpg", false, true);
+        static auto normal = createTextureFromFile("d:\\Falcor\\Media\\flamer\\Textures\\DefaultMaterial_normal.jpg", false, true);
+        static auto spec = createTextureFromFile("d:\\Falcor\\Media\\flamer\\Textures\\DefaultMaterial_metallic.jpg", false, true);
+        for (int i = 0; i < 1; i++) {
+            auto& mt = v.mpModel->getMesh(i)->getMaterial();
+            mt->setBaseColorTexture(baseColor);
+            mt->setNormalMap(normal);
+            mt->setSpecularTexture(spec);
+        }
+        mpGraphicsState->setProgram(mpProgram);
+        pRenderContext->setGraphicsState(mpGraphicsState);
+        pRenderContext->setGraphicsVars(mpProgramVars);
 
+        pScene->addModelInstance(v.mpModel, "");
+    }
+    pSceneRenderer->toggleMeshCulling(true);
+    pSceneRenderer->renderScene(pRenderContext, mpCamera.get());
     //pSample->renderText(mModelString, glm::vec2(10, 30));
 }
 
@@ -163,7 +173,11 @@ void ModelViewer::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     //{
     //    renderModelUI(pGui);
     //}
+    for (auto&v : models) {
+        v.renderMaterialGui(pGui);
+    }
     pGui->popWindow();
+
 }
 bool ModelViewer::onKeyEvent(SampleCallbacks* pSample, const KeyboardEvent& keyEvent)
 {
@@ -226,6 +240,7 @@ ModelResource ModelViewer::loadModelFromFile(const std::string& filename, Resour
     mActiveAnimationID = kBindPoseAnimationID;
 
     r.mpModel->bindSamplerToMaterials(r.mUseTriLinearFiltering ? mpLinearSampler : mpPointSampler);
+    r.init();
     return r;
 }
 

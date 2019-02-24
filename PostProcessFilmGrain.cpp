@@ -11,7 +11,7 @@ void PostProcessFilmGrain::loadProgram(SampleCallbacks * pSample, RenderContext 
 void PostProcessFilmGrain::execute()
 {
     pContext->setGraphicsVars(vFilmGrain);
-    vFilmGrain->setTexture("gTexture", pContext->getGraphicsState()->getFbo()->getColorTexture(0));
+    vFilmGrain->setTexture("gTexture", getRecentFrame());
     vFilmGrain["FilmGrainCB"]["iGlobalTime"] = pSample->getCurrentTime();
     vFilmGrain["FilmGrainCB"]["strength"] = dFilmGrainStrength;
     pFilmGrain->execute(pContext);

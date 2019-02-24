@@ -3,7 +3,7 @@
 void PostProcessGlitch::execute()
 {
     pContext->setGraphicsVars(vGlitch);
-    vGlitch->setTexture("gTexture", pContext->getGraphicsState()->getFbo()->getColorTexture(0));
+    vGlitch->setTexture("gTexture", getRecentFrame());
     vGlitch["GlitchCB"]["iGlobalTime"] = pSample->getCurrentTime();
     vGlitch["GlitchCB"]["strength"] = dGlitchStrength;
     pGlitch->execute(pContext);

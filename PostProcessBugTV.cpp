@@ -14,7 +14,7 @@ void PostProcessBugTV::execute()
 {
     pContext->getGraphicsState()->setScissors(0, GraphicsState::Scissor(250, 100, 600, 500));
     pContext->setGraphicsVars(vBugTV);
-    vBugTV->setTexture("gTexture", pContext->getGraphicsState()->getFbo()->getColorTexture(0));
+    vBugTV->setTexture("gTexture", getRecentFrame());
     vBugTV->setSampler("gSampler", pLineBoardSampler);
     vBugTV["BugTVCB"]["iGlobalTime"] = pSample->getCurrentTime();
     vBugTV["BugTVCB"]["Frequency"] = dFrequency;

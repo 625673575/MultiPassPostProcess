@@ -3,108 +3,156 @@
   <ItemGroup>
     <ClCompile Include="MultiPassPostProcess.cpp" />
     <ClCompile Include="PostProcessBase.cpp" />
-    <ClCompile Include="PostProcessGlitch.cpp" />
-    <ClCompile Include="PostProcessFilmGrain.cpp" />
-    <ClCompile Include="PostProcessSharp.cpp" />
-    <ClCompile Include="PostProcessToneMapping.cpp" />
-    <ClCompile Include="PostProcessVignette.cpp" />
-    <ClCompile Include="PostProcessMixer.cpp" />
-    <ClCompile Include="PostProcessBugTV.cpp" />
     <ClCompile Include="ShaderToyImplementation.cpp" />
     <ClCompile Include="ModelViewer.cpp" />
-    <ClCompile Include="PostProcessMotionBlur.cpp" />
-    <ClCompile Include="PostProcessLut.cpp" />
+    <ClCompile Include="PostProcessBugTV.cpp">
+      <Filter>PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessFilmGrain.cpp">
+      <Filter>PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessGlitch.cpp">
+      <Filter>PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessLut.cpp">
+      <Filter>PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessMixer.cpp">
+      <Filter>PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessMotionBlur.cpp">
+      <Filter>PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessSharp.cpp">
+      <Filter>PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessToneMapping.cpp">
+      <Filter>PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessVignette.cpp">
+      <Filter>PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialInstance.cpp" />
+    <ClCompile Include="ModelResource.cpp" />
+    <ClCompile Include="SceneRendererExtend.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MultiPassPostProcess.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="PostProcessBase.h" />
-    <ClInclude Include="PostProcessGlitch.h" />
-    <ClInclude Include="PostProcessFilmGrain.h" />
-    <ClInclude Include="PostProcessSharp.h" />
-    <ClInclude Include="PostProcessToneMapping.h" />
-    <ClInclude Include="PostProcessVignette.h" />
-    <ClInclude Include="PostProcessMixer.h" />
-    <ClInclude Include="PostProcessBugTV.h" />
     <ClInclude Include="ShaderToyImplementation.h" />
     <ClInclude Include="ModelViewer.h" />
-    <ClInclude Include="PostProcessMotionBlur.h" />
-    <ClInclude Include="PostProcessLut.h" />
+    <ClInclude Include="PostProcessBugTV.h">
+      <Filter>PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessFilmGrain.h">
+      <Filter>PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessGlitch.h">
+      <Filter>PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessLut.h">
+      <Filter>PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessMixer.h">
+      <Filter>PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessMotionBlur.h">
+      <Filter>PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessSharp.h">
+      <Filter>PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessToneMapping.h">
+      <Filter>PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessVignette.h">
+      <Filter>PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialInstance.h" />
+    <ClInclude Include="ModelResource.h" />
+    <ClInclude Include="SceneRendererExtend.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Data">
       <UniqueIdentifier>{e34e3747-1c5f-482c-b882-7b49f0910139}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PostProcess">
+      <UniqueIdentifier>{dcbc22c8-4df1-4029-bbbf-238e71597c25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data\PostProcess">
+      <UniqueIdentifier>{1859dafe-5cfc-4e65-a905-eab32c3da6f1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Blit.ps.hlsl">
       <Filter>Data</Filter>
     </None>
-    <None Include="Data\Sharp.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\FilmGrain.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\Glitch.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\ToneMapping.func.hlsl">
-      <Filter>Data</Filter>
-    </None>
     <None Include="Data\Common.func.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\Mixer.ps.hlsl">
       <Filter>Data</Filter>
     </None>
     <None Include="Data\ColorGrading.func.hlsl">
       <Filter>Data</Filter>
     </None>
-    <None Include="Data\BugTV.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\Topologica.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
     <None Include="Data\GlslContainer.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\Vignette.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\Heart3D.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\OceanStructure.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\Volcanic.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\Pirates.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\FractalCartoonLand.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\VolcanicBuffer0.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\Toy.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
-    <None Include="Data\Seascape.ps.hlsl">
       <Filter>Data</Filter>
     </None>
     <None Include="Data\ModelViewer.ps.hlsl">
       <Filter>Data</Filter>
     </None>
-    <None Include="Data\MotionBlur.ps.hlsl">
-      <Filter>Data</Filter>
+    <None Include="Data\BugTV.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\FilmGrain.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\FractalCartoonLand.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\Glitch.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\Heart3D.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
     </None>
     <None Include="Data\Lut.ps.hlsl">
-      <Filter>Data</Filter>
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\Mixer.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\MotionBlur.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\OceanStructure.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\Pirates.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\Seascape.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\Sharp.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\ToneMapping.func.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\Topologica.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\Toy.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\Vignette.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\Volcanic.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\VolcanicBuffer0.ps.hlsl">
+      <Filter>Data\PostProcess</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

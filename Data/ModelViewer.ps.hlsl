@@ -14,11 +14,15 @@ float4 main(VertexOut vOut) : SV_TARGET
 {
     if (gConstColor)
     {
-        return float4(gAmbient, 1);
+        return float4(0, 1, 0, 1);
     }
     else
     {
-        float4 finalColor = gAlbedo.Sample(gSampler, vOut.texC);
-        return finalColor * float4(gAmbient, 1.0);
+        ShadingData sd = prepareShadingData(vOut, gMaterial, gCamera.posW);
+        float4 finalColor;
+        finalColor.a = 1;
+        finalColor.rgb = evalMaterial(sd, gDirLight, 1).color.rgb;
+        finalColor.rgb += evalMaterial(sd, gPointLight, 1).color.rgb;
+        return finalColor;
     }
 }

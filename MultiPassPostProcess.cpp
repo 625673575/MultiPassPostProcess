@@ -88,6 +88,7 @@ void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRend
     mpBlit = FullScreenPass::create("Blit.ps.hlsl");
     mpProgVars = GraphicsVars::create(mpBlit->getProgram()->getReflector());
 
+    /*
     postProcessor.emplace_back(new PostProcessMixer());
     postProcessor.emplace_back(new PostProcessVignette());
     postProcessor.emplace_back(new PostProcessGlitch());
@@ -116,6 +117,7 @@ void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRend
     toy_pirates->setTexture(0, "iChannel0", pTextureWoodFloor);
     toy_pirates->setTexture(0, "iChannel1", pTextureNoise);
     shaderToy.emplace_back(toy_pirates);
+    */
 
     for (auto& v : postProcessor) {
         v->loadProgram(pSample, pRenderContext, pSample->getGui());
@@ -216,6 +218,7 @@ void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext
 
 void MultiPassPostProcess::onShutdown(SampleCallbacks* pSample)
 {
+   
 }
 
 bool MultiPassPostProcess::onKeyEvent(SampleCallbacks* pSample, const KeyboardEvent& keyEvent)

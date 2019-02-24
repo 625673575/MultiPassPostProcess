@@ -14,7 +14,7 @@ void PostProcessVignette::loadProgram(SampleCallbacks * pSample, RenderContext *
 void PostProcessVignette::execute()
 {
     pContext->setGraphicsVars(vVignette);
-    vVignette->setTexture("gTexture", pContext->getGraphicsState()->getFbo()->getColorTexture(0));
+    vVignette->setTexture("gTexture", getRecentFrame());
 
     vVignette["VignetteCB"]["_ScreenParams"] = getResolution();
     vVignette["VignetteCB"]["_Vignette_Center"] = dVignette_Center;
@@ -31,6 +31,6 @@ void PostProcessVignette::gui()
     pGui->addFloatSlider("Roundness", dVignette_Settings.z, 0, 1);
     static bool rounded = false;
     pGui->addCheckBox("Rounded", rounded);
-    dVignette_Settings.w = rounded? 1.0f : 0.0f;
+    dVignette_Settings.w = rounded ? 1.0f : 0.0f;
     pGui->addRgbColor("Color", dVignette_Color);
 }

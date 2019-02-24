@@ -11,6 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="MaterialInstance.cpp" />
+    <ClCompile Include="ModelResource.cpp" />
     <ClCompile Include="ModelViewer.cpp" />
     <ClCompile Include="MultiPassPostProcess.cpp" />
     <ClCompile Include="PostProcessBase.cpp" />
@@ -23,9 +25,12 @@
     <ClCompile Include="PostProcessSharp.cpp" />
     <ClCompile Include="PostProcessToneMapping.cpp" />
     <ClCompile Include="PostProcessVignette.cpp" />
+    <ClCompile Include="SceneRendererExtend.cpp" />
     <ClCompile Include="ShaderToyImplementation.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MaterialInstance.h" />
+    <ClInclude Include="ModelResource.h" />
     <ClInclude Include="ModelViewer.h" />
     <ClInclude Include="MultiPassPostProcess.h" />
     <ClInclude Include="PostProcessBase.h" />
@@ -39,6 +44,7 @@
     <ClInclude Include="PostProcessToneMapping.h" />
     <ClInclude Include="PostProcessVignette.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SceneRendererExtend.h" />
     <ClInclude Include="ShaderToyImplementation.h" />
   </ItemGroup>
   <ItemGroup>
