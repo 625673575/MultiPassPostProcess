@@ -16,13 +16,13 @@ public:
     bool mUseTriLinearFiltering = false;
     std::string getModelDesc(bool isAfterCull, float loadTime);
     std::map<std::string, MaterialInstance::SharedPtr> sharedMaterials;
+ 
     std::vector<std::string> getMaterialsName();
     size_t getMaterialCount();
     void init();
-    void renderModel(RenderContext* pRenderContext);
+    void setBuffers(RenderContext* pRenderContext,uint32_t meshID);
     void renderMaterialGui(Gui* p);
 private:
     void initMaterials();
-    void renderMeshInstances(RenderContext* pRenderContext);
  
 };

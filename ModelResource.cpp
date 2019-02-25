@@ -38,9 +38,11 @@ void ModelResource::init()
     initMaterials();
 }
 
-void ModelResource::renderModel(RenderContext* pRenderContext)
+void ModelResource::setBuffers(RenderContext* pRenderContext, uint32_t meshID)
 {
-    renderMeshInstances(pRenderContext);
+    auto& pMat = mpModel->getMesh(meshID)->getMaterial();
+    auto& MatInstance = sharedMaterials[pMat->getName()];
+    MatInstance->onRender(pRenderContext);
 }
 
 void ModelResource::renderMaterialGui(Gui* p)
@@ -62,13 +64,7 @@ void ModelResource::initMaterials()
         const auto& matName = mat->getName();
         if (sharedMaterials.find(matName) != sharedMaterials.end())
             continue;
-        auto inst = std::make_shared<MaterialInstance>(mat);
+        auto inst = std::make_shared<MaterialInstance>(matName);
         sharedMaterials.emplace(matName, inst);
     }
-    sharedMaterials["wall"]->insert_ivec4("wall_color", glm::ivec4(1, 2, 3, 4));
-    sharedMaterials["wall"]->set_texture2D("wall_baseColor", MaterialInstance::pBlankTexture);
-}
-
-void ModelResource::renderMeshInstances(RenderContext* pRenderContext)
-{
 }

@@ -35,6 +35,7 @@
     <ClCompile Include="MaterialInstance.cpp" />
     <ClCompile Include="ModelResource.cpp" />
     <ClCompile Include="SceneRendererExtend.cpp" />
+    <ClCompile Include="SceneExtend.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MultiPassPostProcess.h" />
@@ -72,6 +73,7 @@
     <ClInclude Include="MaterialInstance.h" />
     <ClInclude Include="ModelResource.h" />
     <ClInclude Include="SceneRendererExtend.h" />
+    <ClInclude Include="SceneExtend.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Data">

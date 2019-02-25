@@ -16,12 +16,13 @@ public:
     void onGuiRender(SampleCallbacks* pSample, Gui* pGui);
     bool hasModel() { return !models.empty(); }
 private:
-    void loadModel(ResourceFormat fboFormat);
+    void openDialogLoadModel(ResourceFormat fboFormat);
     void deleteCulledMeshes(ModelResource& mesh);
 
     ModelResource loadModelFromFile(const std::string& Filename, ResourceFormat fboFormat, bool animation = false, bool useLinearFilter = true);
     void resetCamera();
     void renderModelUI(Gui* pGui);
+    void loadModelResources();
 
     ModelViewCameraController mModelViewCameraController;
     FirstPersonCameraController mFirstPersonCameraController;
@@ -45,6 +46,10 @@ private:
     RasterizerState::SharedPtr mpWireframeRS = nullptr;
     RasterizerState::SharedPtr mpCullRastState[3]; // 0 = no culling, 1 = backface culling, 2 = frontface culling
     uint32_t mCullMode = 1;
+
+    BlendState::SharedPtr mpBlendState[2];
+    uint32_t mBlendMode = 0;
+
     DepthStencilState::SharedPtr mpNoDepthDS = nullptr;
     DepthStencilState::SharedPtr mpDepthTestDS = nullptr;
 
@@ -57,6 +62,5 @@ private:
     std::vector<ModelResource> models;
     float mNearZ;
     float mFarZ;
-    glm::vec3 mAmbientIntensity;
 };
 

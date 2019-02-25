@@ -14,11 +14,11 @@ public:
     static const std::string psEntry;
 public:
     MaterialInstance() = default;
-    MaterialInstance(const std::string& shader, const Program::DefineList& programDefines);
-    MaterialInstance(const Material::SharedPtr& pMat);
+    MaterialInstance(const std::string& shader, const Program::DefineList& programDefines, const std::string& name);
+    MaterialInstance(const std::string& name);
     //MaterialInstance(Program::SharedPtr program, const Program::DefineList& programDefines);
     ~MaterialInstance() = default;
-    static MaterialInstance::SharedPtr create(const std::string& shader, const Program::DefineList& programDefines);
+    static MaterialInstance::SharedPtr create(const std::string& shader, const Program::DefineList& programDefines, const std::string& _name="");
     //static MaterialInstance::SharedPtr create(Program::SharedPtr& program, const Program::DefineList& programDefines);
 private:
 
@@ -57,10 +57,11 @@ private:
     DEF_VAR(mat3);
     DEF_VAR(mat4);
     std::map<std::string, Texture::SharedPtr> param_texture2D;
-    Material::SharedPtr mpSharedMaterial;
     GraphicsProgram::SharedPtr mpProgram = nullptr;
     GraphicsVars::SharedPtr mpProgramVars = nullptr;
+    std::string mName;
 public:
+    DEF_INSERT_FUNC(bool);
     DEF_INSERT_FUNC(int);
     DEF_INSERT_FUNC(ivec2);
     DEF_INSERT_FUNC(ivec3);
@@ -73,11 +74,12 @@ public:
     DEF_INSERT_FUNC(mat3);
     DEF_INSERT_FUNC(mat4);
     void set_texture2D(const std::string& var_name, const Texture::SharedPtr& tex) { param_texture2D[var_name] = tex; }
-    const Texture::SharedPtr& get_texture2D(const std::string& var_name) { return param_texture2D[var_name]; }
+    Texture::SharedPtr& get_texture2D(const std::string& var_name) { return param_texture2D[var_name]; }
     ConstantBuffer::SharedPtr get_constantbuffer(ECBType t);
     void onMaterialGui(Gui *p);
     void onRender(RenderContext* pRenderContext);
-    static Texture::SharedPtr pBlankTexture;
+    static Texture::SharedPtr BlankTexture;
+    const std::string& getName() { return mName; }
 };
 
 #undef DEF_VAR

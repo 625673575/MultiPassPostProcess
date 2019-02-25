@@ -1,8 +1,9 @@
 #include "ModelViewer.h"
 #include "MultiPassPostProcess.h"
 #include "SceneRendererExtend.h"
+#include "SceneExtend.h"
 
-ModelViewer::ModelViewer() :mAmbientIntensity(1.0f), mNearZ(0.1f), mFarZ(1000.0f)
+ModelViewer::ModelViewer() : mNearZ(0.1f), mFarZ(1000000.0f)
 {
 }
 
@@ -14,7 +15,7 @@ ModelViewer::~ModelViewer()
 void ModelViewer::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext)
 {
     mpCamera = Camera::create();
-    mpProgram = GraphicsProgram::createFromFile("ModelViewer.ps.hlsl", "", "main");
+    mpProgram = GraphicsProgram::createFromFile("ModelViewer.ps.hlsl", "vert", "frag");
 
     // create rasterizer state
     RasterizerState::Desc wireframeDesc;
@@ -29,6 +30,16 @@ void ModelViewer::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext
     mpCullRastState[1] = RasterizerState::create(solidDesc);
     solidDesc.setCullMode(RasterizerState::CullMode::Front);
     mpCullRastState[2] = RasterizerState::create(solidDesc);
+
+    BlendState::Desc blendDesc;
+    mpBlendState[0] = BlendState::create(blendDesc);
+    blendDesc.setAlphaToCoverage(false);
+    blendDesc.setRenderTargetWriteMask(0, true, true, true, true);
+
+    blendDesc.setRtBlend(0, true).setRtParams(0, BlendState::BlendOp::Add, BlendState::BlendOp::Add,
+        BlendState::BlendFunc::SrcAlpha, BlendState::BlendFunc::OneMinusSrcAlpha,
+        BlendState::BlendFunc::One, BlendState::BlendFunc::Zero);
+    mpBlendState[1] = BlendState::create(blendDesc);
 
     // Depth test
     DepthStencilState::Desc dsDesc;
@@ -54,16 +65,33 @@ void ModelViewer::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext
     mpProgramVars = GraphicsVars::create(mpProgram->getReflector());
     mpGraphicsState = GraphicsState::create();
     mpGraphicsState->setProgram(mpProgram);
+
+    loadModelResources();
 }
 
 void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRenderContext, const Fbo::SharedPtr& pTargetFbo)
 {
-    Scene::SharedPtr pScene = Scene::create();
+    std::shared_ptr<SceneExtend> pScene = std::make_shared<SceneExtend>("");
     SceneRendererExtend::SharedPtr pSceneRenderer = SceneRendererExtend::create(pScene);
 
     const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
     pRenderContext->clearFbo(pTargetFbo.get(), clearColor, 1.0f, 0, FboAttachmentType::All);
     mpGraphicsState->setFbo(pTargetFbo);
+
+    if (mDrawWireframe)
+    {
+        mpGraphicsState->setRasterizerState(mpWireframeRS);
+        mpGraphicsState->setDepthStencilState(mpNoDepthDS);
+    }
+    else
+    {
+        mpGraphicsState->setRasterizerState(mpCullRastState[mCullMode]);
+        mpGraphicsState->setDepthStencilState(mpDepthTestDS);
+    }
+    if (mBlendMode != 0) {
+        mpGraphicsState->setDepthStencilState(mpNoDepthDS);
+    }
+    mpGraphicsState->setBlendState(mpBlendState[mBlendMode]);
 
     for (auto& v : models)
     {
@@ -76,42 +104,15 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
             PROFILE("animate");
             v.mpModel->animate(pSample->getCurrentTime());
         }
-        mpProgramVars["PerFrameCB"]["gAmbient"] = mAmbientIntensity;
         // Set render state
-        if (mDrawWireframe)
-        {
-            mpProgramVars["PerFrameCB"]["gConstColor"] = true;
-            mpGraphicsState->setRasterizerState(mpWireframeRS);
-            mpGraphicsState->setDepthStencilState(mpNoDepthDS);
-        }
-        else
-        {
-            mpGraphicsState->setRasterizerState(mpCullRastState[mCullMode]);
-            mpGraphicsState->setDepthStencilState(mpDepthTestDS);
-
-            ConstantBuffer* pCB = mpProgramVars["PerFrameCB"].get();
-            mpProgramVars->setTexture("gAlbedo", MultiPassPostProcess::pTextureSelectedFromFile);
-            mpProgramVars["PerFrameCB"]["gConstColor"] = false;
-            mpDirLight->setIntoProgramVars(mpProgramVars.get(), pCB, "gDirLight");
-            mpPointLight->setIntoProgramVars(mpProgramVars.get(), pCB, "gPointLight");
-        }
 
         v.mpModel->bindSamplerToMaterials(v.mUseTriLinearFiltering ? mpLinearSampler : mpPointSampler);
 
-        static auto baseColor = createTextureFromFile("d:\\Falcor\\Media\\flamer\\Textures\\DefaultMaterial_albedo.jpg", false, true);
-        static auto normal = createTextureFromFile("d:\\Falcor\\Media\\flamer\\Textures\\DefaultMaterial_normal.jpg", false, true);
-        static auto spec = createTextureFromFile("d:\\Falcor\\Media\\flamer\\Textures\\DefaultMaterial_metallic.jpg", false, true);
-        for (int i = 0; i < 1; i++) {
-            auto& mt = v.mpModel->getMesh(i)->getMaterial();
-            mt->setBaseColorTexture(baseColor);
-            mt->setNormalMap(normal);
-            mt->setSpecularTexture(spec);
-        }
         mpGraphicsState->setProgram(mpProgram);
         pRenderContext->setGraphicsState(mpGraphicsState);
         pRenderContext->setGraphicsVars(mpProgramVars);
 
-        pScene->addModelInstance(v.mpModel, "");
+        pScene->addModelResource(v, "");
     }
     pSceneRenderer->toggleMeshCulling(true);
     pSceneRenderer->renderScene(pRenderContext, mpCamera.get());
@@ -125,7 +126,7 @@ void ModelViewer::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     // Load model group
     if (pGui->addButton("Load Model"))
     {
-        loadModel(pSample->getCurrentFbo()->getColorTexture(0)->getFormat());
+        openDialogLoadModel(pSample->getCurrentFbo()->getColorTexture(0)->getFormat());
     }
     if (pGui->beginGroup("Load Options"))
     {
@@ -146,9 +147,13 @@ void ModelViewer::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     cullList.push_back({ 2, "Frontface Culling" });
     pGui->addDropdown("Cull Mode", cullList, mCullMode);
 
+    Gui::DropdownList blendList;
+    blendList.push_back({ 0, "Normal" });
+    blendList.push_back({ 1, "Transparent" });
+    pGui->addDropdown("Blend Mode", blendList, mBlendMode);
+
     if (pGui->beginGroup("Lights"))
     {
-        pGui->addRgbColor("Ambient intensity", mAmbientIntensity);
         if (pGui->beginGroup("Directional Light"))
         {
             mpDirLight->renderUI(pGui);
@@ -244,7 +249,7 @@ ModelResource ModelViewer::loadModelFromFile(const std::string& filename, Resour
     return r;
 }
 
-void ModelViewer::loadModel(ResourceFormat fboFormat)
+void ModelViewer::openDialogLoadModel(ResourceFormat fboFormat)
 {
     std::string Filename;
     if (openFileDialog(Model::kFileExtensionFilters, Filename))
@@ -302,6 +307,29 @@ void ModelViewer::resetCamera()
         m6DoFCameraController.setCameraSpeed(Radius*0.25f);
 
         mNearZ = std::max(0.1f, models.begin()->mpModel->getRadius() / 750.0f);
-        mFarZ = Radius * 10;
+        //mFarZ = Radius * 10;
     }
+}
+
+void ModelViewer::loadModelResources()
+{
+    auto arcade = loadModelFromFile("d:\\Falcor\\Media\\Arcade\\Arcade.fbx", ResourceFormat::RGBA8UnormSrgb);
+    for (auto&v : arcade.sharedMaterials) {
+        auto& m_wall = v.second;
+        m_wall->insert_bool("gConstColor", false);
+        m_wall->insert_vec4("gAmbient", glm::vec4(1.0f));
+        m_wall->set_texture2D("gAlbedo", MaterialInstance::BlankTexture);
+        //m_wall->getDefaultMaterial()->setBaseColorTexture(m_wall->get_texture2D("gAlbedo"));
+    }
+    auto teapot = loadModelFromFile("d:\\Falcor\\Media\\modelo\\SeeU Miniature.dae", ResourceFormat::RGBA8UnormSrgb);
+    for (auto&v : teapot.sharedMaterials) {
+        auto& m_wall = v.second;
+        m_wall->insert_bool("gConstColor", false);
+        m_wall->insert_vec4("gAmbient", glm::vec4(1.0f));
+        m_wall->set_texture2D("gAlbedo", MaterialInstance::BlankTexture);
+        //m_wall->getDefaultMaterial()->setBaseColorTexture(m_wall->get_texture2D("gAlbedo"));
+    }
+    models.emplace_back(arcade);
+    models.emplace_back(teapot);
+    resetCamera();
 }

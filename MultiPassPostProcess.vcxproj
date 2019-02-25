@@ -25,6 +25,7 @@
     <ClCompile Include="PostProcessSharp.cpp" />
     <ClCompile Include="PostProcessToneMapping.cpp" />
     <ClCompile Include="PostProcessVignette.cpp" />
+    <ClCompile Include="SceneExtend.cpp" />
     <ClCompile Include="SceneRendererExtend.cpp" />
     <ClCompile Include="ShaderToyImplementation.cpp" />
   </ItemGroup>
@@ -44,6 +45,7 @@
     <ClInclude Include="PostProcessToneMapping.h" />
     <ClInclude Include="PostProcessVignette.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SceneExtend.h" />
     <ClInclude Include="SceneRendererExtend.h" />
     <ClInclude Include="ShaderToyImplementation.h" />
   </ItemGroup>

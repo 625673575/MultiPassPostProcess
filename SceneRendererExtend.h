@@ -1,5 +1,6 @@
 #pragma once
 #include "Falcor.h"
+#include "SceneExtend.h"
 
 using namespace Falcor;
 
@@ -17,8 +18,12 @@ public:
     virtual ~SceneRendererExtend() = default;
 
     void renderScene(RenderContext* pContext, const Camera* pCamera)override;
+    bool setPerMaterialData(const CurrentWorkingData& currentData, const Material* pMaterial)override;
+
 protected:
+    GraphicsProgram::SharedPtr mpDefaultProgram;
+    GraphicsVars::SharedPtr mpDefaultProgramVars;
     void render(CurrentWorkingData& currentData);
-    void renderMeshInstancesExtend(CurrentWorkingData& currentData, const Scene::ModelInstance* pModelInstance, uint32_t meshID);
+     SceneExtend* getScene() { return static_cast<SceneExtend*>( mpScene.get()); }
 };
 
