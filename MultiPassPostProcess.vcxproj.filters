@@ -99,9 +99,6 @@
     <None Include="Data\GlslContainer.hlsl">
       <Filter>Data</Filter>
     </None>
-    <None Include="Data\ModelViewer.ps.hlsl">
-      <Filter>Data</Filter>
-    </None>
     <None Include="Data\BugTV.ps.hlsl">
       <Filter>Data\PostProcess</Filter>
     </None>
@@ -155,6 +152,18 @@
     </None>
     <None Include="Data\VolcanicBuffer0.ps.hlsl">
       <Filter>Data\PostProcess</Filter>
+    </None>
+    <None Include="Data\downsample.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\ConstColor.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\Diffuse.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\Standard.hlsl">
+      <Filter>Data</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

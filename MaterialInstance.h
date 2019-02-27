@@ -18,7 +18,7 @@ public:
     MaterialInstance(const std::string& name);
     //MaterialInstance(Program::SharedPtr program, const Program::DefineList& programDefines);
     ~MaterialInstance() = default;
-    static MaterialInstance::SharedPtr create(const std::string& shader, const Program::DefineList& programDefines, const std::string& _name="");
+    static MaterialInstance::SharedPtr create(const std::string& shader, const Program::DefineList& programDefines, const std::string& _name = "");
     //static MaterialInstance::SharedPtr create(Program::SharedPtr& program, const Program::DefineList& programDefines);
 private:
 
@@ -57,10 +57,13 @@ private:
     DEF_VAR(mat3);
     DEF_VAR(mat4);
     std::map<std::string, Texture::SharedPtr> param_texture2D;
+    std::map<std::string, Texture::SharedPtr> param_textureCube;
     GraphicsProgram::SharedPtr mpProgram = nullptr;
     GraphicsVars::SharedPtr mpProgramVars = nullptr;
     std::string mName;
 public:
+    const GraphicsProgram::SharedPtr& get_program() { return mpProgram; }
+    void set_program(const  GraphicsProgram::SharedPtr& prog) { clear(); mpProgram = prog; mpProgramVars = GraphicsVars::create(mpProgram->getReflector()); }
     DEF_INSERT_FUNC(bool);
     DEF_INSERT_FUNC(int);
     DEF_INSERT_FUNC(ivec2);
@@ -73,11 +76,15 @@ public:
     DEF_INSERT_FUNC(mat2);
     DEF_INSERT_FUNC(mat3);
     DEF_INSERT_FUNC(mat4);
+    void clear();
     void set_texture2D(const std::string& var_name, const Texture::SharedPtr& tex) { param_texture2D[var_name] = tex; }
     Texture::SharedPtr& get_texture2D(const std::string& var_name) { return param_texture2D[var_name]; }
+    void set_textureCube(const std::string& var_name, const Texture::SharedPtr& tex) { param_textureCube[var_name] = tex; }
+    Texture::SharedPtr& get_textureCube(const std::string& var_name) { return param_textureCube[var_name]; }
+
     ConstantBuffer::SharedPtr get_constantbuffer(ECBType t);
     void onMaterialGui(Gui *p);
-    void onRender(RenderContext* pRenderContext);
+    void onRender(RenderContext* pRenderContext, GraphicsVars* vars);
     static Texture::SharedPtr BlankTexture;
     const std::string& getName() { return mName; }
 };

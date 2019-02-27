@@ -10,8 +10,8 @@ void SceneRendererExtend::renderScene(RenderContext * pContext, const Camera * p
 {
     updateVariableOffsets(pContext->getGraphicsVars()->getReflection().get());
     //设置默认的shader和var
-    mpDefaultProgram = pContext->getGraphicsState()->getProgram();
-    mpDefaultProgramVars = pContext->getGraphicsVars();
+    //mpDefaultProgram = pContext->getGraphicsState()->getProgram();
+    //mpDefaultProgramVars = pContext->getGraphicsVars();
 
     CurrentWorkingData currentData;
     currentData.pContext = pContext;
@@ -32,8 +32,6 @@ bool SceneRendererExtend::setPerMaterialData(const CurrentWorkingData & currentD
 
 void SceneRendererExtend::render(CurrentWorkingData & currentData)
 {
-    setPerFrameData(currentData);
-
     for (uint32_t modelID = 0; modelID < mpScene->getModelCount(); modelID++)
     {
         currentData.pModel = mpScene->getModel(modelID).get();
@@ -49,12 +47,18 @@ void SceneRendererExtend::render(CurrentWorkingData & currentData)
                     if (setPerModelInstanceData(currentData, pInstance, instanceID))
                     {
                         mpLastMaterial = nullptr;
+
                         auto res = getScene()->getModelResource(modelID);
+                        pInstance->setTranslation(res.Translation, true);
+                        pInstance->setRotation(res.Rotation);
+                        pInstance->setScaling(res.Scale);
 
                         // Loop over the meshes
                         for (uint32_t meshID = 0; meshID < pInstance->getObject()->getMeshCount(); meshID++)
                         {
-                            res.setBuffers(currentData.pContext, meshID);
+                            res.setBuffers(currentData.pContext, currentData.pVars, meshID);
+                            updateVariableOffsets(currentData.pContext->getGraphicsVars()->getReflection().get());
+                            setPerFrameData(currentData);
                             renderMeshInstances(currentData, pInstance, meshID);
                         }
                     }

@@ -1,4 +1,5 @@
 #include "MaterialInstance.h"
+#include "ModelViewer.h"
 const std::string MaterialInstance::vsEntry = "vert";
 const std::string MaterialInstance::psEntry = "frag";
 Texture::SharedPtr MaterialInstance::BlankTexture = nullptr;
@@ -14,6 +15,24 @@ MaterialInstance::MaterialInstance(const std::string & shader, const Program::De
 }
 MaterialInstance::MaterialInstance(const std::string& _name) : mName(_name)
 {
+
+}
+void MaterialInstance::clear()
+{
+#define CLEAR_MAP(type) param_##type##.clear()
+    CLEAR_MAP(bool);
+    CLEAR_MAP(int);
+    CLEAR_MAP(ivec2);
+    CLEAR_MAP(ivec3);
+    CLEAR_MAP(ivec4);
+    CLEAR_MAP(float);
+    CLEAR_MAP(vec2);
+    CLEAR_MAP(vec3);
+    CLEAR_MAP(vec4);
+    CLEAR_MAP(mat2);
+    CLEAR_MAP(mat3);
+    CLEAR_MAP(mat4);
+    CLEAR_MAP(texture2D);
 
 }
 inline ConstantBuffer::SharedPtr MaterialInstance::get_constantbuffer(ECBType t)
@@ -71,7 +90,7 @@ void MaterialInstance::onMaterialGui(Gui *p)
     for (auto&v : param_texture2D) {
         if (p->addImageButton(PRE_INDEX_NAME.c_str(), v.second == nullptr ? BlankTexture : v.second, glm::vec2(128, 128), true, true)) {
             std::string filename;
-            FileDialogFilterVec filters = { {"bmp"}, {"jpg"}, {"dds"}, {"png"}, {"tiff"}, {"tif"}, {"tga"},{"gif"} };
+            FileDialogFilterVec filters = { {"bmp"}, {"jpg"}, {"jpeg"}, {"dds"}, {"png"}, {"tiff"}, {"tif"}, {"tga"},{"gif"} };
             if (openFileDialog(filters, filename))
             {
                 v.second = createTextureFromFile(filename, false, true);
@@ -81,9 +100,9 @@ void MaterialInstance::onMaterialGui(Gui *p)
     }
 }
 
-void MaterialInstance::onRender(RenderContext* pRenderContext)
+void MaterialInstance::onRender(RenderContext* pRenderContext,GraphicsVars* vars)
 {
-    static auto& graphicsState = pRenderContext->getGraphicsState();
+    auto& graphicsState = pRenderContext->getGraphicsState();
     if (mpProgramVars == nullptr) {
         mpProgramVars = pRenderContext->getGraphicsVars();
     }
@@ -109,8 +128,10 @@ void MaterialInstance::onRender(RenderContext* pRenderContext)
     SET_CONSTANT_BUFFER(mat3);
     SET_CONSTANT_BUFFER(mat4);
 
-    pRenderContext->setGraphicsVars(mpProgramVars);
-    if (mpProgram)
+    if (mpProgram) {
         graphicsState->setProgram(mpProgram);
+        pRenderContext->setGraphicsVars(mpProgramVars);
+        vars = mpProgramVars.get();
+    }
 
 }

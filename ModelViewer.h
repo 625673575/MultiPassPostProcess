@@ -2,6 +2,7 @@
 #include "Falcor.h"
 #include "ModelResource.h"
 using namespace Falcor;
+
 class ModelViewer
 {
 public:
@@ -22,6 +23,8 @@ private:
     ModelResource loadModelFromFile(const std::string& Filename, ResourceFormat fboFormat, bool animation = false, bool useLinearFilter = true);
     void resetCamera();
     void renderModelUI(Gui* pGui);
+    void loadShaderProgram();
+    void loadMaterialFunctions();
     void loadModelResources();
 
     ModelViewCameraController mModelViewCameraController;
@@ -38,6 +41,8 @@ private:
 
     Camera::SharedPtr mpCamera;
     CameraController& getActiveCameraController();
+    float mNearZ;
+    float mFarZ;
 
     bool mDrawWireframe = false;
     uint32_t mActiveAnimationID = kBindPoseAnimationID;
@@ -60,7 +65,13 @@ private:
     GraphicsVars::SharedPtr mpProgramVars = nullptr;
     GraphicsState::SharedPtr mpGraphicsState = nullptr;
     std::vector<ModelResource> models;
-    float mNearZ;
-    float mFarZ;
+    static std::map<std::string, std::function<void(MaterialInstance::SharedPtr&)>>mMaterialFuncMap;
+    static std::map<std::string, GraphicsProgram::SharedPtr>mProgramMap;
+public:
+    static std::function<void(MaterialInstance::SharedPtr&)>& getMaterialFunc(const std::string& name) { return mMaterialFuncMap[name]; };
+    static GraphicsProgram::SharedPtr& getProgram(const std::string& name) { return mProgramMap[name]; }
+    static const std::map<std::string, std::function<void(MaterialInstance::SharedPtr&)>>& getMaterialFuncMap() { return mMaterialFuncMap; };
+    static const std::map<std::string, GraphicsProgram::SharedPtr>& getProgramMap() { return mProgramMap; }
+
 };
 

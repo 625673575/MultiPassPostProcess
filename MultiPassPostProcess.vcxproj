@@ -152,17 +152,28 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Data\ModelViewer.ps.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Data\MotionBlur.ps.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Lut.ps.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\downsample.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Data\Standard.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\ConstColor.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Data\Diffuse.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

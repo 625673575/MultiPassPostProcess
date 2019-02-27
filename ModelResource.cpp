@@ -1,6 +1,13 @@
 #include "ModelResource.h"
+#include "ModelViewer.h"
 
-ModelResource::ModelResource(const Model::SharedPtr& pModel)
+Gui::DropdownList ModelResource::programDropDownList = {};
+bool ModelResource::hasInitGui = false;
+ModelResource::ModelResource() :Translation(0), Rotation(0), Scale(1)
+{
+}
+
+ModelResource::ModelResource(const Model::SharedPtr& pModel) : Translation(0), Rotation(0), Scale(1)
 {
     mpModel = pModel;
 }
@@ -20,6 +27,25 @@ std::string ModelResource::getModelDesc(bool isAfterCull, float loadTime)
     return mModelString;
 }
 
+void ModelResource::setProgram(const std::string & materialName, const std::string & programName)
+{
+    auto& material = sharedMaterials[materialName];
+    ModelViewer::getMaterialFuncMap().at(programName)(material);
+    resetMaterialGui();
+}
+
+uint32_t ModelResource::getProgramIndex(const GraphicsProgram::SharedPtr & pProgram)
+{
+    uint32_t i = 0;
+    for (auto & p : ModelViewer::getProgramMap()) {
+        if (p.second == pProgram) {
+            return i;
+        }
+        i++;
+    }
+    return 0;
+}
+
 std::vector<std::string> ModelResource::getMaterialsName()
 {
     std::vector<std::string> r;
@@ -28,33 +54,74 @@ std::vector<std::string> ModelResource::getMaterialsName()
     return r;
 }
 
+const std::map<std::string, std::function<void(MaterialInstance::SharedPtr&)>>& ModelResource::getProgramMapFunc()
+{
+    return  ModelViewer::getMaterialFuncMap();
+}
+
 size_t ModelResource::getMaterialCount()
 {
     return sharedMaterials.size();
 }
 
+void ModelResource::resetMaterialGui()
+{
+    for (auto&inst : sharedMaterials) {
+        auto initProgramIndex = getProgramIndex(inst.second->get_program());
+        programDropDownIndex.emplace(inst.first, initProgramIndex);
+    }
+}
+
 void ModelResource::init()
 {
+    if(!hasInitGui){
+        uint32_t i = 0;
+        auto& materialFuncMap = ModelViewer::getMaterialFuncMap();
+        for (auto&v : materialFuncMap) {
+            programDropDownList.push_back({ i++, v.first });
+        }
+        hasInitGui = true;
+    }
     initMaterials();
 }
 
-void ModelResource::setBuffers(RenderContext* pRenderContext, uint32_t meshID)
+void ModelResource::setBuffers(RenderContext* pRenderContext, GraphicsVars* vars, uint32_t meshID)
 {
     auto& pMat = mpModel->getMesh(meshID)->getMaterial();
     auto& MatInstance = sharedMaterials[pMat->getName()];
-    MatInstance->onRender(pRenderContext);
+    MatInstance->onRender(pRenderContext, vars);
 }
 
-void ModelResource::renderMaterialGui(Gui* p)
+void ModelResource::onGui(Gui* p)
 {
+    p->addSeparator();
+    auto modelName = mpModel->getName();
+    p->addText(("Transform " + modelName).c_str());
+    p->addFloat3Var((mpModel->getName() + "-Translation").c_str(), Translation);
+    p->addFloat3Var((mpModel->getName() + "-Rotation").c_str(), Rotation);
+    p->addFloat3Var((mpModel->getName() + "-Scale").c_str(), Scale);
     for (auto&v : sharedMaterials) {
-        if (v.second) {
-            if (p->beginGroup(v.first, true)) {
-                v.second->onMaterialGui(p);
-                p->endGroup();
+        if (p->beginGroup(v.first, true)) {
+            auto dropDownName = modelName + v.first + "-shader";
+            if (p->addDropdown(dropDownName.c_str(), programDropDownList, programDropDownIndex[v.first])) {
+                auto i = 0;
+                for (auto & func : getProgramMapFunc()) {
+                    if (i++ == programDropDownIndex[v.first]) {
+                        func.second(v.second);
+                    }
+                }
             }
+            v.second->onMaterialGui(p);
+            p->endGroup();
         }
     }
+}
+
+void ModelResource::setTRS(const glm::vec3 & translation, const glm::vec3 & rotation, const glm::vec3 & scale)
+{
+    Translation = translation;
+    Rotation = rotation;
+    Scale = scale;
 }
 
 void ModelResource::initMaterials()

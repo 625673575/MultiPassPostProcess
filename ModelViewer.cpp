@@ -3,6 +3,9 @@
 #include "SceneRendererExtend.h"
 #include "SceneExtend.h"
 
+std::map<std::string, std::function<void(MaterialInstance::SharedPtr&)>> ModelViewer::mMaterialFuncMap;
+std::map<std::string, GraphicsProgram::SharedPtr> ModelViewer::mProgramMap;
+
 ModelViewer::ModelViewer() : mNearZ(0.1f), mFarZ(1000000.0f)
 {
 }
@@ -15,8 +18,10 @@ ModelViewer::~ModelViewer()
 void ModelViewer::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext)
 {
     mpCamera = Camera::create();
-    mpProgram = GraphicsProgram::createFromFile("ModelViewer.ps.hlsl", "vert", "frag");
+    mpProgram = GraphicsProgram::createFromFile("Diffuse.hlsl", "", "frag");
+    //mpProgram = GraphicsProgram::createFromFile("pbr.hlsl", "", "frag");
 
+    mpProgramVars = GraphicsVars::create(mpProgram->getReflector());
     // create rasterizer state
     RasterizerState::Desc wireframeDesc;
     wireframeDesc.setFillMode(RasterizerState::FillMode::Wireframe);
@@ -62,10 +67,11 @@ void ModelViewer::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext
     mpPointLight = PointLight::create();
     mpDirLight->setWorldDirection(glm::vec3(0.13f, 0.27f, -0.9f));
 
-    mpProgramVars = GraphicsVars::create(mpProgram->getReflector());
     mpGraphicsState = GraphicsState::create();
     mpGraphicsState->setProgram(mpProgram);
 
+    loadShaderProgram();
+    loadMaterialFunctions();
     loadModelResources();
 }
 
@@ -92,7 +98,15 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
         mpGraphicsState->setDepthStencilState(mpNoDepthDS);
     }
     mpGraphicsState->setBlendState(mpBlendState[mBlendMode]);
+    pRenderContext->setGraphicsState(mpGraphicsState);
 
+    mpGraphicsState->setProgram(mpProgram);
+    pRenderContext->setGraphicsVars(mpProgramVars);
+    static  auto i = 0;
+    if (i++ % 2 == 0) {
+        mpGraphicsState->setProgram(mProgramMap["ConstColor"]);
+        pRenderContext->setGraphicsVars(GraphicsVars::create(mProgramMap["ConstColor"]->getReflector()));
+    }
     for (auto& v : models)
     {
         mpCamera->setDepthRange(mNearZ, mFarZ);
@@ -108,11 +122,7 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
 
         v.mpModel->bindSamplerToMaterials(v.mUseTriLinearFiltering ? mpLinearSampler : mpPointSampler);
 
-        mpGraphicsState->setProgram(mpProgram);
-        pRenderContext->setGraphicsState(mpGraphicsState);
-        pRenderContext->setGraphicsVars(mpProgramVars);
-
-        pScene->addModelResource(v, "");
+        pScene->addModelResource(v, v.mpModel->getName());
     }
     pSceneRenderer->toggleMeshCulling(true);
     pSceneRenderer->renderScene(pRenderContext, mpCamera.get());
@@ -124,10 +134,12 @@ void ModelViewer::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     static ivec4 frameRect(300, 600, 500, 100);
     pGui->pushWindow("Model Viewer", frameRect.x, frameRect.y, frameRect.z, frameRect.w, false, true, true, false);
     // Load model group
+
     if (pGui->addButton("Load Model"))
     {
         openDialogLoadModel(pSample->getCurrentFbo()->getColorTexture(0)->getFormat());
     }
+
     if (pGui->beginGroup("Load Options"))
     {
         if (pGui->addButton("Delete Culled Meshes"))
@@ -179,7 +191,7 @@ void ModelViewer::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     //    renderModelUI(pGui);
     //}
     for (auto&v : models) {
-        v.renderMaterialGui(pGui);
+        v.onGui(pGui);
     }
     pGui->popWindow();
 
@@ -311,25 +323,61 @@ void ModelViewer::resetCamera()
     }
 }
 
+void ModelViewer::loadShaderProgram()
+{
+    const char* psEntry = "frag";
+    mProgramMap.emplace("Standard", GraphicsProgram::createFromFile("Standard.hlsl", "", psEntry));
+    mProgramMap.emplace("Diffuse", GraphicsProgram::createFromFile("Diffuse.hlsl", "", psEntry));
+    mProgramMap.emplace("ConstColor", GraphicsProgram::createFromFile("ConstColor.hlsl", "", psEntry));
+}
+
+void ModelViewer::loadMaterialFunctions()
+{
+    mMaterialFuncMap.emplace("Standard", [this](MaterialInstance::SharedPtr& m) {
+        m->set_program(mProgramMap["Standard"]);
+        m->set_texture2D("gAlbedoTexture", MaterialInstance::BlankTexture);
+        m->set_texture2D("gNormalTexture", MaterialInstance::BlankTexture);
+        m->set_texture2D("gMentalnessTexture", MaterialInstance::BlankTexture);
+        m->set_texture2D("gRoughnessTexture", MaterialInstance::BlankTexture);
+        m->set_textureCube("gSpecularTexture", MaterialInstance::BlankTexture);
+        m->set_textureCube("gIrradianceTexture", MaterialInstance::BlankTexture);
+        m->set_texture2D("gSpecularBRDF_LUT", MaterialInstance::BlankTexture);
+    });
+    mMaterialFuncMap.emplace("Diffuse", [this](MaterialInstance::SharedPtr& m) {
+        m->set_program(mProgramMap["Diffuse"]);
+        m->insert_bool("gConstColor", false);
+        m->insert_vec4("gAmbient", glm::vec4(1.0f));
+        m->set_texture2D("gAlbedoTexture", MaterialInstance::BlankTexture); });
+
+    mMaterialFuncMap.emplace("ConstColor", [this](MaterialInstance::SharedPtr& m) {
+        m->set_program(mProgramMap["ConstColor"]);
+        m->insert_vec4("gColor", glm::vec4(0.6f, 0.8f, 1.0f, 1.0f)); });
+}
 void ModelViewer::loadModelResources()
 {
-    auto arcade = loadModelFromFile("d:\\Falcor\\Media\\Arcade\\Arcade.fbx", ResourceFormat::RGBA8UnormSrgb);
-    for (auto&v : arcade.sharedMaterials) {
-        auto& m_wall = v.second;
-        m_wall->insert_bool("gConstColor", false);
-        m_wall->insert_vec4("gAmbient", glm::vec4(1.0f));
-        m_wall->set_texture2D("gAlbedo", MaterialInstance::BlankTexture);
-        //m_wall->getDefaultMaterial()->setBaseColorTexture(m_wall->get_texture2D("gAlbedo"));
+    {
+        auto cynthia = loadModelFromFile("d:\\Falcor\\Media\\Cynthia\\Cynthia.obj", ResourceFormat::RGBA8UnormSrgb);
+        for (auto&v : cynthia.sharedMaterials) {
+            auto& m_wall = v.second;
+            mMaterialFuncMap["Diffuse"](m_wall);
+        }
+        cynthia.Translation = glm::vec3(-100, 0, 0);
+        cynthia.Rotation = glm::vec3(0, 1, 0);
+        cynthia.Scale = glm::vec3(10);
+        auto albedo = createTextureFromFile("d:\\Falcor\\Media\\Cynthia\\textures\\texture_1.jpg", false, true);
+        cynthia.sharedMaterials["material_0"]->set_texture2D("gAlbedoTexture", albedo);
+        models.emplace_back(cynthia);
     }
-    auto teapot = loadModelFromFile("d:\\Falcor\\Media\\modelo\\SeeU Miniature.dae", ResourceFormat::RGBA8UnormSrgb);
-    for (auto&v : teapot.sharedMaterials) {
-        auto& m_wall = v.second;
-        m_wall->insert_bool("gConstColor", false);
-        m_wall->insert_vec4("gAmbient", glm::vec4(1.0f));
-        m_wall->set_texture2D("gAlbedo", MaterialInstance::BlankTexture);
-        //m_wall->getDefaultMaterial()->setBaseColorTexture(m_wall->get_texture2D("gAlbedo"));
+    {
+        auto miniature = loadModelFromFile("d:\\Falcor\\Media\\modelo\\SeeU Miniature.dae", ResourceFormat::RGBA8UnormSrgb);
+        for (auto&v : miniature.sharedMaterials) {
+            auto& m_wall = v.second;
+            mMaterialFuncMap["ConstColor"](m_wall);
+            //m_wall->getDefaultMaterial()->setBaseColorTexture(m_wall->get_texture2D("gAlbedo"));
+        }
+        miniature.setProgram("mat_05", "Diffuse");
+        miniature.setProgram("mat_06", "Diffuse");
+        models.emplace_back(miniature);
     }
-    models.emplace_back(arcade);
-    models.emplace_back(teapot);
     resetCamera();
 }

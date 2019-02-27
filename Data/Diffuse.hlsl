@@ -1,13 +1,13 @@
 __import Shading;
 __import DefaultVS;
-cbuffer DCB : register(b1)
+cbuffer DCB : register(b0)
 {
     SamplerState gSampler;
-    Texture2D gAlbedo;
+    Texture2D gAlbedoTexture;
     bool gConstColor;
     float4 gAmbient;
 }
-cbuffer SCB : register(b2)
+cbuffer SCB : register(b1)
 {
     float4 gSt;
 }
@@ -35,8 +35,33 @@ struct VertexOut
     uint renderTargetIndex : SV_RenderTargetArrayIndex;
 #endif
 };*/
+//Constant Buffer
+/*
+cbuffer InternalPerFrameCB : register(b10)
+{
+    CameraData gCamera;
+    uint32_t gLightsCount;
+    float3 internalPerFrameCBPad;
+    LightData gLights[MAX_LIGHT_SOURCES];
+    LightProbeData gLightProbe;
+    LightProbeSharedResources gProbeShared;
+};
 
+cbuffer InternalPerMeshCB
+{
+    float4x4 gWorldMat[MAX_INSTANCES]; // Per-instance world transforms
+    float4x4 gPrevWorldMat[MAX_INSTANCES]; // Previous frame world transforms
+    float3x4 gWorldInvTransposeMat[MAX_INSTANCES]; // Per-instance matrices for transforming normals
+    uint32_t gDrawId[MAX_INSTANCES]; // Zero-based order/ID of Mesh Instances drawn per SceneRenderer::renderScene call.
+    uint32_t gMeshId;
+};
 
+cbuffer InternalBoneCB
+{
+    float4x4 gBoneMat[MAX_BONES]; // Per-model bone matrices
+    float4x4 gInvTransposeBoneMat[MAX_BONES]; // Per-model bone inverse transpose matrices
+};
+*/
 VertexOut vert(VertexIn vIn)
 {
     VertexOut vOut;
@@ -100,6 +125,6 @@ float4 frag(VertexOut vOut) : SV_TARGET
     }
     else
     {
-        return gAlbedo.Sample(gSampler, vOut.texC) * gAmbient;
+        return gAlbedoTexture.Sample(gSampler, vOut.texC) * gAmbient;
     }
 }
