@@ -63,6 +63,7 @@ private:
     Material::SharedPtr mpMaterial = nullptr;
     bool bUseMaterial = false;
     std::string mName;
+    static void loadStaticData();
 public:
     const GraphicsProgram::SharedPtr& get_program() { return mpProgram; }
     void set_program(const  GraphicsProgram::SharedPtr& prog, bool use_default_material = false);

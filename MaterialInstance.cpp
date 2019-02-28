@@ -15,12 +15,13 @@ MaterialInstance::SharedPtr MaterialInstance::create(const std::string & shader,
 
 MaterialInstance::MaterialInstance(const std::string & shader, const Program::DefineList& programDefines, const std::string& _name) :mName(_name)
 {
+    loadStaticData();
     mpProgram = GraphicsProgram::createFromFile(shader, vsEntry, psEntry, programDefines);
     mpProgramVars = GraphicsVars::create(mpProgram->getReflector());
 }
 MaterialInstance::MaterialInstance(const std::string& _name, const  Material::SharedPtr& material) : mName(_name), mpMaterial(material)
 {
-
+    loadStaticData();
 }
 void MaterialInstance::clear()
 {
@@ -51,26 +52,6 @@ inline ConstantBuffer::SharedPtr MaterialInstance::get_constantbuffer(ECBType t)
 void MaterialInstance::onMaterialGui(Gui *p)
 {
     int i = 0;
-    if (WhiteTexture == nullptr) {
-        const uint8_t blankData[16] = { 255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255 };
-        WhiteTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData);
-    }
-    if (BlackTexture == nullptr) {
-        const uint8_t blankData[16] = { 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255 };
-        BlackTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData);
-    }
-    if (RedTexture == nullptr) {
-        const uint8_t blankData[16] = { 255,0,0,255, 255,0,0,255, 255,0,0,255, 255,0,0,255 };
-        RedTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData);
-    }
-    if (GreenTexture == nullptr) {
-        const uint8_t blankData[16] = { 0,255,0,255, 0,255,0,255, 0,255,0,255, 0,255,0,255 };
-        GreenTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData);
-    }
-    if (BlueTexture == nullptr) {
-        const uint8_t blankData[16] = { 0,0,255,255, 0,0,255,255, 0,0,255,255, 0,0,255,255 };
-        BlueTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData);
-    }
 #define PRE_INDEX_NAME  (v.first + ":" + mName)
 #define ADD_GUI_VEC(vec,var_type)\
     for (auto &v : param_##vec) {\
@@ -136,7 +117,7 @@ void MaterialInstance::onMaterialGui(Gui *p)
         if (p->addButton("Red",true)) { mpMaterial->set##FunctionName(RedTexture); return;}\
         if (p->addButton("Green",true)) { mpMaterial->set##FunctionName(GreenTexture); return;}\
         if (p->addButton("Blue",true)) { mpMaterial->set##FunctionName(BlueTexture);  return;}*/
-        
+
         ADD_MATERIAL_TEXTURE(Albedo, BaseColorTexture, WhiteTexture);
         ADD_MATERIAL_TEXTURE(Specular, SpecularTexture, BlackTexture);
         ADD_MATERIAL_TEXTURE(NormalMap, NormalMap, WhiteTexture);
@@ -180,6 +161,22 @@ void MaterialInstance::onRender(RenderContext* pRenderContext, GraphicsVars* var
         vars = mpProgramVars.get();
     }
 
+}
+
+void MaterialInstance::loadStaticData()
+{
+    if (WhiteTexture == nullptr) {
+        std::vector<uint8_t> blankData = { 255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255 };
+        WhiteTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData.data());
+        blankData = { 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255 };
+        BlackTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData.data());
+        const uint8_t blankData[16] = { 255,0,0,255, 255,0,0,255, 255,0,0,255, 255,0,0,255 };
+        RedTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData.data());
+        const uint8_t blankData[16] = { 0,255,0,255, 0,255,0,255, 0,255,0,255, 0,255,0,255 };
+        GreenTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData.data());
+        const uint8_t blankData[16] = { 0,0,255,255, 0,0,255,255, 0,0,255,255, 0,0,255,255 };
+        BlueTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData.data());
+    }
 }
 
 void MaterialInstance::set_program(const GraphicsProgram::SharedPtr & prog, bool use_default_material)
