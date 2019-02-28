@@ -18,6 +18,9 @@ public:
     virtual ~SceneRendererExtend() = default;
 
     void renderScene(RenderContext* pContext, const Camera* pCamera)override;
+    void setPerFrameData(const CurrentWorkingData& currentData)override;
+    bool setPerModelData(const CurrentWorkingData& currentData)override;
+    bool setPerMeshInstanceData(const CurrentWorkingData& currentData, const Scene::ModelInstance* pModelInstance, const Model::MeshInstance* pMeshInstance, uint32_t drawInstanceID)override;
     bool setPerMaterialData(const CurrentWorkingData& currentData, const Material* pMaterial)override;
 
 protected:
