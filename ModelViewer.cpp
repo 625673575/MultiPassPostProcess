@@ -132,7 +132,7 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
 void ModelViewer::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 {
     static ivec4 frameRect(300, 600, 500, 100);
-    pGui->pushWindow("Model Viewer", frameRect.x, frameRect.y, frameRect.z, frameRect.w, false, true, true, false);
+    pGui->pushWindow("Model Viewer", frameRect.x, frameRect.y, frameRect.z, frameRect.w, false, true, true);
     // Load model group
 
     if (pGui->addButton("Load Model"))
@@ -366,18 +366,20 @@ void ModelViewer::loadModelResources()
         cynthia.Scale = glm::vec3(10);
         auto albedo = createTextureFromFile("d:\\Falcor\\Media\\Cynthia\\textures\\texture_1.jpg", false, true);
         cynthia.sharedMaterials["material_0"]->set_texture2D("gAlbedoTexture", albedo);
+        cynthia.resetMaterialGui();
         models.emplace_back(cynthia);
     }
-    {
-        auto miniature = loadModelFromFile("d:\\Falcor\\Media\\modelo\\SeeU Miniature.dae", ResourceFormat::RGBA8UnormSrgb);
-        for (auto&v : miniature.sharedMaterials) {
-            auto& m_wall = v.second;
-            mMaterialFuncMap["ConstColor"](m_wall);
-            //m_wall->getDefaultMaterial()->setBaseColorTexture(m_wall->get_texture2D("gAlbedo"));
-        }
-        miniature.setProgram("mat_05", "Diffuse");
-        miniature.setProgram("mat_06", "Diffuse");
-        models.emplace_back(miniature);
-    }
+    //{
+    //    auto miniature = loadModelFromFile("d:\\Falcor\\Media\\modelo\\SeeU Miniature.dae", ResourceFormat::RGBA8UnormSrgb);
+    //    for (auto&v : miniature.sharedMaterials) {
+    //        auto& m_wall = v.second;
+    //        mMaterialFuncMap["ConstColor"](m_wall);
+    //        //m_wall->getDefaultMaterial()->setBaseColorTexture(m_wall->get_texture2D("gAlbedo"));
+    //    }
+    //    miniature.setProgram("mat_05", "Diffuse");
+    //    miniature.setProgram("mat_06", "Diffuse");
+    //    miniature.resetMaterialGui();
+    //    models.emplace_back(miniature);
+    //}
     resetCamera();
 }

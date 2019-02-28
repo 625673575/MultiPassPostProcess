@@ -132,7 +132,7 @@ void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRend
 void MultiPassPostProcess::loadImage(SampleCallbacks* pSample)
 {
     std::string filename;
-    FileDialogFilterVec filters = { {"bmp"}, {"jpg"}, {"dds"}, {"png"}, {"tiff"}, {"tif"}, {"tga"},{"gif"} };
+    FileDialogFilterVec filters = { {"bmp"}, {"jpg"},{"jpeg"},  {"dds"}, {"png"}, {"tiff"}, {"tif"}, {"tga"},{"gif"} };
     if (openFileDialog(filters, filename))
     {
         loadImageFromFile(pSample, filename);
