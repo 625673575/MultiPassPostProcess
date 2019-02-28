@@ -2,7 +2,6 @@
 #include "Falcor.h"
 #include "ModelResource.h"
 using namespace Falcor;
-
 class ModelViewer
 {
 public:
@@ -23,6 +22,7 @@ private:
     ModelResource loadModelFromFile(const std::string& Filename, ResourceFormat fboFormat, bool animation = false, bool useLinearFilter = true);
     void resetCamera();
     void renderModelUI(Gui* pGui);
+    void loadSkyBox();
     void loadShaderProgram();
     void loadMaterialFunctions();
     void loadModelResources();
@@ -38,6 +38,17 @@ private:
         FirstPersonCamera,
         SixDoFCamera
     } mCameraType = ModelViewCamera;
+
+    enum HdrImage
+    {
+        EveningSun,
+        OvercastDay,
+        AtTheWindow
+    };
+    static const Gui::DropdownList kSkyBoxDropDownList;
+    HdrImage mHdrImageIndex = HdrImage::EveningSun;
+    Texture::SharedPtr mHdrImage;
+    SkyBox::SharedPtr mpSkyBox;
 
     Camera::SharedPtr mpCamera;
     CameraController& getActiveCameraController();
@@ -64,6 +75,7 @@ private:
     GraphicsProgram::SharedPtr mpProgram = nullptr;
     GraphicsVars::SharedPtr mpProgramVars = nullptr;
     GraphicsState::SharedPtr mpGraphicsState = nullptr;
+
     std::vector<ModelResource> models;
     static std::map<std::string, std::function<void(MaterialInstance::SharedPtr&)>>mMaterialFuncMap;
     static std::map<std::string, GraphicsProgram::SharedPtr>mProgramMap;

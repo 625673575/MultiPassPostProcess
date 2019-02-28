@@ -1,15 +1,9 @@
+__import ShaderCommon;
 __import Shading;
-__import DefaultVS;
 cbuffer DCB : register(b0)
 {
-    SamplerState gSampler;
-    Texture2D gAlbedoTexture;
     bool gConstColor;
     float4 gAmbient;
-}
-cbuffer SCB : register(b1)
-{
-    float4 gSt;
 }
 /*
 struct VertexOut
@@ -120,11 +114,15 @@ VertexOut vert(VertexIn vIn)
 float4 frag(VertexOut vOut) : SV_TARGET
 {
     if (gConstColor)
+        return gAmbient;
+    ShadingData sd = prepareShadingData(vOut, gMaterial, gCamera.posW);
+
+    float3 color = 0;
+
+    for (uint l = 0; l < gLightsCount; l++)
     {
-        return float4(0, 1, 0, 0.35);
+        color += evalMaterial(sd, gLights[l], 1).color.rgb;
     }
-    else
-    {
-        return gAlbedoTexture.Sample(gSampler, vOut.texC) * gAmbient;
-    }
+
+    return float4(color, 1.f);
 }

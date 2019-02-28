@@ -5,6 +5,9 @@
 
 std::map<std::string, std::function<void(MaterialInstance::SharedPtr&)>> ModelViewer::mMaterialFuncMap;
 std::map<std::string, GraphicsProgram::SharedPtr> ModelViewer::mProgramMap;
+const Gui::DropdownList ModelViewer::kSkyBoxDropDownList = { { HdrImage::EveningSun, "Evening Sun" },
+                                                    { HdrImage::AtTheWindow, "Window" },
+                                                    { HdrImage::OvercastDay, "Overcast Day" } };
 
 ModelViewer::ModelViewer() : mNearZ(0.1f), mFarZ(1000000.0f)
 {
@@ -19,9 +22,11 @@ void ModelViewer::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext
 {
     mpCamera = Camera::create();
     mpProgram = GraphicsProgram::createFromFile("Diffuse.hlsl", "", "frag");
-    //mpProgram = GraphicsProgram::createFromFile("pbr.hlsl", "", "frag");
-
     mpProgramVars = GraphicsVars::create(mpProgram->getReflector());
+
+    mpGraphicsState = GraphicsState::create();
+    mpGraphicsState->setProgram(mpProgram);
+
     // create rasterizer state
     RasterizerState::Desc wireframeDesc;
     wireframeDesc.setFillMode(RasterizerState::FillMode::Wireframe);
@@ -51,6 +56,8 @@ void ModelViewer::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext
     dsDesc.setDepthTest(false);
     mpNoDepthDS = DepthStencilState::create(dsDesc);
     dsDesc.setDepthTest(true);
+    dsDesc.setStencilFunc(DepthStencilState::Face::FrontAndBack, DepthStencilState::Func::Never);
+    dsDesc.setDepthFunc(DepthStencilState::Func::Less);
     mpDepthTestDS = DepthStencilState::create(dsDesc);
 
     mModelViewCameraController.attachCamera(mpCamera);
@@ -67,9 +74,7 @@ void ModelViewer::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext
     mpPointLight = PointLight::create();
     mpDirLight->setWorldDirection(glm::vec3(0.13f, 0.27f, -0.9f));
 
-    mpGraphicsState = GraphicsState::create();
-    mpGraphicsState->setProgram(mpProgram);
-
+    loadSkyBox();
     loadShaderProgram();
     loadMaterialFunctions();
     loadModelResources();
@@ -82,6 +87,7 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
 
     const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
     pRenderContext->clearFbo(pTargetFbo.get(), clearColor, 1.0f, 0, FboAttachmentType::All);
+
     mpGraphicsState->setFbo(pTargetFbo);
 
     if (mDrawWireframe)
@@ -93,6 +99,8 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
     {
         mpGraphicsState->setRasterizerState(mpCullRastState[mCullMode]);
         mpGraphicsState->setDepthStencilState(mpDepthTestDS);
+        if (mpSkyBox)
+            mpSkyBox->render(pRenderContext, mpCamera.get());
     }
     if (mBlendMode != 0) {
         mpGraphicsState->setDepthStencilState(mpNoDepthDS);
@@ -102,16 +110,9 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
 
     mpGraphicsState->setProgram(mpProgram);
     pRenderContext->setGraphicsVars(mpProgramVars);
-    static  auto i = 0;
-    if (i++ % 2 == 0) {
-        mpGraphicsState->setProgram(mProgramMap["ConstColor"]);
-        pRenderContext->setGraphicsVars(GraphicsVars::create(mProgramMap["ConstColor"]->getReflector()));
-    }
+
     for (auto& v : models)
     {
-        mpCamera->setDepthRange(mNearZ, mFarZ);
-        getActiveCameraController().update();
-
         // Animate
         if (v.mAnimate)
         {
@@ -124,6 +125,11 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
 
         pScene->addModelResource(v, v.mpModel->getName());
     }
+    pScene->addLight(mpDirLight);
+    pScene->addLight(mpPointLight);
+    mpCamera->setDepthRange(mNearZ, mFarZ);
+    getActiveCameraController().update();
+    pSceneRenderer->update(pSample->getCurrentTime());
     pSceneRenderer->toggleMeshCulling(true);
     pSceneRenderer->renderScene(pRenderContext, mpCamera.get());
     //pSample->renderText(mModelString, glm::vec2(10, 30));
@@ -132,9 +138,15 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
 void ModelViewer::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 {
     static ivec4 frameRect(300, 600, 500, 100);
-    pGui->pushWindow("Model Viewer", frameRect.x, frameRect.y, frameRect.z, frameRect.w, false, true, true);
-    // Load model group
-
+    pGui->pushWindow("Model Viewer", frameRect.x, frameRect.y, frameRect.z, frameRect.w, true, true, true, false);
+    // Load SkyBox
+    uint32_t uHdrIndex = static_cast<uint32_t>(mHdrImageIndex);
+    if (pGui->addDropdown("HdrImage", kSkyBoxDropDownList, uHdrIndex))
+    {
+        mHdrImageIndex = static_cast<HdrImage>(uHdrIndex);
+        loadSkyBox();
+    }
+    // Load Model
     if (pGui->addButton("Load Model"))
     {
         openDialogLoadModel(pSample->getCurrentFbo()->getColorTexture(0)->getFormat());
@@ -151,6 +163,7 @@ void ModelViewer::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     }
 
     pGui->addSeparator();
+    // Set Render Model
     pGui->addCheckBox("Wireframe", mDrawWireframe);
 
     Gui::DropdownList cullList;
@@ -186,12 +199,12 @@ void ModelViewer::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 
     pGui->addDropdown("Camera Type", cameraDropdown, (uint32_t&)mCameraType);
 
-    //if (mpModel)
-    //{
-    //    renderModelUI(pGui);
-    //}
-    for (auto&v : models) {
-        v.onGui(pGui);
+    for (auto&v = models.begin(); v != models.end(); v++) {
+        if (pGui->addButton("remove")) {
+            models.erase(v);
+            break;
+        }
+        v->onGui(pGui);
     }
     pGui->popWindow();
 
@@ -257,7 +270,8 @@ ModelResource ModelViewer::loadModelFromFile(const std::string& filename, Resour
     mActiveAnimationID = kBindPoseAnimationID;
 
     r.mpModel->bindSamplerToMaterials(r.mUseTriLinearFiltering ? mpLinearSampler : mpPointSampler);
-    r.init();
+    r.init("Diffuse");
+    //r.resetMaterialGui();
     return r;
 }
 
@@ -323,6 +337,26 @@ void ModelViewer::resetCamera()
     }
 }
 
+void ModelViewer::loadSkyBox() {
+
+    std::string filename;
+    switch (mHdrImageIndex)
+    {
+    case HdrImage::AtTheWindow:
+        filename = "LightProbes/20060807_wells6_hd.hdr";
+        break;
+    case HdrImage::EveningSun:
+        filename = "LightProbes/hallstatt4_hd.hdr";
+        break;
+    case HdrImage::OvercastDay:
+        filename = "LightProbes/20050806-03_hd.hdr";
+        break;
+    }
+
+    mHdrImage = createTextureFromFile(filename, false, false, Resource::BindFlags::ShaderResource);
+    mpSkyBox = SkyBox::create(mHdrImage, mpLinearSampler);
+}
+
 void ModelViewer::loadShaderProgram()
 {
     const char* psEntry = "frag";
@@ -335,19 +369,18 @@ void ModelViewer::loadMaterialFunctions()
 {
     mMaterialFuncMap.emplace("Standard", [this](MaterialInstance::SharedPtr& m) {
         m->set_program(mProgramMap["Standard"]);
-        m->set_texture2D("gAlbedoTexture", MaterialInstance::BlankTexture);
-        m->set_texture2D("gNormalTexture", MaterialInstance::BlankTexture);
-        m->set_texture2D("gMentalnessTexture", MaterialInstance::BlankTexture);
-        m->set_texture2D("gRoughnessTexture", MaterialInstance::BlankTexture);
-        m->set_textureCube("gSpecularTexture", MaterialInstance::BlankTexture);
-        m->set_textureCube("gIrradianceTexture", MaterialInstance::BlankTexture);
-        m->set_texture2D("gSpecularBRDF_LUT", MaterialInstance::BlankTexture);
+        m->set_texture2D("gAlbedoTexture", MaterialInstance::WhiteTexture);
+        m->set_texture2D("gNormalTexture", MaterialInstance::BlackTexture);
+        m->set_texture2D("gMentalnessTexture", MaterialInstance::BlackTexture);
+        m->set_texture2D("gRoughnessTexture", MaterialInstance::BlackTexture);
+        m->set_textureCube("gSpecularTexture", MaterialInstance::BlackTexture);
+        m->set_textureCube("gIrradianceTexture", MaterialInstance::BlackTexture);
+        m->set_texture2D("gSpecularBRDF_LUT", MaterialInstance::BlackTexture);
     });
     mMaterialFuncMap.emplace("Diffuse", [this](MaterialInstance::SharedPtr& m) {
-        m->set_program(mProgramMap["Diffuse"]);
+        m->set_program(mProgramMap["Diffuse"],true);
         m->insert_bool("gConstColor", false);
-        m->insert_vec4("gAmbient", glm::vec4(1.0f));
-        m->set_texture2D("gAlbedoTexture", MaterialInstance::BlankTexture); });
+        m->insert_vec4("gAmbient", glm::vec4(1.0f)); });
 
     mMaterialFuncMap.emplace("ConstColor", [this](MaterialInstance::SharedPtr& m) {
         m->set_program(mProgramMap["ConstColor"]);
@@ -365,7 +398,7 @@ void ModelViewer::loadModelResources()
         cynthia.Rotation = glm::vec3(0, 1, 0);
         cynthia.Scale = glm::vec3(10);
         auto albedo = createTextureFromFile("d:\\Falcor\\Media\\Cynthia\\textures\\texture_1.jpg", false, true);
-        cynthia.sharedMaterials["material_0"]->set_texture2D("gAlbedoTexture", albedo);
+        //cynthia.sharedMaterials["material_0"]->set_texture2D("gAlbedoTexture", albedo);
         cynthia.resetMaterialGui();
         models.emplace_back(cynthia);
     }

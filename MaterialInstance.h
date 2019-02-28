@@ -15,7 +15,7 @@ public:
 public:
     MaterialInstance() = default;
     MaterialInstance(const std::string& shader, const Program::DefineList& programDefines, const std::string& name);
-    MaterialInstance(const std::string& name);
+    MaterialInstance(const std::string& name, const  Material::SharedPtr& material = nullptr);
     //MaterialInstance(Program::SharedPtr program, const Program::DefineList& programDefines);
     ~MaterialInstance() = default;
     static MaterialInstance::SharedPtr create(const std::string& shader, const Program::DefineList& programDefines, const std::string& _name = "");
@@ -60,10 +60,13 @@ private:
     std::map<std::string, Texture::SharedPtr> param_textureCube;
     GraphicsProgram::SharedPtr mpProgram = nullptr;
     GraphicsVars::SharedPtr mpProgramVars = nullptr;
+    Material::SharedPtr mpMaterial = nullptr;
+    bool bUseMaterial = false;
     std::string mName;
 public:
     const GraphicsProgram::SharedPtr& get_program() { return mpProgram; }
-    void set_program(const  GraphicsProgram::SharedPtr& prog) { clear(); mpProgram = prog; mpProgramVars = GraphicsVars::create(mpProgram->getReflector()); }
+    void set_program(const  GraphicsProgram::SharedPtr& prog, bool use_default_material = false);
+
     DEF_INSERT_FUNC(bool);
     DEF_INSERT_FUNC(int);
     DEF_INSERT_FUNC(ivec2);
@@ -85,7 +88,7 @@ public:
     ConstantBuffer::SharedPtr get_constantbuffer(ECBType t);
     void onMaterialGui(Gui *p);
     void onRender(RenderContext* pRenderContext, GraphicsVars* vars);
-    static Texture::SharedPtr BlankTexture;
+    static Texture::SharedPtr WhiteTexture,BlackTexture,RedTexture,GreenTexture,BlueTexture;
     const std::string& getName() { return mName; }
 };
 

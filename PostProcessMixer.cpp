@@ -33,7 +33,7 @@ void PostProcessMixer::gui()
         loadImage([this](auto y) {
             imageFiles.push_back(y); 
         dImageCount++;});
-        dImageArray = createTextureFromFile(imageFiles, false, true);
+        //dImageArray = createTextureFromFile(imageFiles, false, true);
     }
     for (int i = 0; i < dImageCount; i++) {
         pGui->addFloatSlider("ratio", dRatio[i], 0, 1);

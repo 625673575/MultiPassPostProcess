@@ -26,12 +26,12 @@ public:
     size_t getMaterialCount();
     void resetMaterialGui();
     static bool hasInitGui;
-    void init();
+    void init(const std::string& default_shader="");
     void setBuffers(RenderContext* pRenderContext, GraphicsVars* vars, uint32_t meshID);
     void onGui(Gui* p);
     void setTRS(const glm::vec3& translation, const glm::vec3& rotation, const glm::vec3& scale);
 private:
-    void initMaterials();
+    void initMaterials(const std::string& default_shader = "");
     std::map<std::string,uint32_t> programDropDownIndex;
     static Gui::DropdownList programDropDownList;
 

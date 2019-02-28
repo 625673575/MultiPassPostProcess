@@ -133,7 +133,7 @@ bool SceneRendererExtend::setPerMeshInstanceData(const CurrentWorkingData & curr
 
 bool SceneRendererExtend::setPerMaterialData(const CurrentWorkingData & currentData, const Material * pMaterial)
 {
-    //currentData.pVars->setParameterBlock("gMaterial", pMaterial->getParameterBlock());
+    currentData.pContext->getGraphicsVars()->setParameterBlock("gMaterial", pMaterial->getParameterBlock());
     return true;
 }
 
