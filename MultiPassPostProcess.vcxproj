@@ -28,6 +28,7 @@
     <ClCompile Include="SceneExtend.cpp" />
     <ClCompile Include="SceneRendererExtend.cpp" />
     <ClCompile Include="ShaderToyImplementation.cpp" />
+    <ClCompile Include="TextureHelperExtend.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MaterialInstance.h" />
@@ -48,6 +49,7 @@
     <ClInclude Include="SceneExtend.h" />
     <ClInclude Include="SceneRendererExtend.h" />
     <ClInclude Include="ShaderToyImplementation.h" />
+    <ClInclude Include="TextureHelperExtend.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Framework\Source\Falcor.vcxproj">

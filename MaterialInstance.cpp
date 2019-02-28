@@ -117,11 +117,11 @@ void MaterialInstance::onMaterialGui(Gui *p)
                 v.second = createTextureFromFile(filename, false, true);
             }
         }
-        if (p->addButton("White"))  v.second = WhiteTexture;
-        if (p->addButton("Black", true))  v.second = BlackTexture;
-        if (p->addButton("Red"),true)  v.second = RedTexture;
-        if (p->addButton("Green", true))  v.second = GreenTexture;
-        if (p->addButton("Blue", true))  v.second = BlueTexture;
+        //if (p->addButton("White"))  v.second = WhiteTexture;
+        //if (p->addButton("Black", true))  v.second = BlackTexture;
+        //if (p->addButton("Red"),true)  v.second = RedTexture;
+        //if (p->addButton("Green", true))  v.second = GreenTexture;
+        //if (p->addButton("Blue", true))  v.second = BlueTexture;
         p->addText(v.first.c_str(), true);
     }
     if (bUseMaterial) {
