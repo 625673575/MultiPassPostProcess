@@ -8,6 +8,12 @@ Texture::SharedPtr MaterialInstance::BlackTexture = nullptr;
 Texture::SharedPtr MaterialInstance::RedTexture = nullptr;
 Texture::SharedPtr MaterialInstance::GreenTexture = nullptr;
 Texture::SharedPtr MaterialInstance::BlueTexture = nullptr;
+Texture::SharedPtr MaterialInstance::pTextureNoise = nullptr;
+Texture::SharedPtr MaterialInstance::pTextureNoiseRGB = nullptr;
+Texture::SharedPtr MaterialInstance::pTextureSmoke = nullptr;
+Texture::SharedPtr MaterialInstance::pTextureStar = nullptr;
+Texture::SharedPtr MaterialInstance::pTextureGirl = nullptr;
+Texture::SharedPtr MaterialInstance::pTextureWoodFloor = nullptr;
 MaterialInstance::SharedPtr MaterialInstance::create(const std::string & shader, const Program::DefineList & programDefines, const std::string& _name)
 {
     return std::make_shared<MaterialInstance>(shader, programDefines, _name);
@@ -92,12 +98,13 @@ void MaterialInstance::onMaterialGui(Gui *p)
     std::string filename;
     FileDialogFilterVec filters = { {"bmp"}, {"jpg"}, {"jpeg"}, {"dds"}, {"png"}, {"tiff"}, {"tif"}, {"tga"},{"gif"} };
     for (auto&v : param_texture2D) {
-        if (p->addImageButton(PRE_INDEX_NAME.c_str(), v.second == nullptr ? WhiteTexture : v.second, glm::vec2(128, 128), true)) {
+        if (p->addImageButton("", v.second == nullptr ? WhiteTexture : v.second, glm::vec2(32, 32), false)) {
             if (openFileDialog(filters, filename))
             {
                 v.second = createTextureFromFile(filename, false, true);
             }
         }
+
         //if (p->addButton("White"))  v.second = WhiteTexture;
         //if (p->addButton("Black", true))  v.second = BlackTexture;
         //if (p->addButton("Red"),true)  v.second = RedTexture;
@@ -108,10 +115,10 @@ void MaterialInstance::onMaterialGui(Gui *p)
     if (bUseMaterial) {
 #define ADD_MATERIAL_TEXTURE(Text,FunctionName,DefaultTexture)auto& FunctionName##ref=mpMaterial->get##FunctionName();\
         if(FunctionName##ref==nullptr){mpMaterial->set##FunctionName(DefaultTexture); return;}\
-        p->addText(#Text);\
-        if (p->addImageButton("",FunctionName##ref , glm::vec2(128, 128), true)) {\
+        if (p->addImageButton("",FunctionName##ref , glm::vec2(32, 32), false)) {\
             if (openFileDialog(filters, filename))mpMaterial->set##FunctionName(createTextureFromFile(filename, false, true));\
-        }
+        }\
+        p->addText(#Text,true);
         /*if (p->addButton("White")) { mpMaterial->set##FunctionName(WhiteTexture);return;}\
         if (p->addButton("Black",true)) { mpMaterial->set##FunctionName(BlackTexture); return;}\
         if (p->addButton("Red",true)) { mpMaterial->set##FunctionName(RedTexture); return;}\
@@ -121,9 +128,10 @@ void MaterialInstance::onMaterialGui(Gui *p)
         ADD_MATERIAL_TEXTURE(Albedo, BaseColorTexture, WhiteTexture);
         ADD_MATERIAL_TEXTURE(Specular, SpecularTexture, BlackTexture);
         ADD_MATERIAL_TEXTURE(NormalMap, NormalMap, WhiteTexture);
-        ADD_MATERIAL_TEXTURE(HeightMap, HeightMap, BlackTexture);
+        ADD_MATERIAL_TEXTURE(Emissive, EmissiveTexture, BlackTexture);
         ADD_MATERIAL_TEXTURE(OcclusionMap, OcclusionMap, BlackTexture);
         //ADD_MATERIAL_TEXTURE(LightMap, LightMap);
+        //ADD_MATERIAL_TEXTURE(HeightMap, HeightMap);
     }
 }
 
@@ -138,9 +146,8 @@ void MaterialInstance::onRender(RenderContext* pRenderContext, GraphicsVars* var
     }
     auto& cb = get_constantbuffer(ECBType::PerFrame);
 #define SET_CONSTANT_BUFFER(type)\
-    for (auto&v : param_##type) {\
-        cb[v.first] = v.second;\
-    }
+    for (auto&v : bind_##type) {v.execute();}\
+    for (auto&v : param_##type) { cb[v.first] = v.second;}
 
     SET_CONSTANT_BUFFER(bool);
     SET_CONSTANT_BUFFER(int);
@@ -170,12 +177,19 @@ void MaterialInstance::loadStaticData()
         WhiteTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData.data());
         blankData = { 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255 };
         BlackTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData.data());
-        const uint8_t blankData[16] = { 255,0,0,255, 255,0,0,255, 255,0,0,255, 255,0,0,255 };
+        blankData = { 255,0,0,255, 255,0,0,255, 255,0,0,255, 255,0,0,255 };
         RedTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData.data());
-        const uint8_t blankData[16] = { 0,255,0,255, 0,255,0,255, 0,255,0,255, 0,255,0,255 };
+        blankData = { 0,255,0,255, 0,255,0,255, 0,255,0,255, 0,255,0,255 };
         GreenTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData.data());
-        const uint8_t blankData[16] = { 0,0,255,255, 0,0,255,255, 0,0,255,255, 0,0,255,255 };
+        blankData = { 0,0,255,255, 0,0,255,255, 0,0,255,255, 0,0,255,255 };
         BlueTexture = Texture::create2D(2, 2, ResourceFormat::RGBA8UnormSrgb, 1, 1, blankData.data());
+
+        pTextureSmoke = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\smoke.jpg", false, true);
+        pTextureNoise = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\noise1024.png", false, true);
+        pTextureNoiseRGB = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\noisergb.jpg", false, true);
+        pTextureStar = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\star.jpg", false, true);
+        pTextureGirl = createTextureFromFile("c:\\Users\\Liu\\Pictures\\mnv.jpg", false, true);
+        pTextureWoodFloor = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\wood_floor.jpg", false, true);
     }
 }
 

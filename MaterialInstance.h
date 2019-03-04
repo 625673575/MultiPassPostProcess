@@ -2,12 +2,24 @@
 #include "Falcor.h"
 using namespace Falcor;
 
-#define DEF_VAR(vec) std::map<std::string, vec> param_##vec;
-#define DEF_INSERT_FUNC(vec) void insert_##vec(const std::string& var_name,const vec value) { param_##vec.emplace(var_name, value); }\
-const vec& get_##vec(const std::string& var_name){return param_##vec[var_name];};
+#define DEF_VAR(vec) std::map<std::string, vec> param_##vec;\
+std::vector<_Bind<vec>> bind_##vec;
+#define DEF_INSERT_FUNC(vec) vec& insert_##vec(const std::string& var_name,const vec value) { param_##vec.emplace(var_name, value);return param_##vec[var_name];}\
+const vec& get_##vec(const std::string& var_name){return param_##vec[var_name];};\
+void bind(vec& value, std::function<vec()> f) {_Bind<vec> r;r.bind(value, f); bind_##vec.push_back(std::move(r)); }
+#define BIND_THIS_VAR(var)[this](){return var; }
 
 class MaterialInstance :std::enable_shared_from_this<MaterialInstance>
 {
+    template <typename T>
+    struct _Bind {
+    private:
+        T* source;
+        std::function<T()> func;
+    public:
+        void bind(T& v, std::function<T()> f) { source = &v; func = f; }
+        void execute() { *source = func(); }
+    };
 public:
     using SharedPtr = std::shared_ptr<MaterialInstance>;
     static const std::string vsEntry;
@@ -67,7 +79,6 @@ private:
 public:
     const GraphicsProgram::SharedPtr& get_program() { return mpProgram; }
     void set_program(const  GraphicsProgram::SharedPtr& prog, bool use_default_material = false);
-
     DEF_INSERT_FUNC(bool);
     DEF_INSERT_FUNC(int);
     DEF_INSERT_FUNC(ivec2);
@@ -89,8 +100,16 @@ public:
     ConstantBuffer::SharedPtr get_constantbuffer(ECBType t);
     void onMaterialGui(Gui *p);
     void onRender(RenderContext* pRenderContext, GraphicsVars* vars);
-    static Texture::SharedPtr WhiteTexture,BlackTexture,RedTexture,GreenTexture,BlueTexture;
     const std::string& getName() { return mName; }
+
+    static Texture::SharedPtr WhiteTexture, BlackTexture, RedTexture, GreenTexture, BlueTexture;
+    static Texture::SharedPtr pTextureNoise;
+    static Texture::SharedPtr pTextureNoiseRGB;
+    static Texture::SharedPtr pTextureSmoke;
+    static Texture::SharedPtr pTextureStar;
+    static Texture::SharedPtr pTextureWoodFloor;
+    static Texture::SharedPtr pTextureGirl;
+    static Texture::SharedPtr pTextureSelectedFromFile;
 };
 
 #undef DEF_VAR

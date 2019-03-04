@@ -3,7 +3,7 @@ __import Shading;
 cbuffer DCB : register(b0)
 {
     bool gConstColor;
-    float4 gAmbient;
+    float4 gBaseColor;
 }
 /*
 struct VertexOut
@@ -114,7 +114,7 @@ VertexOut vert(VertexIn vIn)
 float4 frag(VertexOut vOut) : SV_TARGET
 {
     if (gConstColor)
-        return gAmbient;
+        return gBaseColor;
     ShadingData sd = prepareShadingData(vOut, gMaterial, gCamera.posW);
 
     float3 color = 0;

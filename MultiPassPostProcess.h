@@ -75,14 +75,9 @@ private:
     void loadImage(SampleCallbacks* pSample);
     void loadImageFromFile(SampleCallbacks* pSample, std::string filename);
     void loadVideoFromFile(SampleCallbacks* pSample);
-    
+    void loadShaderToy();
+    void loadPostProcess();
     //testing 
     void onInitializeTesting(SampleCallbacks* pSample) override;
-public:
-    static Texture::SharedPtr pTextureNoise;
-    static Texture::SharedPtr pTextureNoiseRGB;
-    static Texture::SharedPtr pTextureStar;
-    static Texture::SharedPtr pTextureWoodFloor;
-    static Texture::SharedPtr pTextureGirl;
-    static Texture::SharedPtr pTextureSelectedFromFile;
+    Texture::SharedPtr pTextureSelectedFromFile = nullptr;
 };

@@ -27,12 +27,6 @@
 ***************************************************************************/
 #include "MultiPassPostProcess.h"
 
-Texture::SharedPtr MultiPassPostProcess::pTextureNoise = nullptr;
-Texture::SharedPtr MultiPassPostProcess::pTextureNoiseRGB = nullptr;
-Texture::SharedPtr MultiPassPostProcess::pTextureStar = nullptr;
-Texture::SharedPtr MultiPassPostProcess::pTextureGirl = nullptr;
-Texture::SharedPtr MultiPassPostProcess::pTextureWoodFloor = nullptr;
-Texture::SharedPtr MultiPassPostProcess::pTextureSelectedFromFile = nullptr;
 
 void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 {
@@ -54,7 +48,7 @@ void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     }
 
     static ivec4 rect(200, 400, 20, 400);
-    pGui->pushWindow("ShaderToy", rect.x, rect.y, rect.z, rect.w, false, true, true, false);
+    pGui->pushWindow("ShaderToy", rect.x, rect.y, rect.z, rect.w);
     //pGui->addTooltip(help, true);
 
     for (auto& v : shaderToy) {
@@ -64,9 +58,7 @@ void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     pGui->popWindow();
 
     static ivec4 frameRect(300, 900, 1300, 40);
-    pGui->pushWindow("History Frames", frameRect.x, frameRect.y, frameRect.z, frameRect.w, false, true, true, false);
-    //pGui->addText("History Frames");
-    //pGui->addTooltip(help, true);
+    pGui->pushWindow("History Frames", frameRect.x, frameRect.y, frameRect.z, frameRect.w);
 
     for (auto& v : PostProcessBase::gRencentFrames) {
         pGui->addImage("", v);
@@ -78,46 +70,13 @@ void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 }
 void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext)
 {
-    pTextureNoise = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\noise1024.png", false, true);
-    pTextureNoiseRGB = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\noisergb.jpg", false, true);
-    pTextureStar = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\star.jpg", false, true);
-    pTextureGirl = createTextureFromFile("c:\\Users\\Liu\\Pictures\\mnv.jpg", false, true);
-    pTextureWoodFloor = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\wood_floor.jpg", false, true);
 
     mpGaussianBlur = GaussianBlur::create(5);
     mpBlit = FullScreenPass::create("Blit.ps.hlsl");
     mpProgVars = GraphicsVars::create(mpBlit->getProgram()->getReflector());
 
-    /*
-    postProcessor.emplace_back(new PostProcessMixer());
-    postProcessor.emplace_back(new PostProcessVignette());
-    postProcessor.emplace_back(new PostProcessGlitch());
-    postProcessor.emplace_back(new PostProcessSharp());
-    postProcessor.emplace_back(new PostProcessFilmGrain());
-    postProcessor.emplace_back(new PostProcessBugTV());
-    postProcessor.emplace_back(new PostProcessMotionBlur());
-    postProcessor.emplace_back(new PostProcessLut());
-
-    shaderToy.emplace_back(new ShaderToyImplementation("Toy"));
-    shaderToy.emplace_back(new ShaderToyImplementation("Heart3D"));
-    shaderToy.emplace_back(new ShaderToyImplementation("OceanStructure"));
-    shaderToy.emplace_back(new ShaderToyImplementation("FractalCartoonLand"));
-    shaderToy.emplace_back(new ShaderToyImplementation("Topologica"));
-    auto mars = new ShaderToyImplementation("Seascape");
-    mars->setTexture(0, "iChannel0", pTextureNoise);
-    shaderToy.emplace_back(mars);
-    std::vector<std::string> volcanic_name{ "VolcanicBuffer0", "Volcanic" };
-    auto toy_volcanic = new ShaderToyImplementation(volcanic_name);
-    toy_volcanic->setTexture(0, "iChannel0", pTextureGirl);
-    toy_volcanic->setTexture(0, "iChannel1", pTextureNoise);
-    toy_volcanic->setTexture(0, "iChannel2", pTextureWoodFloor);
-    shaderToy.emplace_back(toy_volcanic);
-
-    auto toy_pirates = new ShaderToyImplementation("Pirates");
-    toy_pirates->setTexture(0, "iChannel0", pTextureWoodFloor);
-    toy_pirates->setTexture(0, "iChannel1", pTextureNoise);
-    shaderToy.emplace_back(toy_pirates);
-    */
+    /*loadShaderToy();
+    loadPostProcess();*/
 
     for (auto& v : postProcessor) {
         v->loadProgram(pSample, pRenderContext, pSample->getGui());
@@ -161,6 +120,41 @@ void MultiPassPostProcess::loadVideoFromFile(SampleCallbacks * pSample)
         //auto frame= mpVideoDecoder->getTextureForNextFrame(1.0f);
 
     }
+}
+
+void MultiPassPostProcess::loadShaderToy()
+{
+    shaderToy.emplace_back(new ShaderToyImplementation("Toy"));
+    shaderToy.emplace_back(new ShaderToyImplementation("Heart3D"));
+    shaderToy.emplace_back(new ShaderToyImplementation("OceanStructure"));
+    shaderToy.emplace_back(new ShaderToyImplementation("FractalCartoonLand"));
+    shaderToy.emplace_back(new ShaderToyImplementation("Topologica"));
+    auto mars = new ShaderToyImplementation("Seascape");
+    mars->setTexture(0, "iChannel0", MaterialInstance::pTextureNoise);
+    shaderToy.emplace_back(mars);
+    std::vector<std::string> volcanic_name{ "VolcanicBuffer0", "Volcanic" };
+    auto toy_volcanic = new ShaderToyImplementation(volcanic_name);
+    toy_volcanic->setTexture(0, "iChannel0", MaterialInstance::pTextureGirl);
+    toy_volcanic->setTexture(0, "iChannel1", MaterialInstance::pTextureNoise);
+    toy_volcanic->setTexture(0, "iChannel2", MaterialInstance::pTextureWoodFloor);
+    shaderToy.emplace_back(toy_volcanic);
+
+    auto toy_pirates = new ShaderToyImplementation("Pirates");
+    toy_pirates->setTexture(0, "iChannel0", MaterialInstance::pTextureWoodFloor);
+    toy_pirates->setTexture(0, "iChannel1", MaterialInstance::pTextureNoise);
+    shaderToy.emplace_back(toy_pirates);
+}
+
+void MultiPassPostProcess::loadPostProcess()
+{
+    postProcessor.emplace_back(new PostProcessMixer());
+    postProcessor.emplace_back(new PostProcessVignette());
+    postProcessor.emplace_back(new PostProcessGlitch());
+    postProcessor.emplace_back(new PostProcessSharp());
+    postProcessor.emplace_back(new PostProcessFilmGrain());
+    postProcessor.emplace_back(new PostProcessBugTV());
+    postProcessor.emplace_back(new PostProcessMotionBlur());
+    postProcessor.emplace_back(new PostProcessLut());
 }
 
 void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext* pContext, const Fbo::SharedPtr& pTargetFbo)

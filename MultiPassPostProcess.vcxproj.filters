@@ -167,6 +167,18 @@
     <None Include="Data\Standard.hlsl">
       <Filter>Data</Filter>
     </None>
+    <None Include="Data\UnLit.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\VertDistortion.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\Dissolve.hlsl">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="Data\FlashEffect.hlsl">
+      <Filter>Data</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MultiPassPostProcess.rc" />

@@ -26,7 +26,7 @@ private:
     void loadShaderProgram();
     void loadMaterialFunctions();
     void loadModelResources();
-
+    SampleCallbacks* pSample;
     ModelViewCameraController mModelViewCameraController;
     FirstPersonCameraController mFirstPersonCameraController;
     SixDoFCameraController m6DoFCameraController;
@@ -43,7 +43,9 @@ private:
     {
         EveningSun,
         OvercastDay,
-        AtTheWindow
+        AtTheWindow,
+        DayTime,
+        Rathaus
     };
     static const Gui::DropdownList kSkyBoxDropDownList;
     HdrImage mHdrImageIndex = HdrImage::EveningSun;

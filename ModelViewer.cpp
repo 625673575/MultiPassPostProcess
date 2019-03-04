@@ -7,7 +7,9 @@ std::map<std::string, std::function<void(MaterialInstance::SharedPtr&)>> ModelVi
 std::map<std::string, GraphicsProgram::SharedPtr> ModelViewer::mProgramMap;
 const Gui::DropdownList ModelViewer::kSkyBoxDropDownList = { { HdrImage::EveningSun, "Evening Sun" },
                                                     { HdrImage::AtTheWindow, "Window" },
-                                                    { HdrImage::OvercastDay, "Overcast Day" } };
+                                                    { HdrImage::OvercastDay, "Overcast Day" },
+                                                    { HdrImage::DayTime, "Day Time" },
+                                                    { HdrImage::Rathaus, "Rathaus" } };
 
 ModelViewer::ModelViewer() : mNearZ(0.1f), mFarZ(1000000.0f)
 {
@@ -18,8 +20,9 @@ ModelViewer::~ModelViewer()
 {
 }
 
-void ModelViewer::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext)
+void ModelViewer::onLoad(SampleCallbacks* ppSample, RenderContext* pRenderContext)
 {
+    pSample = ppSample;
     mpCamera = Camera::create();
     mpProgram = GraphicsProgram::createFromFile("Diffuse.hlsl", "", "frag");
     mpProgramVars = GraphicsVars::create(mpProgram->getReflector());
@@ -56,7 +59,9 @@ void ModelViewer::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext
     dsDesc.setDepthTest(false);
     mpNoDepthDS = DepthStencilState::create(dsDesc);
     dsDesc.setDepthTest(true);
-    dsDesc.setStencilFunc(DepthStencilState::Face::FrontAndBack, DepthStencilState::Func::Never);
+    dsDesc.setStencilOp(DepthStencilState::Face::FrontAndBack, DepthStencilState::StencilOp::Keep, DepthStencilState::StencilOp::Keep, DepthStencilState::StencilOp::Replace);
+    dsDesc.setDepthTest(true).setStencilTest(true).setStencilFunc(DepthStencilState::Face::FrontAndBack, DepthStencilState::Func::NotEqual);
+    //dsDesc.setStencilOp(DepthStencilState::Face::FrontAndBack, DepthStencilState::StencilOp::Keep, DepthStencilState::StencilOp::Keep, DepthStencilState::StencilOp::Keep);
     dsDesc.setDepthFunc(DepthStencilState::Func::Less);
     mpDepthTestDS = DepthStencilState::create(dsDesc);
 
@@ -351,6 +356,12 @@ void ModelViewer::loadSkyBox() {
     case HdrImage::OvercastDay:
         filename = "LightProbes/20050806-03_hd.hdr";
         break;
+    case HdrImage::DayTime:
+        filename = "LightProbes/daytime.hdr";
+        break;
+    case HdrImage::Rathaus:
+        filename = "LightProbes/rathaus.hdr";
+        break;
     }
 
     mHdrImage = createTextureFromFile(filename, false, false, Resource::BindFlags::ShaderResource);
@@ -360,9 +371,14 @@ void ModelViewer::loadSkyBox() {
 void ModelViewer::loadShaderProgram()
 {
     const char* psEntry = "frag";
+    const char* vsEntry = "vert";
     mProgramMap.emplace("Standard", GraphicsProgram::createFromFile("Standard.hlsl", "", psEntry));
     mProgramMap.emplace("Diffuse", GraphicsProgram::createFromFile("Diffuse.hlsl", "", psEntry));
     mProgramMap.emplace("ConstColor", GraphicsProgram::createFromFile("ConstColor.hlsl", "", psEntry));
+    mProgramMap.emplace("UnLit", GraphicsProgram::createFromFile("UnLit.hlsl", "", psEntry));
+    mProgramMap.emplace("VertDistortion", GraphicsProgram::createFromFile("VertDistortion.hlsl", vsEntry, psEntry));
+    mProgramMap.emplace("Dissolve", GraphicsProgram::createFromFile("Dissolve.hlsl", "", psEntry));
+    mProgramMap.emplace("FlashEffect", GraphicsProgram::createFromFile("FlashEffect.hlsl", "", psEntry));
 }
 
 void ModelViewer::loadMaterialFunctions()
@@ -378,13 +394,40 @@ void ModelViewer::loadMaterialFunctions()
         m->set_texture2D("gSpecularBRDF_LUT", MaterialInstance::BlackTexture);
     });
     mMaterialFuncMap.emplace("Diffuse", [this](MaterialInstance::SharedPtr& m) {
-        m->set_program(mProgramMap["Diffuse"],true);
+        m->set_program(mProgramMap["Diffuse"], true);
         m->insert_bool("gConstColor", false);
-        m->insert_vec4("gAmbient", glm::vec4(1.0f)); });
+        m->insert_vec4("gBaseColor", glm::vec4(1.0f)); });
 
     mMaterialFuncMap.emplace("ConstColor", [this](MaterialInstance::SharedPtr& m) {
         m->set_program(mProgramMap["ConstColor"]);
-        m->insert_vec4("gColor", glm::vec4(0.6f, 0.8f, 1.0f, 1.0f)); });
+        m->insert_vec4("gBaseColor", glm::vec4(0.6f, 0.8f, 1.0f, 1.0f)); });
+
+    mMaterialFuncMap.emplace("UnLit", [this](MaterialInstance::SharedPtr& m) {
+        m->set_program(mProgramMap["UnLit"]);
+        m->insert_vec4("gBaseColor", glm::vec4(1.f, 1.f, 1.0f, 1.0f));
+        m->set_texture2D("gAlbedo", MaterialInstance::BlackTexture); });
+
+    mMaterialFuncMap.emplace("VertDistortion", [this](MaterialInstance::SharedPtr& m) {
+        m->set_program(mProgramMap["VertDistortion"],true);
+        m->insert_vec3("gDistortionDir", glm::vec3(1.f, 10.f, 1.0f));
+        m->bind(m->insert_float("gTime", 0.0f), std::bind(&SampleCallbacks::getCurrentTime,pSample));
+        });
+
+    mMaterialFuncMap.emplace("Dissolve", [this](MaterialInstance::SharedPtr& m) {
+        m->set_program(mProgramMap["Dissolve"], true);
+        m->insert_float("gDissolve", .0f);
+        m->set_texture2D("gDissolveTexture", MaterialInstance::pTextureSmoke); });
+
+    mMaterialFuncMap.emplace("FlashEffect", [this](MaterialInstance::SharedPtr& m) {
+        m->set_program(mProgramMap["FlashEffect"]);
+        m->set_texture2D("gAlbedo", MaterialInstance::pTextureGirl);
+        m->set_texture2D("gFlashTexture", MaterialInstance::pTextureStar);
+        m->insert_vec4("gFlashColor", glm::vec4(1));
+        m->insert_vec4("gFlashFactor", glm::vec4(1));
+        m->insert_float("gFlashStrength", 1);
+        m->bind(m->insert_float("gTime", 0), std::bind(&SampleCallbacks::getCurrentTime, pSample));
+        m->insert_vec3("gLightDir", glm::vec3(1));
+    });
 }
 void ModelViewer::loadModelResources()
 {
