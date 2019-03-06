@@ -18,6 +18,7 @@ protected:
     static vec3 vMouseState;
 public:
     static std::vector<Texture::SharedPtr> gRencentFrames;
+    static Texture::SharedPtr gDepthTexture;
     static const int HISTORY_FRAME_COUNT = 5;
 public:
     using UniquePtr = std::unique_ptr<PostProcessBase>;

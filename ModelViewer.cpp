@@ -58,12 +58,21 @@ void ModelViewer::onLoad(SampleCallbacks* ppSample, RenderContext* pRenderContex
     DepthStencilState::Desc dsDesc;
     dsDesc.setDepthTest(false);
     mpNoDepthDS = DepthStencilState::create(dsDesc);
-    dsDesc.setDepthTest(true);
-    dsDesc.setStencilOp(DepthStencilState::Face::FrontAndBack, DepthStencilState::StencilOp::Keep, DepthStencilState::StencilOp::Keep, DepthStencilState::StencilOp::Replace);
-    dsDesc.setDepthTest(true).setStencilTest(true).setStencilFunc(DepthStencilState::Face::FrontAndBack, DepthStencilState::Func::NotEqual);
-    //dsDesc.setStencilOp(DepthStencilState::Face::FrontAndBack, DepthStencilState::StencilOp::Keep, DepthStencilState::StencilOp::Keep, DepthStencilState::StencilOp::Keep);
-    dsDesc.setDepthFunc(DepthStencilState::Func::Less);
-    mpDepthTestDS = DepthStencilState::create(dsDesc);
+    dsDesc.setDepthTest(true).setStencilTest(false).setDepthWriteMask(true).setDepthFunc(DepthStencilState::Func::Less);
+    mpDepthTestLessDS = DepthStencilState::create(dsDesc);
+    dsDesc.setDepthFunc(DepthStencilState::Func::Greater);
+    mpDepthTestGreaterDS = DepthStencilState::create(dsDesc);
+    initDepthPass();
+
+    uint32_t w = ppSample->getWindow()->getClientAreaWidth();
+    uint32_t h = ppSample->getWindow()->getClientAreaHeight();
+
+    // Common FBO desc (2 color outputs - color and normal)
+    Fbo::Desc fboDesc;
+    fboDesc.setColorTarget(0, ResourceFormat::RGBA32Float).setColorTarget(1, ResourceFormat::RGBA8Unorm).setDepthStencilTarget(ResourceFormat::D32Float);
+    auto mpMainFbo = FboHelper::create2D(w, h, fboDesc);
+    mpDepthPassFbo = Fbo::create();
+    mpDepthPassFbo->attachDepthStencilTarget(mpMainFbo->getDepthStencilTexture());
 
     mModelViewCameraController.attachCamera(mpCamera);
     mFirstPersonCameraController.attachCamera(mpCamera);
@@ -87,34 +96,21 @@ void ModelViewer::onLoad(SampleCallbacks* ppSample, RenderContext* pRenderContex
 
 void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRenderContext, const Fbo::SharedPtr& pTargetFbo)
 {
+
     std::shared_ptr<SceneExtend> pScene = std::make_shared<SceneExtend>("");
     SceneRendererExtend::SharedPtr pSceneRenderer = SceneRendererExtend::create(pScene);
 
     const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
     pRenderContext->clearFbo(pTargetFbo.get(), clearColor, 1.0f, 0, FboAttachmentType::All);
+    pRenderContext->clearFbo(mpDepthPassFbo.get(), clearColor, 1.0f, 0, FboAttachmentType::All);
+    mpGraphicsState->setFbo(mpDepthPassFbo);
+    mpGraphicsState->setProgram(mDepthPass.pProgram);
+    pRenderContext->setGraphicsVars(mDepthPass.pVars);
 
-    mpGraphicsState->setFbo(pTargetFbo);
-
-    if (mDrawWireframe)
-    {
-        mpGraphicsState->setRasterizerState(mpWireframeRS);
-        mpGraphicsState->setDepthStencilState(mpNoDepthDS);
-    }
-    else
-    {
-        mpGraphicsState->setRasterizerState(mpCullRastState[mCullMode]);
-        mpGraphicsState->setDepthStencilState(mpDepthTestDS);
-        if (mpSkyBox)
-            mpSkyBox->render(pRenderContext, mpCamera.get());
-    }
-    if (mBlendMode != 0) {
-        mpGraphicsState->setDepthStencilState(mpNoDepthDS);
-    }
-    mpGraphicsState->setBlendState(mpBlendState[mBlendMode]);
     pRenderContext->setGraphicsState(mpGraphicsState);
 
-    mpGraphicsState->setProgram(mpProgram);
-    pRenderContext->setGraphicsVars(mpProgramVars);
+    //mpGraphicsState->setProgram(mpProgram);
+    //pRenderContext->setGraphicsVars(mpProgramVars);
 
     for (auto& v : models)
     {
@@ -130,14 +126,36 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
 
         pScene->addModelResource(v, v.mpModel->getName());
     }
+
+    mpGraphicsState->setDepthStencilState(mpDepthTestLessDS);
+    pSceneRenderer->renderScene(pRenderContext, mpCamera.get());
+
     pScene->addLight(mpDirLight);
     pScene->addLight(mpPointLight);
     mpCamera->setDepthRange(mNearZ, mFarZ);
     getActiveCameraController().update();
     pSceneRenderer->update(pSample->getCurrentTime());
     pSceneRenderer->toggleMeshCulling(true);
+
+    if (mDrawWireframe)
+    {
+        mpGraphicsState->setRasterizerState(mpWireframeRS);
+        mpGraphicsState->setDepthStencilState(mpNoDepthDS);
+    }
+    else
+    {
+        mpGraphicsState->setRasterizerState(mpCullRastState[mCullMode]);
+        mpGraphicsState->setDepthStencilState(mpDepthTestGreaterDS);
+    }
+    if (mBlendMode != 0) {
+        mpGraphicsState->setDepthStencilState(mpNoDepthDS);
+    }
+    mpGraphicsState->setBlendState(mpBlendState[mBlendMode]);
+    mpGraphicsState->setFbo(pTargetFbo);
+    mpDepthPassFbo->attachDepthStencilTarget(pTargetFbo->getDepthStencilTexture());
+    if (mpSkyBox)
+        mpSkyBox->render(pRenderContext, mpCamera.get());
     pSceneRenderer->renderScene(pRenderContext, mpCamera.get());
-    //pSample->renderText(mModelString, glm::vec2(10, 30));
 }
 
 void ModelViewer::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
@@ -227,6 +245,9 @@ bool ModelViewer::onKeyEvent(SampleCallbacks* pSample, const KeyboardEvent& keyE
                 resetCamera();
                 bHandled = true;
                 break;
+            case KeyboardEvent::Key::C:
+                mpDepthPassFbo->getDepthStencilTexture()->captureToFile(0, 0, "d:/cap.png");
+                return true;
             }
         }
     }
@@ -248,12 +269,14 @@ void ModelViewer::onResizeSwapChain(SampleCallbacks* pSample, uint32_t width, ui
     mpCamera->setAspectRatio(aspectRatio);
 }
 
-ModelResource ModelViewer::loadModelFromFile(const std::string& filename, ResourceFormat fboFormat, bool animation, bool useLinearFilter)
+void ModelViewer::initDepthPass()
 {
-    ModelResource r;
-    CpuTimer timer;
-    timer.update();
+    mDepthPass.pProgram = GraphicsProgram::createFromFile("DepthPass.hlsl", "", "main");
+    mDepthPass.pVars = GraphicsVars::create(mDepthPass.pProgram->getReflector());
+}
 
+bool ModelViewer::loadModelFromFile(ModelResource& r, const std::string& filename, ResourceFormat fboFormat, bool animation, bool useLinearFilter)
+{
     Model::LoadFlags flags = Model::LoadFlags::None;
 
     flags |= isSrgbFormat(fboFormat) ? Model::LoadFlags::None : Model::LoadFlags::AssumeLinearSpaceTextures;
@@ -261,23 +284,13 @@ ModelResource ModelViewer::loadModelFromFile(const std::string& filename, Resour
     r.mpModel = Model::createFromFile(filename.c_str(), flags);
     if (r.mpModel == nullptr)
     {
-        msgBox("Could not load model");
-        return r;
+        return false;
     }
     r.mUseTriLinearFiltering = useLinearFilter;
     r.mAnimate = animation;
 
-    float radius = r.mpModel->getRadius();
-    float lightHeight = max(1.0f + radius, radius*1.25f);
-    mpPointLight->setWorldPosition(glm::vec3(0, lightHeight, 0));
-    timer.update();
-
-    mActiveAnimationID = kBindPoseAnimationID;
-
-    r.mpModel->bindSamplerToMaterials(r.mUseTriLinearFiltering ? mpLinearSampler : mpPointSampler);
     r.init("Diffuse");
-    //r.resetMaterialGui();
-    return r;
+    return true;
 }
 
 void ModelViewer::openDialogLoadModel(ResourceFormat fboFormat)
@@ -285,8 +298,11 @@ void ModelViewer::openDialogLoadModel(ResourceFormat fboFormat)
     std::string Filename;
     if (openFileDialog(Model::kFileExtensionFilters, Filename))
     {
-        models.emplace_back(loadModelFromFile(Filename, fboFormat));
-        resetCamera();
+        ModelResource res;
+        if (loadModelFromFile(res, Filename, fboFormat)) {
+            models.emplace_back(res);
+            resetCamera();
+        }
     }
 }
 
@@ -332,6 +348,7 @@ void ModelViewer::resetCamera()
         mpCamera->setTarget(ModelCenter);
         mpCamera->setUpVector(glm::vec3(0, 1, 0));
 
+        mpCamera->setDepthRange(0.1f, Radius * 10);
         // Update the controllers
         mModelViewCameraController.setModelParams(ModelCenter, Radius, 3.5f);
         mFirstPersonCameraController.setCameraSpeed(Radius*0.25f);
@@ -405,13 +422,13 @@ void ModelViewer::loadMaterialFunctions()
     mMaterialFuncMap.emplace("UnLit", [this](MaterialInstance::SharedPtr& m) {
         m->set_program(mProgramMap["UnLit"]);
         m->insert_vec4("gBaseColor", glm::vec4(1.f, 1.f, 1.0f, 1.0f));
-        m->set_texture2D("gAlbedo", MaterialInstance::BlackTexture); });
+        m->set_texture2D("gAlbedoTexture", MaterialInstance::BlackTexture); });
 
     mMaterialFuncMap.emplace("VertDistortion", [this](MaterialInstance::SharedPtr& m) {
-        m->set_program(mProgramMap["VertDistortion"],true);
+        m->set_program(mProgramMap["VertDistortion"], true);
         m->insert_vec3("gDistortionDir", glm::vec3(1.f, 10.f, 1.0f));
-        m->bind(m->insert_float("gTime", 0.0f), std::bind(&SampleCallbacks::getCurrentTime,pSample));
-        });
+        m->bind(m->insert_float("gTime", 0.0f), std::bind(&SampleCallbacks::getCurrentTime, pSample));
+    });
 
     mMaterialFuncMap.emplace("Dissolve", [this](MaterialInstance::SharedPtr& m) {
         m->set_program(mProgramMap["Dissolve"], true);
@@ -432,18 +449,29 @@ void ModelViewer::loadMaterialFunctions()
 void ModelViewer::loadModelResources()
 {
     {
-        auto cynthia = loadModelFromFile("d:\\Falcor\\Media\\Cynthia\\Cynthia.obj", ResourceFormat::RGBA8UnormSrgb);
+        ModelResource cynthia;
+        loadModelFromFile(cynthia, "d:\\Falcor\\Media\\Cynthia\\Cynthia.obj", ResourceFormat::RGBA8UnormSrgb);
         for (auto&v : cynthia.sharedMaterials) {
-            auto& m_wall = v.second;
-            mMaterialFuncMap["Diffuse"](m_wall);
+            mMaterialFuncMap["UnLit"](v.second);
         }
         cynthia.Translation = glm::vec3(-100, 0, 0);
         cynthia.Rotation = glm::vec3(0, 1, 0);
         cynthia.Scale = glm::vec3(10);
         auto albedo = createTextureFromFile("d:\\Falcor\\Media\\Cynthia\\textures\\texture_1.jpg", false, true);
-        //cynthia.sharedMaterials["material_0"]->set_texture2D("gAlbedoTexture", albedo);
+        cynthia.sharedMaterials["material_0"]->set_texture2D("gAlbedoTexture", albedo);
         cynthia.resetMaterialGui();
         models.emplace_back(cynthia);
+    }
+    {
+        ModelResource quad;
+        loadModelFromFile(quad, "d:\\Falcor\\Media\\quad1x1.obj", ResourceFormat::RGBA8UnormSrgb);
+        for (auto&v : quad.sharedMaterials) {
+            mMaterialFuncMap["ConstColor"](v.second);
+        }
+        quad.Rotation = glm::vec3(0.258f, -0.243f, -0.127f);
+        quad.Scale = glm::vec3(10);
+        quad.resetMaterialGui();
+        models.emplace_back(quad);
     }
     //{
     //    auto miniature = loadModelFromFile("d:\\Falcor\\Media\\modelo\\SeeU Miniature.dae", ResourceFormat::RGBA8UnormSrgb);

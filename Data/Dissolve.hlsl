@@ -8,8 +8,9 @@ cbuffer DCB : register(b0)
 float4 frag(VertexOut vOut) : SV_TARGET
 {
     float4 dissolve = gDissolveTexture.Sample(gMaterial.resources.samplerState, vOut.texC);
-    if(dissolve.x<gDissolve)
-        discard;
+    //if(dissolve.x<gDissolve)
+    //    discard;
+    clip(dissolve.x - gDissolve);
     ShadingData sd = prepareShadingData(vOut, gMaterial, gCamera.posW);
     float3 color = 0;
 

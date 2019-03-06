@@ -59,7 +59,10 @@ void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 
     static ivec4 frameRect(300, 900, 1300, 40);
     pGui->pushWindow("History Frames", frameRect.x, frameRect.y, frameRect.z, frameRect.w);
-
+    auto& depthTex= PostProcessBase::gDepthTexture;
+    if (depthTex) {
+        pGui->addImage("", depthTex);
+    }
     for (auto& v : PostProcessBase::gRencentFrames) {
         pGui->addImage("", v);
     }
@@ -207,6 +210,10 @@ void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext
         if (PostProcessBase::gRencentFrames.size() > PostProcessBase::HISTORY_FRAME_COUNT) {
             PostProcessBase::gRencentFrames.erase(PostProcessBase::gRencentFrames.begin());
         }
+        auto& d = pContext->getGraphicsState()->getFbo()->getDepthStencilTexture();
+         PostProcessBase::gDepthTexture = Texture::create2D(d->getWidth(), d->getHeight(), d->getFormat(), d->getArraySize(), 1);
+        gpDevice->getRenderContext()->copyResource(PostProcessBase::gDepthTexture.get(), d.get());
+      
     }
 }
 

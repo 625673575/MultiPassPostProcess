@@ -19,7 +19,8 @@ private:
     void openDialogLoadModel(ResourceFormat fboFormat);
     void deleteCulledMeshes(ModelResource& mesh);
 
-    ModelResource loadModelFromFile(const std::string& Filename, ResourceFormat fboFormat, bool animation = false, bool useLinearFilter = true);
+    void initDepthPass();
+    bool loadModelFromFile(ModelResource& r, const std::string& Filename, ResourceFormat fboFormat, bool animation = false, bool useLinearFilter = true);
     void resetCamera();
     void renderModelUI(Gui* pGui);
     void loadSkyBox();
@@ -69,7 +70,8 @@ private:
     uint32_t mBlendMode = 0;
 
     DepthStencilState::SharedPtr mpNoDepthDS = nullptr;
-    DepthStencilState::SharedPtr mpDepthTestDS = nullptr;
+    DepthStencilState::SharedPtr mpDepthTestLessDS = nullptr;
+    DepthStencilState::SharedPtr mpDepthTestGreaterDS = nullptr;
 
     DirectionalLight::SharedPtr mpDirLight;
     PointLight::SharedPtr mpPointLight;
@@ -77,6 +79,13 @@ private:
     GraphicsProgram::SharedPtr mpProgram = nullptr;
     GraphicsVars::SharedPtr mpProgramVars = nullptr;
     GraphicsState::SharedPtr mpGraphicsState = nullptr;
+
+    struct
+    {
+        GraphicsVars::SharedPtr pVars;
+        GraphicsProgram::SharedPtr pProgram;
+    } mDepthPass;
+    Fbo::SharedPtr mpDepthPassFbo;
 
     std::vector<ModelResource> models;
     static std::map<std::string, std::function<void(MaterialInstance::SharedPtr&)>>mMaterialFuncMap;

@@ -179,6 +179,9 @@
     <None Include="Data\FlashEffect.hlsl">
       <Filter>Data</Filter>
     </None>
+    <None Include="Data\DepthPass.hlsl">
+      <Filter>Data</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MultiPassPostProcess.rc" />

@@ -2,6 +2,7 @@
 
 vec3 PostProcessBase::vMouseState = vec3();
 std::vector<Texture::SharedPtr> PostProcessBase::gRencentFrames = std::vector<Texture::SharedPtr>();
+Texture::SharedPtr PostProcessBase::gDepthTexture = nullptr;
 
 
 void PostProcessBase::loadProgram(SampleCallbacks * Sample, RenderContext * Context, Gui * Gui)
