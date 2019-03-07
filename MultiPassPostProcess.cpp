@@ -173,11 +173,13 @@ void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext
             hasImage = true;
         }
     }
+    pContext->pushGraphicsState(pContext->getGraphicsState());
     if (!hasImage && modelViewer->hasModel()) {
         modelViewer->onFrameRender(pSample, pContext, pTargetFbo);
         hasImage = true;
     }
 
+    pContext->popGraphicsState();
     if (hasImage || pTextureSelectedFromFile)
     {
         Texture::SharedPtr& pSrcTex = hasImage ? pContext->getGraphicsState()->getFbo()->getColorTexture(0) : pTextureSelectedFromFile;

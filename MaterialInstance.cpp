@@ -1,5 +1,35 @@
 #include "MaterialInstance.h"
 #include "ModelViewer.h"
+
+
+std::vector<DepthStencilState::SharedPtr> DepthStencilStateBundle::state = {};
+bool DepthStencilStateBundle::operator==(const DepthStencilStateBundle & rhs)
+{
+    return bWriteDepth == rhs.bWriteDepth && eDepthTestFunc == rhs.eDepthTestFunc;
+}
+
+bool DepthStencilStateBundle::Get(const DepthStencilStateBundle & bundle, DepthStencilState::SharedPtr& ref)
+{
+    for (auto&v : state) {
+        if (v->isDepthWriteEnabled() == bundle.bWriteDepth && v->getDepthFunc() == bundle.eDepthTestFunc && v->isDepthTestEnabled() == bundle.bDepthTest) {
+            ref = v;
+            return true;
+        }
+    }
+    return false;
+}
+
+DepthStencilState::SharedPtr DepthStencilStateBundle::Get(const DepthStencilStateBundle & bundle)
+{
+    DepthStencilState::SharedPtr r;
+    if (Get(bundle, r))return r;
+    DepthStencilState::Desc desc;
+    desc.setDepthTest(bundle.bDepthTest).setDepthFunc(bundle.eDepthTestFunc).setDepthWriteMask(bundle.bWriteDepth).setStencilTest(false);
+    r = DepthStencilState::create(desc);
+    state.push_back(r);
+    return r;
+}
+
 const std::string MaterialInstance::vsEntry = "vert";
 const std::string MaterialInstance::psEntry = "frag";
 
@@ -22,12 +52,18 @@ MaterialInstance::SharedPtr MaterialInstance::create(const std::string & shader,
 MaterialInstance::MaterialInstance(const std::string & shader, const Program::DefineList& programDefines, const std::string& _name) :mName(_name)
 {
     loadStaticData();
+    mpState = GraphicsState::create();
     mpProgram = GraphicsProgram::createFromFile(shader, vsEntry, psEntry, programDefines);
+    mpState->setProgram(mpProgram);
     mpProgramVars = GraphicsVars::create(mpProgram->getReflector());
 }
 MaterialInstance::MaterialInstance(const std::string& _name, const  Material::SharedPtr& material) : mName(_name), mpMaterial(material)
 {
     loadStaticData();
+    mpState = GraphicsState::create();
+    mpProgram = ModelViewer::getProgramMap().at("Diffuse");
+    mpState->setProgram(mpProgram);
+    mpProgramVars = GraphicsVars::create(mpProgram->getReflector());
 }
 void MaterialInstance::clear()
 {
@@ -135,12 +171,12 @@ void MaterialInstance::onMaterialGui(Gui *p)
     }
 }
 
-void MaterialInstance::onRender(RenderContext* pRenderContext, GraphicsVars* vars)
+void MaterialInstance::onRender(RenderContext* pRenderContext)
 {
-    auto& graphicsState = pRenderContext->getGraphicsState();
-    if (mpProgramVars == nullptr) {
-        mpProgramVars = pRenderContext->getGraphicsVars();
-    }
+    //mpState->setBlendState(pRenderContext->getGraphicsState()->getBlendState());
+    //mpState->setRasterizerState(pRenderContext->getGraphicsState()->getRasterizerState());
+    //mpState->setDepthStencilState(pRenderContext->getGraphicsState()->getDepthStencilState());
+
     for (auto&v : param_texture2D) {
         mpProgramVars->setTexture(v.first, v.second);
     }
@@ -162,12 +198,12 @@ void MaterialInstance::onRender(RenderContext* pRenderContext, GraphicsVars* var
     SET_CONSTANT_BUFFER(mat3);
     SET_CONSTANT_BUFFER(mat4);
 
-    if (mpProgram) {
-        graphicsState->setProgram(mpProgram);
-        pRenderContext->setGraphicsVars(mpProgramVars);
-        vars = mpProgramVars.get();
-    }
-
+    depthStencilBundle.eDepthTestFunc = ComparisonFunc::Greater;
+    mpDepthStencilState = DepthStencilStateBundle::Get(depthStencilBundle);
+    mpState->setDepthStencilState(mpDepthStencilState);
+    mpState->setProgram(mpProgram);
+    pRenderContext->setGraphicsState(mpState);
+    pRenderContext->setGraphicsVars(mpProgramVars);
 }
 
 void MaterialInstance::loadStaticData()

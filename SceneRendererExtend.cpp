@@ -6,13 +6,9 @@ SceneRendererExtend::SceneRendererExtend(const Scene::SharedPtr& pScene) :SceneR
 {
 }
 
-void SceneRendererExtend::renderScene(RenderContext * pContext, const Camera * pCamera)
+void SceneRendererExtend::renderScene(RenderContext * pContext, const Fbo::SharedPtr& fbo, const Camera * pCamera)
 {
-    updateVariableOffsets(pContext->getGraphicsVars()->getReflection().get());
-    //设置默认的shader和var
-    //mpDefaultProgram = pContext->getGraphicsState()->getProgram();
-    //mpDefaultProgramVars = pContext->getGraphicsVars();
-
+    mpFbo = fbo;
     CurrentWorkingData currentData;
     currentData.pContext = pContext;
     currentData.pState = pContext->getGraphicsState().get();
@@ -155,7 +151,7 @@ void SceneRendererExtend::render(CurrentWorkingData & currentData)
                     {
                         mpLastMaterial = nullptr;
 
-                        auto res = getScene()->getModelResource(modelID);
+                        ModelResource& res = getScene()->getModelResource(modelID);
                         pInstance->setTranslation(res.Translation, true);
                         pInstance->setRotation(res.Rotation);
                         pInstance->setScaling(res.Scale);
@@ -163,7 +159,11 @@ void SceneRendererExtend::render(CurrentWorkingData & currentData)
                         // Loop over the meshes
                         for (uint32_t meshID = 0; meshID < pInstance->getObject()->getMeshCount(); meshID++)
                         {
-                            res.setBuffers(currentData.pContext, currentData.pVars, meshID);
+                            MaterialInstance::SharedPtr& mat = res.getMaterialInstance(meshID);
+                            currentData.pState = mat->get_state().get();
+                            currentData.pVars = mat->get_programVars().get();
+                            currentData.pState->setFbo(mpFbo);
+                            mat->onRender(currentData.pContext);
                             updateVariableOffsets(currentData.pContext->getGraphicsVars()->getReflection().get());
                             setPerFrameData(currentData);
                             renderMeshInstances(currentData, pInstance, meshID);

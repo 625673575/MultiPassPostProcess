@@ -2,6 +2,24 @@
 #include "Falcor.h"
 using namespace Falcor;
 
+struct DepthStencilStateBundle {
+    bool bWriteDepth = true;
+    bool bDepthTest = true;
+    ComparisonFunc eDepthTestFunc = ComparisonFunc::Less;
+    bool operator ==(const DepthStencilStateBundle&rhs);
+    static std::vector<DepthStencilState::SharedPtr> state;
+    static bool Get(const DepthStencilStateBundle & bundle, DepthStencilState::SharedPtr& ref);
+    static DepthStencilState::SharedPtr Get(const DepthStencilStateBundle & bundle);
+};
+
+enum class ERenderQueue :uint32_t {
+    Background = 1000,
+    Geometry = 2000,
+    AlphaTest = 2450,
+    Transparent = 3000,
+    Overlay = 4000
+};
+
 #define DEF_VAR(vec) std::map<std::string, vec> param_##vec;\
 std::vector<_Bind<vec>> bind_##vec;
 #define DEF_INSERT_FUNC(vec) vec& insert_##vec(const std::string& var_name,const vec value) { param_##vec.emplace(var_name, value);return param_##vec[var_name];}\
@@ -71,13 +89,20 @@ private:
     std::map<std::string, Texture::SharedPtr> param_texture2D;
     std::map<std::string, Texture::SharedPtr> param_textureCube;
     GraphicsProgram::SharedPtr mpProgram = nullptr;
+    GraphicsState::SharedPtr mpState = nullptr;
     GraphicsVars::SharedPtr mpProgramVars = nullptr;
+    DepthStencilState::SharedPtr mpDepthStencilState = nullptr;
+    
     Material::SharedPtr mpMaterial = nullptr;
     bool bUseMaterial = false;
     std::string mName;
+    DepthStencilStateBundle depthStencilBundle;
+    uint32_t renderQueue = uint32_t(ERenderQueue::Geometry);
     static void loadStaticData();
 public:
     const GraphicsProgram::SharedPtr& get_program() { return mpProgram; }
+    const GraphicsState::SharedPtr& get_state() { return mpState; }
+    const GraphicsVars::SharedPtr& get_programVars() { return mpProgramVars; }
     void set_program(const  GraphicsProgram::SharedPtr& prog, bool use_default_material = false);
     DEF_INSERT_FUNC(bool);
     DEF_INSERT_FUNC(int);
@@ -99,8 +124,13 @@ public:
 
     ConstantBuffer::SharedPtr get_constantbuffer(ECBType t);
     void onMaterialGui(Gui *p);
-    void onRender(RenderContext* pRenderContext, GraphicsVars* vars);
+    void onRender(RenderContext* pRenderContext);
     const std::string& getName() { return mName; }
+
+    MaterialInstance& setWriteDepth(bool write) { depthStencilBundle.bWriteDepth = write; return *this; }
+    MaterialInstance& setDepthTestFunc(ComparisonFunc func) { depthStencilBundle.eDepthTestFunc = func; return *this; }
+    MaterialInstance& setRenderQueue(ERenderQueue queue) { renderQueue = uint32_t(queue); return *this; }
+    MaterialInstance& setRenderQueue(uint32_t queue) { renderQueue = queue; return *this; }
 
     static Texture::SharedPtr WhiteTexture, BlackTexture, RedTexture, GreenTexture, BlueTexture;
     static Texture::SharedPtr pTextureNoise;

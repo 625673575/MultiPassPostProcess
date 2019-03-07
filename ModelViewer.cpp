@@ -128,7 +128,7 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
     }
 
     mpGraphicsState->setDepthStencilState(mpDepthTestLessDS);
-    pSceneRenderer->renderScene(pRenderContext, mpCamera.get());
+    pSceneRenderer->renderScene(pRenderContext,pTargetFbo, mpCamera.get());
 
     pScene->addLight(mpDirLight);
     pScene->addLight(mpPointLight);
@@ -145,7 +145,7 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
     else
     {
         mpGraphicsState->setRasterizerState(mpCullRastState[mCullMode]);
-        mpGraphicsState->setDepthStencilState(mpDepthTestGreaterDS);
+        mpGraphicsState->setDepthStencilState(mpDepthTestLessDS);
     }
     if (mBlendMode != 0) {
         mpGraphicsState->setDepthStencilState(mpNoDepthDS);
@@ -155,7 +155,7 @@ void ModelViewer::onFrameRender(SampleCallbacks* pSample, RenderContext* pRender
     mpDepthPassFbo->attachDepthStencilTarget(pTargetFbo->getDepthStencilTexture());
     if (mpSkyBox)
         mpSkyBox->render(pRenderContext, mpCamera.get());
-    pSceneRenderer->renderScene(pRenderContext, mpCamera.get());
+    pSceneRenderer->renderScene(pRenderContext,pTargetFbo, mpCamera.get());
 }
 
 void ModelViewer::onGuiRender(SampleCallbacks* pSample, Gui* pGui)

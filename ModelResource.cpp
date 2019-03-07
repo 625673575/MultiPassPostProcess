@@ -64,6 +64,12 @@ size_t ModelResource::getMaterialCount()
     return sharedMaterials.size();
 }
 
+MaterialInstance::SharedPtr & ModelResource::getMaterialInstance(uint32_t meshID)
+{
+    auto& pMat = mpModel->getMesh(meshID)->getMaterial();
+    return sharedMaterials[pMat->getName()];
+}
+
 void ModelResource::resetMaterialGui()
 {
     for (auto&inst : sharedMaterials) {
@@ -85,12 +91,6 @@ void ModelResource::init(const std::string& default_shader)
     initMaterials(default_shader);
 }
 
-void ModelResource::setBuffers(RenderContext* pRenderContext, GraphicsVars* vars, uint32_t meshID)
-{
-    auto& pMat = mpModel->getMesh(meshID)->getMaterial();
-    auto& MatInstance = sharedMaterials[pMat->getName()];
-    MatInstance->onRender(pRenderContext, vars);
-}
 
 void ModelResource::onGui(Gui* p)
 {
@@ -98,7 +98,7 @@ void ModelResource::onGui(Gui* p)
     auto modelName = mpModel->getName();
     if (p->beginGroup(modelName, true)) {
         p->addText("Transform ");
-        p->addFloat3Var((modelName+"-Translation").c_str(), Translation);
+        p->addFloat3Var((modelName + "-Translation").c_str(), Translation);
         p->addFloat3Var((modelName + "-Rotation").c_str(), Rotation);
         p->addFloat3Var((modelName + "-Scale").c_str(), Scale);
         for (auto&v : sharedMaterials) {

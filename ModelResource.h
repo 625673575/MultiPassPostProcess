@@ -24,10 +24,10 @@ public:
     std::vector<std::string> getMaterialsName();
     static const std::map<std::string, std::function<void(MaterialInstance::SharedPtr&)>>& getProgramMapFunc();
     size_t getMaterialCount();
+    MaterialInstance::SharedPtr& getMaterialInstance(uint32_t meshID);
     void resetMaterialGui();
     static bool hasInitGui;
     void init(const std::string& default_shader="");
-    void setBuffers(RenderContext* pRenderContext, GraphicsVars* vars, uint32_t meshID);
     void onGui(Gui* p);
     void setTRS(const glm::vec3& translation, const glm::vec3& rotation, const glm::vec3& scale);
 private:

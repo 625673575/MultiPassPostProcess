@@ -17,7 +17,7 @@ public:
     SceneRendererExtend(const Scene::SharedPtr& pScene);
     virtual ~SceneRendererExtend() = default;
 
-    void renderScene(RenderContext* pContext, const Camera* pCamera)override;
+    void renderScene(RenderContext* pContext,const Fbo::SharedPtr& fbo, const Camera* pCamera);
     void setPerFrameData(const CurrentWorkingData& currentData)override;
     bool setPerModelData(const CurrentWorkingData& currentData)override;
     bool setPerMeshInstanceData(const CurrentWorkingData& currentData, const Scene::ModelInstance* pModelInstance, const Model::MeshInstance* pMeshInstance, uint32_t drawInstanceID)override;
@@ -26,6 +26,7 @@ public:
 protected:
     GraphicsProgram::SharedPtr mpDefaultProgram;
     GraphicsVars::SharedPtr mpDefaultProgramVars;
+    Fbo::SharedPtr mpFbo;
     void render(CurrentWorkingData& currentData);
      SceneExtend* getScene() { return static_cast<SceneExtend*>( mpScene.get()); }
 };
