@@ -41,9 +41,13 @@ Texture::SharedPtr MaterialInstance::BlueTexture = nullptr;
 Texture::SharedPtr MaterialInstance::pTextureNoise = nullptr;
 Texture::SharedPtr MaterialInstance::pTextureNoiseRGB = nullptr;
 Texture::SharedPtr MaterialInstance::pTextureSmoke = nullptr;
-Texture::SharedPtr MaterialInstance::pTextureStar = nullptr;
-Texture::SharedPtr MaterialInstance::pTextureGirl = nullptr;
 Texture::SharedPtr MaterialInstance::pTextureWoodFloor = nullptr;
+RasterizerState::SharedPtr MaterialInstance::pRasterizerState_Wire = nullptr;
+RasterizerState::SharedPtr MaterialInstance::pRasterizerState_Solid_Back = nullptr;
+RasterizerState::SharedPtr MaterialInstance::pRasterizerState_Solid_Front = nullptr;
+RasterizerState::SharedPtr MaterialInstance::pRasterizerState_Solid_None = nullptr;
+BlendState::SharedPtr MaterialInstance::pBlenderState_Opaque = nullptr;
+BlendState::SharedPtr MaterialInstance::pBlenderState_Transparent = nullptr;
 MaterialInstance::SharedPtr MaterialInstance::create(const std::string & shader, const Program::DefineList & programDefines, const std::string& _name)
 {
     return std::make_shared<MaterialInstance>(shader, programDefines, _name);
@@ -56,7 +60,15 @@ MaterialInstance::MaterialInstance(const std::string & shader, const Program::De
     mpProgram = GraphicsProgram::createFromFile(shader, vsEntry, psEntry, programDefines);
     mpState->setProgram(mpProgram);
     mpProgramVars = GraphicsVars::create(mpProgram->getReflector());
+
+    mpDepthStencilState = DepthStencilStateBundle::Get(depthStencilBundle);
+
+    mpState->setDepthStencilState(mpDepthStencilState);
+    mpState->setBlendState(pBlenderState_Opaque);
+    mpState->setRasterizerState(pRasterizerState_Solid_Back);
+
 }
+
 MaterialInstance::MaterialInstance(const std::string& _name, const  Material::SharedPtr& material) : mName(_name), mpMaterial(material)
 {
     loadStaticData();
@@ -64,7 +76,14 @@ MaterialInstance::MaterialInstance(const std::string& _name, const  Material::Sh
     mpProgram = ModelViewer::getProgramMap().at("Diffuse");
     mpState->setProgram(mpProgram);
     mpProgramVars = GraphicsVars::create(mpProgram->getReflector());
+
+    mpDepthStencilState = DepthStencilStateBundle::Get(depthStencilBundle);
+
+    mpState->setDepthStencilState(mpDepthStencilState);
+    mpState->setBlendState(pBlenderState_Opaque);
+    mpState->setRasterizerState(pRasterizerState_Solid_Back);
 }
+
 void MaterialInstance::clear()
 {
 #define CLEAR_MAP(type) param_##type##.clear()
@@ -198,9 +217,6 @@ void MaterialInstance::onRender(RenderContext* pRenderContext)
     SET_CONSTANT_BUFFER(mat3);
     SET_CONSTANT_BUFFER(mat4);
 
-    depthStencilBundle.eDepthTestFunc = ComparisonFunc::Greater;
-    mpDepthStencilState = DepthStencilStateBundle::Get(depthStencilBundle);
-    mpState->setDepthStencilState(mpDepthStencilState);
     mpState->setProgram(mpProgram);
     pRenderContext->setGraphicsState(mpState);
     pRenderContext->setGraphicsVars(mpProgramVars);
@@ -223,13 +239,35 @@ void MaterialInstance::loadStaticData()
         pTextureSmoke = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\smoke.jpg", false, true);
         pTextureNoise = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\noise1024.png", false, true);
         pTextureNoiseRGB = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\noisergb.jpg", false, true);
-        pTextureStar = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\star.jpg", false, true);
-        pTextureGirl = createTextureFromFile("c:\\Users\\Liu\\Pictures\\mnv.jpg", false, true);
         pTextureWoodFloor = createTextureFromFile("d:\\Falcor\\Samples\\Core\\MultiPassPostProcess\\Media\\wood_floor.jpg", false, true);
+
+        // create rasterizer state
+        RasterizerState::Desc wireframeDesc;
+        wireframeDesc.setFillMode(RasterizerState::FillMode::Wireframe);
+        wireframeDesc.setCullMode(RasterizerState::CullMode::None);
+        pRasterizerState_Wire = RasterizerState::create(wireframeDesc);
+
+        RasterizerState::Desc solidDesc;
+        solidDesc.setCullMode(RasterizerState::CullMode::None);
+        pRasterizerState_Solid_None = RasterizerState::create(solidDesc);
+        solidDesc.setCullMode(RasterizerState::CullMode::Back);
+        pRasterizerState_Solid_Back = RasterizerState::create(solidDesc);
+        solidDesc.setCullMode(RasterizerState::CullMode::Front);
+        pRasterizerState_Solid_Front = RasterizerState::create(solidDesc);
+
+        BlendState::Desc blendDesc;
+        pBlenderState_Opaque = BlendState::create(blendDesc);
+        blendDesc.setAlphaToCoverage(false);
+        blendDesc.setRenderTargetWriteMask(0, true, true, true, true);
+
+        blendDesc.setRtBlend(0, true).setRtParams(0, BlendState::BlendOp::Add, BlendState::BlendOp::Add,
+            BlendState::BlendFunc::SrcAlpha, BlendState::BlendFunc::OneMinusSrcAlpha,
+            BlendState::BlendFunc::One, BlendState::BlendFunc::Zero);
+        pBlenderState_Transparent = BlendState::create(blendDesc);
     }
 }
 
-void MaterialInstance::set_program(const GraphicsProgram::SharedPtr & prog, bool use_default_material)
+MaterialInstance& MaterialInstance::set_program(const GraphicsProgram::SharedPtr & prog, bool use_default_material)
 {
     if (!use_default_material) { bUseMaterial = false; }
     clear(); mpProgram = prog;
@@ -237,4 +275,51 @@ void MaterialInstance::set_program(const GraphicsProgram::SharedPtr & prog, bool
     if (use_default_material && mpMaterial) {
         bUseMaterial = use_default_material;
     }
+    return *this;
+}
+
+MaterialInstance& MaterialInstance::set_blendMode(EBlendMode mode)
+{
+    blendMode = mode;
+    switch (mode)
+    {
+    case MaterialInstance::EBlendMode::Opaque:
+        mpState->setBlendState(pBlenderState_Opaque);
+        break;
+    case MaterialInstance::EBlendMode::Transparent:
+        mpState->setBlendState(pBlenderState_Transparent);
+        break;
+    default:
+        break;
+    }
+    return *this;
+}
+
+MaterialInstance& MaterialInstance::set_rasterizeMode(ERasterizeMode mode)
+{
+    rasterizeMode = mode;
+    switch (mode)
+    {
+    case MaterialInstance::ERasterizeMode::Wire:
+        mpState->setRasterizerState(pRasterizerState_Wire);
+        break;
+    case MaterialInstance::ERasterizeMode::CullNone:
+        mpState->setRasterizerState(pRasterizerState_Solid_None);
+        break;
+    case MaterialInstance::ERasterizeMode::CullBack:
+        mpState->setRasterizerState(pRasterizerState_Solid_Back);
+        break;
+    case MaterialInstance::ERasterizeMode::CullFront:
+        mpState->setRasterizerState(pRasterizerState_Solid_Front);
+        break;
+    default:
+        break;
+    }
+    return *this;
+}
+
+MaterialInstance& MaterialInstance::set_depthStencilTest(const DepthStencilStateBundle & bundle)
+{
+    mpState->setDepthStencilState(DepthStencilStateBundle::Get(bundle));
+    return *this;
 }

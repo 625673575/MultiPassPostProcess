@@ -72,6 +72,7 @@ private:
     DepthStencilState::SharedPtr mpNoDepthDS = nullptr;
     DepthStencilState::SharedPtr mpDepthTestLessDS = nullptr;
     DepthStencilState::SharedPtr mpDepthTestGreaterDS = nullptr;
+    DepthStencilState::SharedPtr mpDepthTestAlways = nullptr;
 
     DirectionalLight::SharedPtr mpDirLight;
     PointLight::SharedPtr mpPointLight;

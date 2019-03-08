@@ -5,7 +5,7 @@ using namespace Falcor;
 struct DepthStencilStateBundle {
     bool bWriteDepth = true;
     bool bDepthTest = true;
-    ComparisonFunc eDepthTestFunc = ComparisonFunc::Less;
+    ComparisonFunc eDepthTestFunc = ComparisonFunc::LessEqual;
     bool operator ==(const DepthStencilStateBundle&rhs);
     static std::vector<DepthStencilState::SharedPtr> state;
     static bool Get(const DepthStencilStateBundle & bundle, DepthStencilState::SharedPtr& ref);
@@ -73,6 +73,17 @@ public:
         Float4x4,
         Texture2D
     };
+    enum class EBlendMode {
+        Opaque,
+        Transparent
+    };
+    enum class ERasterizeMode {
+        Wire,
+        CullNone,
+        CullBack,
+        CullFront
+    };
+   
 private:
     DEF_VAR(bool);
     DEF_VAR(int);
@@ -97,13 +108,18 @@ private:
     bool bUseMaterial = false;
     std::string mName;
     DepthStencilStateBundle depthStencilBundle;
+    EBlendMode blendMode;
+    ERasterizeMode rasterizeMode;
     uint32_t renderQueue = uint32_t(ERenderQueue::Geometry);
     static void loadStaticData();
 public:
     const GraphicsProgram::SharedPtr& get_program() { return mpProgram; }
     const GraphicsState::SharedPtr& get_state() { return mpState; }
     const GraphicsVars::SharedPtr& get_programVars() { return mpProgramVars; }
-    void set_program(const  GraphicsProgram::SharedPtr& prog, bool use_default_material = false);
+    MaterialInstance& set_program(const  GraphicsProgram::SharedPtr& prog, bool use_default_material = false);
+    MaterialInstance& set_blendMode(EBlendMode mode);
+    MaterialInstance& set_rasterizeMode(ERasterizeMode mode);
+    MaterialInstance& set_depthStencilTest(const DepthStencilStateBundle& bundle);
     DEF_INSERT_FUNC(bool);
     DEF_INSERT_FUNC(int);
     DEF_INSERT_FUNC(ivec2);
@@ -136,10 +152,15 @@ public:
     static Texture::SharedPtr pTextureNoise;
     static Texture::SharedPtr pTextureNoiseRGB;
     static Texture::SharedPtr pTextureSmoke;
-    static Texture::SharedPtr pTextureStar;
     static Texture::SharedPtr pTextureWoodFloor;
-    static Texture::SharedPtr pTextureGirl;
     static Texture::SharedPtr pTextureSelectedFromFile;
+
+    static RasterizerState::SharedPtr pRasterizerState_Wire;
+    static RasterizerState::SharedPtr pRasterizerState_Solid_Back;
+    static RasterizerState::SharedPtr pRasterizerState_Solid_Front;
+    static RasterizerState::SharedPtr pRasterizerState_Solid_None;
+    static BlendState::SharedPtr pBlenderState_Opaque;
+    static BlendState::SharedPtr pBlenderState_Transparent;
 };
 
 #undef DEF_VAR

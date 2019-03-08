@@ -137,7 +137,7 @@ void MultiPassPostProcess::loadShaderToy()
     shaderToy.emplace_back(mars);
     std::vector<std::string> volcanic_name{ "VolcanicBuffer0", "Volcanic" };
     auto toy_volcanic = new ShaderToyImplementation(volcanic_name);
-    toy_volcanic->setTexture(0, "iChannel0", MaterialInstance::pTextureGirl);
+    toy_volcanic->setTexture(0, "iChannel0", MaterialInstance::pTextureSmoke);
     toy_volcanic->setTexture(0, "iChannel1", MaterialInstance::pTextureNoise);
     toy_volcanic->setTexture(0, "iChannel2", MaterialInstance::pTextureWoodFloor);
     shaderToy.emplace_back(toy_volcanic);

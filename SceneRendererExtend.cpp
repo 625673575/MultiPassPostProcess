@@ -6,9 +6,10 @@ SceneRendererExtend::SceneRendererExtend(const Scene::SharedPtr& pScene) :SceneR
 {
 }
 
-void SceneRendererExtend::renderScene(RenderContext * pContext, const Fbo::SharedPtr& fbo, const Camera * pCamera)
+void SceneRendererExtend::renderScene(RenderContext * pContext, const Fbo::SharedPtr& fbo, const Camera * pCamera, bool renderDepth)
 {
     mpFbo = fbo;
+    mSetShaderForEachMaterial = renderDepth;
     CurrentWorkingData currentData;
     currentData.pContext = pContext;
     currentData.pState = pContext->getGraphicsState().get();
@@ -159,12 +160,14 @@ void SceneRendererExtend::render(CurrentWorkingData & currentData)
                         // Loop over the meshes
                         for (uint32_t meshID = 0; meshID < pInstance->getObject()->getMeshCount(); meshID++)
                         {
-                            MaterialInstance::SharedPtr& mat = res.getMaterialInstance(meshID);
-                            currentData.pState = mat->get_state().get();
-                            currentData.pVars = mat->get_programVars().get();
-                            currentData.pState->setFbo(mpFbo);
-                            mat->onRender(currentData.pContext);
-                            updateVariableOffsets(currentData.pContext->getGraphicsVars()->getReflection().get());
+                            if (mSetShaderForEachMaterial) {
+                                MaterialInstance::SharedPtr& mat = res.getMaterialInstance(meshID);
+                                currentData.pState = mat->get_state().get();
+                                currentData.pVars = mat->get_programVars().get();
+                                currentData.pState->setFbo(mpFbo);
+                                mat->onRender(currentData.pContext);
+                            }
+                            updateVariableOffsets(currentData.pVars->getReflection().get());
                             setPerFrameData(currentData);
                             renderMeshInstances(currentData, pInstance, meshID);
                         }
