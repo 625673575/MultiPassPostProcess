@@ -11,14 +11,16 @@ public:
     ModelResource(const Model::SharedPtr& pModel);
 public:
     std::string mModelString;
+    uint64_t mResId;
     Model::SharedPtr mpModel = nullptr;
     glm::vec3 Translation;
     glm::vec3 Rotation;
     glm::vec3 Scale;
     bool mAnimate = false;
     bool mUseTriLinearFiltering = false;
-    std::string getModelDesc(bool isAfterCull, float loadTime);
     std::map<std::string, MaterialInstance::SharedPtr> sharedMaterials;
+    
+    std::string getModelDesc(bool isAfterCull, float loadTime);
     void setProgram(const std::string& materialName, const std::string& programName);
     uint32_t getProgramIndex(const GraphicsProgram::SharedPtr&);
     std::vector<std::string> getMaterialsName();
@@ -30,9 +32,12 @@ public:
     void init(const std::string& default_shader="");
     void onGui(Gui* p);
     void setTRS(const glm::vec3& translation, const glm::vec3& rotation, const glm::vec3& scale);
+    std::string getModelResName();
 private:
     void initMaterials(const std::string& default_shader = "");
     std::map<std::string,uint32_t> programDropDownIndex;
     static Gui::DropdownList programDropDownList;
-
+    static uint64_t count;
+public:
+    static uint64_t getModelCount() { return count; };
 };

@@ -217,7 +217,7 @@ void ModelViewer::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     pGui->addDropdown("Camera Type", cameraDropdown, (uint32_t&)mCameraType);
 
     for (auto&v = models.begin(); v != models.end(); v++) {
-        if (pGui->addButton("remove")) {
+        if (pGui->addButton(("Remove "+v->getModelResName()).c_str())) {
             models.erase(v);
             break;
         }
@@ -450,17 +450,6 @@ void ModelViewer::loadModelResources()
 {
     //必须要将quad放在人物前面渲染，后面的人物才可以将被遮挡的部分进行显示出来,原因在于必须先渲染这个才会写入深度导致后续的Greater测试成功
     {
-        ModelResource quad;
-        loadModelFromFile(quad, "d:\\Falcor\\Media\\quad1x1.obj", ResourceFormat::RGBA8UnormSrgb);
-        for (auto&v : quad.sharedMaterials) {
-            mMaterialFuncMap["ConstColor"](v.second);
-        }
-        quad.Rotation = glm::vec3(0.258f, -0.243f, -0.127f);
-        quad.Scale = glm::vec3(10);
-        quad.resetMaterialGui();
-        models.emplace_back(quad);
-    }
-    {
         ModelResource cynthia;
         loadModelFromFile(cynthia, "d:\\Falcor\\Media\\Cynthia\\Cynthia.obj", ResourceFormat::RGBA8UnormSrgb);
         for (auto&v : cynthia.sharedMaterials) {
@@ -473,6 +462,17 @@ void ModelViewer::loadModelResources()
         cynthia.sharedMaterials["material_0"]->set_texture2D("gAlbedoTexture", albedo);
         cynthia.resetMaterialGui();
         models.emplace_back(cynthia);
+    }
+    {
+        ModelResource quad;
+        loadModelFromFile(quad, "d:\\Falcor\\Media\\quad1x1.obj", ResourceFormat::RGBA8UnormSrgb);
+        for (auto&v : quad.sharedMaterials) {
+            mMaterialFuncMap["ConstColor"](v.second);
+        }
+        quad.Rotation = glm::vec3(0.258f, -0.243f, -0.127f);
+        quad.Scale = glm::vec3(10);
+        quad.resetMaterialGui();
+        models.emplace_back(quad);
     }
     {
         ModelResource miniature;

@@ -3,6 +3,7 @@
 
 Gui::DropdownList ModelResource::programDropDownList = {};
 bool ModelResource::hasInitGui = false;
+uint64_t ModelResource::count = 0;
 ModelResource::ModelResource() :Translation(0), Rotation(0), Scale(1)
 {
 }
@@ -88,6 +89,7 @@ void ModelResource::init(const std::string& default_shader)
         }
         hasInitGui = true;
     }
+    mResId = count++;
     initMaterials(default_shader);
 }
 
@@ -95,7 +97,7 @@ void ModelResource::init(const std::string& default_shader)
 void ModelResource::onGui(Gui* p)
 {
     p->addSeparator();
-    auto modelName = mpModel->getName();
+    auto modelName = getModelResName();
     if (p->beginGroup(modelName, true)) {
         p->addText("Transform ");
         p->addFloat3Var((modelName + "-Translation").c_str(), Translation);
@@ -125,6 +127,11 @@ void ModelResource::setTRS(const glm::vec3 & translation, const glm::vec3 & rota
     Translation = translation;
     Rotation = rotation;
     Scale = scale;
+}
+
+std::string ModelResource::getModelResName()
+{
+    return  mpModel->getName() + "res id:"+std::to_string(mResId);
 }
 
 void ModelResource::initMaterials(const std::string& default_shader)

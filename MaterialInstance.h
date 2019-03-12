@@ -12,7 +12,7 @@ struct DepthStencilStateBundle {
     static DepthStencilState::SharedPtr Get(const DepthStencilStateBundle & bundle);
 };
 
-enum class ERenderQueue :uint32_t {
+enum class ERenderQueue :int32_t {
     Background = 1000,
     Geometry = 2000,
     AlphaTest = 2450,
@@ -50,6 +50,7 @@ public:
     ~MaterialInstance() = default;
     static MaterialInstance::SharedPtr create(const std::string& shader, const Program::DefineList& programDefines, const std::string& _name = "");
     //static MaterialInstance::SharedPtr create(Program::SharedPtr& program, const Program::DefineList& programDefines);
+    bool ComaparsionQueue(const MaterialInstance* rhs)const;
 private:
 
 public:
@@ -83,7 +84,7 @@ public:
         CullBack,
         CullFront
     };
-   
+
 private:
     DEF_VAR(bool);
     DEF_VAR(int);
@@ -103,20 +104,22 @@ private:
     GraphicsState::SharedPtr mpState = nullptr;
     GraphicsVars::SharedPtr mpProgramVars = nullptr;
     DepthStencilState::SharedPtr mpDepthStencilState = nullptr;
-    
+
     Material::SharedPtr mpMaterial = nullptr;
     bool bUseMaterial = false;
     std::string mName;
+    uint64_t mResId;
     DepthStencilStateBundle depthStencilBundle;
     EBlendMode blendMode;
     ERasterizeMode rasterizeMode;
-    uint32_t renderQueue = uint32_t(ERenderQueue::Geometry);
+    int32_t renderQueue = int32_t(ERenderQueue::Geometry);
     static void loadStaticData();
 public:
+    std::string get_resName() { return mName + "res id:" + std::to_string(mResId); }
     const GraphicsProgram::SharedPtr& get_program() { return mpProgram; }
     const GraphicsState::SharedPtr& get_state() { return mpState; }
     const GraphicsVars::SharedPtr& get_programVars() { return mpProgramVars; }
-    MaterialInstance& set_program(const  GraphicsProgram::SharedPtr& prog, bool use_default_material = false);
+    MaterialInstance& set_program(const  GraphicsProgram::SharedPtr& prog, bool use_default_material = false, bool resetState = true);
     MaterialInstance& set_blendMode(EBlendMode mode);
     MaterialInstance& set_rasterizeMode(ERasterizeMode mode);
     MaterialInstance& set_depthStencilTest(const DepthStencilStateBundle& bundle);
@@ -142,12 +145,15 @@ public:
     void onMaterialGui(Gui *p);
     void onRender(RenderContext* pRenderContext);
     const std::string& getName() { return mName; }
+    const std::string& getInstanceName() { return mName; }
 
     MaterialInstance& setWriteDepth(bool write) { depthStencilBundle.bWriteDepth = write; return *this; }
     MaterialInstance& setDepthTestFunc(ComparisonFunc func) { depthStencilBundle.eDepthTestFunc = func; return *this; }
     MaterialInstance& setRenderQueue(ERenderQueue queue) { renderQueue = uint32_t(queue); return *this; }
     MaterialInstance& setRenderQueue(uint32_t queue) { renderQueue = queue; return *this; }
 
+    static const Gui::DropdownList kBlendModeDropDownList;
+    static const Gui::DropdownList kRasterizeModeDropDownList;
     static Texture::SharedPtr WhiteTexture, BlackTexture, RedTexture, GreenTexture, BlueTexture;
     static Texture::SharedPtr pTextureNoise;
     static Texture::SharedPtr pTextureNoiseRGB;

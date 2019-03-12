@@ -136,6 +136,7 @@ bool SceneRendererExtend::setPerMaterialData(const CurrentWorkingData & currentD
 
 void SceneRendererExtend::render(CurrentWorkingData & currentData)
 {
+    mSavedInstance.clear();
     for (uint32_t modelID = 0; modelID < mpScene->getModelCount(); modelID++)
     {
         currentData.pModel = mpScene->getModel(modelID).get();
@@ -161,19 +162,33 @@ void SceneRendererExtend::render(CurrentWorkingData & currentData)
                         for (uint32_t meshID = 0; meshID < pInstance->getObject()->getMeshCount(); meshID++)
                         {
                             if (mSetShaderForEachMaterial) {
-                                MaterialInstance::SharedPtr& mat = res.getMaterialInstance(meshID);
+                                auto& mat = res.getMaterialInstance(meshID);
                                 currentData.pState = mat->get_state().get();
                                 currentData.pVars = mat->get_programVars().get();
-                                currentData.pState->setFbo(mpFbo);
-                                mat->onRender(currentData.pContext);
+                                mSavedInstance.emplace_back(mat.get(), pInstance, meshID, currentData);
                             }
-                            updateVariableOffsets(currentData.pVars->getReflection().get());
-                            setPerFrameData(currentData);
-                            renderMeshInstances(currentData, pInstance, meshID);
+                            else {//render depth buffer
+                                updateVariableOffsets(currentData.pVars->getReflection().get());
+                                setPerFrameData(currentData);
+                                renderMeshInstances(currentData, pInstance, meshID);
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+    if (mSetShaderForEachMaterial) {
+        std::sort(mSavedInstance.begin(), mSavedInstance.end(), [](const MaterialInstanceBuffer&l, const MaterialInstanceBuffer&r)->bool {
+            return l.pMaterialInstance->ComaparsionQueue(r.pMaterialInstance);
+        });
+        for (auto& mat : mSavedInstance) {
+            mat.data.pState->setFbo(mpFbo);
+            mat.pMaterialInstance->onRender(mat.data.pContext);
+
+            updateVariableOffsets(mat.data.pVars->getReflection().get());
+            setPerFrameData(mat.data);
+            renderMeshInstances(mat.data, mat.pModelInstance, mat.meshId);
         }
     }
 }

@@ -48,13 +48,24 @@ RasterizerState::SharedPtr MaterialInstance::pRasterizerState_Solid_Front = null
 RasterizerState::SharedPtr MaterialInstance::pRasterizerState_Solid_None = nullptr;
 BlendState::SharedPtr MaterialInstance::pBlenderState_Opaque = nullptr;
 BlendState::SharedPtr MaterialInstance::pBlenderState_Transparent = nullptr;
+
+const Gui::DropdownList MaterialInstance::kBlendModeDropDownList = { {uint32_t(EBlendMode::Opaque),"Opaque"}, {uint32_t(EBlendMode::Transparent),"Transparent"} };
+const Gui::DropdownList MaterialInstance::kRasterizeModeDropDownList = { {uint32_t(ERasterizeMode::Wire),"Wire"},  {uint32_t(ERasterizeMode::CullNone),"CullNone"},  {uint32_t(ERasterizeMode::CullBack),"CullBack"}, {uint32_t(ERasterizeMode::Wire),"CullFront"} };
+
 MaterialInstance::SharedPtr MaterialInstance::create(const std::string & shader, const Program::DefineList & programDefines, const std::string& _name)
 {
     return std::make_shared<MaterialInstance>(shader, programDefines, _name);
 }
 
+bool MaterialInstance::ComaparsionQueue(const MaterialInstance* rhs)const
+{
+    if (this->renderQueue == rhs->renderQueue) return this->mResId < rhs->mResId;
+    return this->renderQueue < rhs->renderQueue;
+}
+
 MaterialInstance::MaterialInstance(const std::string & shader, const Program::DefineList& programDefines, const std::string& _name) :mName(_name)
 {
+    mResId = ModelResource::getModelCount();
     loadStaticData();
     mpState = GraphicsState::create();
     mpProgram = GraphicsProgram::createFromFile(shader, vsEntry, psEntry, programDefines);
@@ -64,13 +75,14 @@ MaterialInstance::MaterialInstance(const std::string & shader, const Program::De
     mpDepthStencilState = DepthStencilStateBundle::Get(depthStencilBundle);
 
     mpState->setDepthStencilState(mpDepthStencilState);
-    mpState->setBlendState(pBlenderState_Opaque);
-    mpState->setRasterizerState(pRasterizerState_Solid_Back);
+    set_blendMode(EBlendMode::Opaque);
+    set_rasterizeMode(ERasterizeMode::CullBack);
 
 }
 
 MaterialInstance::MaterialInstance(const std::string& _name, const  Material::SharedPtr& material) : mName(_name), mpMaterial(material)
 {
+    mResId = ModelResource::getModelCount();
     loadStaticData();
     mpState = GraphicsState::create();
     mpProgram = ModelViewer::getProgramMap().at("Diffuse");
@@ -80,8 +92,8 @@ MaterialInstance::MaterialInstance(const std::string& _name, const  Material::Sh
     mpDepthStencilState = DepthStencilStateBundle::Get(depthStencilBundle);
 
     mpState->setDepthStencilState(mpDepthStencilState);
-    mpState->setBlendState(pBlenderState_Opaque);
-    mpState->setRasterizerState(pRasterizerState_Solid_Back);
+    set_blendMode(EBlendMode::Opaque);
+    set_rasterizeMode(ERasterizeMode::CullBack);
 }
 
 void MaterialInstance::clear()
@@ -113,7 +125,7 @@ inline ConstantBuffer::SharedPtr MaterialInstance::get_constantbuffer(ECBType t)
 void MaterialInstance::onMaterialGui(Gui *p)
 {
     int i = 0;
-#define PRE_INDEX_NAME  (v.first + ":" + mName)
+#define PRE_INDEX_NAME  (v.first + ":" + get_resName())
 #define ADD_GUI_VEC(vec,var_type)\
     for (auto &v : param_##vec) {\
         std::string a=PRE_INDEX_NAME+std::string("(")+#vec+std::string(")");\
@@ -123,6 +135,23 @@ void MaterialInstance::onMaterialGui(Gui *p)
     for (auto &v : param_##mat) {\
         std::string a=PRE_INDEX_NAME+std::string("(")+#mat+std::string(")");\
         p->addMatrixVar<mat>(a.c_str(), v.second);\
+    }
+    //Render Queue 
+    std::string renderQueueS = get_resName() + std::string("-Render Queue");
+    p->addIntSlider(renderQueueS.c_str(), renderQueue, 0, 5000);
+    //Blend Mode
+    std::string blendS = get_resName() + std::string("-Blend Mode");
+    uint32_t blendModeUint = uint32_t(blendMode);
+    if (p->addDropdown(blendS.c_str(), kBlendModeDropDownList, blendModeUint)) {
+        blendMode = EBlendMode(blendModeUint);
+        set_blendMode(blendMode);
+    }
+    //Rasterize Mode
+    std::string rasterizeS = get_resName() + std::string("-Rasterize Mode");
+    uint32_t rastModeUint = uint32_t(rasterizeMode);
+    if (p->addDropdown(rasterizeS.c_str(), kRasterizeModeDropDownList, rastModeUint)) {
+        rasterizeMode = ERasterizeMode(rastModeUint);
+        set_rasterizeMode(rasterizeMode);
     }
     ADD_GUI_VEC(float, Float);
     ADD_GUI_VEC(vec2, Float2);
@@ -267,13 +296,20 @@ void MaterialInstance::loadStaticData()
     }
 }
 
-MaterialInstance& MaterialInstance::set_program(const GraphicsProgram::SharedPtr & prog, bool use_default_material)
+MaterialInstance& MaterialInstance::set_program(const GraphicsProgram::SharedPtr & prog, bool use_default_material, bool resetState)
 {
     if (!use_default_material) { bUseMaterial = false; }
     clear(); mpProgram = prog;
     mpProgramVars = GraphicsVars::create(mpProgram->getReflector());
     if (use_default_material && mpMaterial) {
         bUseMaterial = use_default_material;
+    }
+    if (resetState) {
+        //在添加了DepthStencil的面板之后就不需要这些了
+        //set_blendMode(EBlendMode::Opaque);
+        //set_rasterizeMode(ERasterizeMode::CullBack);
+        const static DepthStencilStateBundle defaultBundle;
+        set_depthStencilTest(defaultBundle);
     }
     return *this;
 }
