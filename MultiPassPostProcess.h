@@ -58,9 +58,11 @@ public:
     bool onKeyEvent(SampleCallbacks* pSample, const KeyboardEvent& keyEvent) override;
     bool onMouseEvent(SampleCallbacks* pSample, const MouseEvent& mouseEvent) override;
     void onGuiRender(SampleCallbacks* pSample, Gui* pGui) override;
+    void onDroppedFile(SampleCallbacks* pSample, const std::string& filename) override;
 private:
     Fbo::SharedPtr mpTempFB;
     //VideoDecoder::UniquePtr mpVideoDecoder;
+    bool mEnableGaussianBlur = false;
     GaussianBlur::UniquePtr mpGaussianBlur;
     FullScreenPass::UniquePtr mpBlit;
 
@@ -69,8 +71,12 @@ private:
     ModelViewer::UniquePtr modelViewer;
   
     GraphicsVars::SharedPtr mpProgVars;
-    
-    bool mEnableGaussianBlur = false;
+
+    ComputeProgram::SharedPtr mpComputeProg;
+    ComputeState::SharedPtr mpComputeState;
+    ComputeVars::SharedPtr mpComputeProgVars;
+    //利用ComputeShader变成01范围内的
+    Texture::SharedPtr mpDepthLiner01Texture;
 
     void loadImage(SampleCallbacks* pSample);
     void loadImageFromFile(SampleCallbacks* pSample, std::string filename);

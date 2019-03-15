@@ -1,6 +1,8 @@
 #pragma once
 #include "Falcor.h"
 #include "ModelResource.h"
+#include "SceneRendererExtend.h"
+#include "SceneExtend.h"
 using namespace Falcor;
 class ModelViewer
 {
@@ -14,7 +16,8 @@ public:
     bool onKeyEvent(SampleCallbacks* pSample, const KeyboardEvent& keyEvent);
     bool onMouseEvent(SampleCallbacks* pSample, const MouseEvent& mouseEvent);
     void onGuiRender(SampleCallbacks* pSample, Gui* pGui);
-    bool hasModel() { return !models.empty(); }
+    bool hasModel() { return !mpScene->empty(); }
+    void loadModel(const std::string& Filename, ResourceFormat fboFormat, bool animation = false, bool useLinearFilter = true);
 private:
     void openDialogLoadModel(ResourceFormat fboFormat);
     void deleteCulledMeshes(ModelResource& mesh);
@@ -28,6 +31,8 @@ private:
     void loadMaterialFunctions();
     void loadModelResources();
     SampleCallbacks* pSample;
+    std::shared_ptr<SceneExtend> mpScene;
+    SceneRendererExtend::SharedPtr pSceneRenderer;
     ModelViewCameraController mModelViewCameraController;
     FirstPersonCameraController mFirstPersonCameraController;
     SixDoFCameraController m6DoFCameraController;
@@ -88,7 +93,6 @@ private:
     } mDepthPass;
     Fbo::SharedPtr mpDepthPassFbo;
 
-    std::vector<ModelResource> models;
     static std::map<std::string, std::function<void(MaterialInstance::SharedPtr&)>>mMaterialFuncMap;
     static std::map<std::string, GraphicsProgram::SharedPtr>mProgramMap;
 public:

@@ -59,27 +59,42 @@ void MultiPassPostProcess::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 
     static ivec4 frameRect(300, 900, 1300, 40);
     pGui->pushWindow("History Frames", frameRect.x, frameRect.y, frameRect.z, frameRect.w);
-    auto& depthTex= PostProcessBase::gDepthTexture;
+    auto& depthTex = PostProcessBase::gDepthTexture;
     if (depthTex) {
-        pGui->addImage("", depthTex);
+        pGui->addImage("", mpDepthLiner01Texture);
     }
     for (auto& v : PostProcessBase::gRencentFrames) {
         pGui->addImage("", v);
     }
-
     pGui->popWindow();
 
     modelViewer->onGuiRender(pSample, pGui);
 }
+void MultiPassPostProcess::onDroppedFile(SampleCallbacks* pSample, const std::string& filename)
+{
+    if (hasSuffix(filename, ".fbx", false) || hasSuffix(filename, ".dae", false) || hasSuffix(filename, ".obj", false))
+    {
+        modelViewer->loadModel(filename, ResourceFormat::RGBA8UnormSrgb);
+        return;
+    }
+    FileDialogFilterVec filters = { {"bmp"}, {"jpg"},{"jpeg"},  {"dds"}, {"png"}, {"tiff"}, {"tif"}, {"tga"},{"gif"} };
+    for (auto& v : filters) {
+        if (hasSuffix(filename, v.ext, false)) {
+            loadImageFromFile(pSample, filename);
+            return;
+        }
+    }
+    msgBox("DropFile only support 3d Model and picture format");
+}
 void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRenderContext)
 {
-
+    MaterialInstance::loadStaticData();
     mpGaussianBlur = GaussianBlur::create(5);
     mpBlit = FullScreenPass::create("Blit.ps.hlsl");
     mpProgVars = GraphicsVars::create(mpBlit->getProgram()->getReflector());
 
-    /*loadShaderToy();
-    loadPostProcess();*/
+    //loadShaderToy();
+    //loadPostProcess();
 
     for (auto& v : postProcessor) {
         v->loadProgram(pSample, pRenderContext, pSample->getGui());
@@ -89,9 +104,18 @@ void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRend
     }
     modelViewer = std::make_unique<ModelViewer>();
     modelViewer->onLoad(pSample, pRenderContext);
+
+    //Compute Shader
+    mpComputeProg = ComputeProgram::createFromFile("DepthToLiner01.hlsl", "main");
+    mpComputeState = ComputeState::create();
+    mpComputeState->setProgram(mpComputeProg);
+    mpComputeProgVars = ComputeVars::create(mpComputeProg->getReflector());
+    Fbo::SharedPtr pFbo = pSample->getCurrentFbo();
+    mpDepthLiner01Texture = Texture::create2D(pFbo->getWidth(), pFbo->getHeight(), ResourceFormat::RGBA8Unorm, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess);
+    PostProcessBase::gDepthTexture = Texture::create2D(pFbo->getWidth(), pFbo->getHeight(), ResourceFormat::D32Float, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess);
 }
 
-void MultiPassPostProcess::loadImage(SampleCallbacks* pSample)
+void MultiPassPostProcess::loadImage(SampleCallbacks * pSample)
 {
     std::string filename;
     FileDialogFilterVec filters = { {"bmp"}, {"jpg"},{"jpeg"},  {"dds"}, {"png"}, {"tiff"}, {"tif"}, {"tga"},{"gif"} };
@@ -101,7 +125,7 @@ void MultiPassPostProcess::loadImage(SampleCallbacks* pSample)
     }
 }
 
-void MultiPassPostProcess::loadImageFromFile(SampleCallbacks* pSample, std::string filename)
+void MultiPassPostProcess::loadImageFromFile(SampleCallbacks * pSample, std::string filename)
 {
     auto fboFormat = pSample->getCurrentFbo()->getColorTexture(0)->getFormat();
     pTextureSelectedFromFile = createTextureFromFile(filename, false, isSrgbFormat(fboFormat));
@@ -160,7 +184,7 @@ void MultiPassPostProcess::loadPostProcess()
     postProcessor.emplace_back(new PostProcessLut());
 }
 
-void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext* pContext, const Fbo::SharedPtr& pTargetFbo)
+void MultiPassPostProcess::onFrameRender(SampleCallbacks * pSample, RenderContext * pContext, const Fbo::SharedPtr & pTargetFbo)
 {
     const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
     pContext->clearFbo(pTargetFbo.get(), clearColor, 0, 0, FboAttachmentType::Color);
@@ -178,8 +202,17 @@ void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext
         modelViewer->onFrameRender(pSample, pContext, pTargetFbo);
         hasImage = true;
     }
-
     pContext->popGraphicsState();
+    mpComputeProgVars->setTexture("gInput", PostProcessBase::gDepthTexture);
+    mpComputeProgVars->setTexture("gOutput", mpDepthLiner01Texture);
+
+    pContext->setComputeState(mpComputeState);
+    pContext->setComputeVars(mpComputeProgVars);
+
+    uint32_t w = (PostProcessBase::gDepthTexture->getWidth() / 16) + 1;
+    uint32_t h = (PostProcessBase::gDepthTexture->getHeight() / 16) + 1;
+    pContext->dispatch(w, h, 1);
+
     if (hasImage || pTextureSelectedFromFile)
     {
         Texture::SharedPtr& pSrcTex = hasImage ? pContext->getGraphicsState()->getFbo()->getColorTexture(0) : pTextureSelectedFromFile;
@@ -212,19 +245,16 @@ void MultiPassPostProcess::onFrameRender(SampleCallbacks* pSample, RenderContext
         if (PostProcessBase::gRencentFrames.size() > PostProcessBase::HISTORY_FRAME_COUNT) {
             PostProcessBase::gRencentFrames.erase(PostProcessBase::gRencentFrames.begin());
         }
-        auto& d = pContext->getGraphicsState()->getFbo()->getDepthStencilTexture();
-         PostProcessBase::gDepthTexture = Texture::create2D(d->getWidth(), d->getHeight(), d->getFormat(), d->getArraySize(), 1);
-        gpDevice->getRenderContext()->copyResource(PostProcessBase::gDepthTexture.get(), d.get());
-      
+
     }
 }
 
-void MultiPassPostProcess::onShutdown(SampleCallbacks* pSample)
+void MultiPassPostProcess::onShutdown(SampleCallbacks * pSample)
 {
-   
+
 }
 
-bool MultiPassPostProcess::onKeyEvent(SampleCallbacks* pSample, const KeyboardEvent& keyEvent)
+bool MultiPassPostProcess::onKeyEvent(SampleCallbacks * pSample, const KeyboardEvent & keyEvent)
 {
     if (keyEvent.type == KeyboardEvent::Type::KeyPressed)
     {
@@ -249,7 +279,7 @@ bool MultiPassPostProcess::onMouseEvent(SampleCallbacks * pSample, const MouseEv
     return false;
 }
 
-void MultiPassPostProcess::onInitializeTesting(SampleCallbacks* pSample)
+void MultiPassPostProcess::onInitializeTesting(SampleCallbacks * pSample)
 {
     auto argList = pSample->getArgList();
     std::vector<ArgList::Arg> filenames = argList.getValues("loadimage");

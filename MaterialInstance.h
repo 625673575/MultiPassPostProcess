@@ -39,6 +39,7 @@ class MaterialInstance :std::enable_shared_from_this<MaterialInstance>
         void execute() { *source = func(); }
     };
 public:
+    friend class SceneExtend;
     using SharedPtr = std::shared_ptr<MaterialInstance>;
     static const std::string vsEntry;
     static const std::string psEntry;
@@ -108,18 +109,18 @@ private:
     Material::SharedPtr mpMaterial = nullptr;
     bool bUseMaterial = false;
     std::string mName;
+    std::string mShaderName; 
     uint64_t mResId;
     DepthStencilStateBundle depthStencilBundle;
     EBlendMode blendMode;
     ERasterizeMode rasterizeMode;
     int32_t renderQueue = int32_t(ERenderQueue::Geometry);
-    static void loadStaticData();
 public:
     std::string get_resName() { return mName + "res id:" + std::to_string(mResId); }
     const GraphicsProgram::SharedPtr& get_program() { return mpProgram; }
     const GraphicsState::SharedPtr& get_state() { return mpState; }
     const GraphicsVars::SharedPtr& get_programVars() { return mpProgramVars; }
-    MaterialInstance& set_program(const  GraphicsProgram::SharedPtr& prog, bool use_default_material = false, bool resetState = true);
+    MaterialInstance& set_program(const  GraphicsProgram::SharedPtr& prog,const std::string& shaderName, bool use_default_material = false, uint32_t shaderModel = ShadingModelSpecGloss, bool resetState = true);
     MaterialInstance& set_blendMode(EBlendMode mode);
     MaterialInstance& set_rasterizeMode(ERasterizeMode mode);
     MaterialInstance& set_depthStencilTest(const DepthStencilStateBundle& bundle);
@@ -154,6 +155,7 @@ public:
 
     static const Gui::DropdownList kBlendModeDropDownList;
     static const Gui::DropdownList kRasterizeModeDropDownList;
+    static const Gui::DropdownList kDepthTestFuncDropDownList;
     static Texture::SharedPtr WhiteTexture, BlackTexture, RedTexture, GreenTexture, BlueTexture;
     static Texture::SharedPtr pTextureNoise;
     static Texture::SharedPtr pTextureNoiseRGB;
@@ -167,6 +169,7 @@ public:
     static RasterizerState::SharedPtr pRasterizerState_Solid_None;
     static BlendState::SharedPtr pBlenderState_Opaque;
     static BlendState::SharedPtr pBlenderState_Transparent;
+    static void loadStaticData();
 };
 
 #undef DEF_VAR

@@ -3,14 +3,14 @@
 
 
 std::vector<DepthStencilState::SharedPtr> DepthStencilStateBundle::state = {};
-bool DepthStencilStateBundle::operator==(const DepthStencilStateBundle & rhs)
+bool DepthStencilStateBundle::operator==(const DepthStencilStateBundle& rhs)
 {
     return bWriteDepth == rhs.bWriteDepth && eDepthTestFunc == rhs.eDepthTestFunc;
 }
 
-bool DepthStencilStateBundle::Get(const DepthStencilStateBundle & bundle, DepthStencilState::SharedPtr& ref)
+bool DepthStencilStateBundle::Get(const DepthStencilStateBundle& bundle, DepthStencilState::SharedPtr& ref)
 {
-    for (auto&v : state) {
+    for (auto& v : state) {
         if (v->isDepthWriteEnabled() == bundle.bWriteDepth && v->getDepthFunc() == bundle.eDepthTestFunc && v->isDepthTestEnabled() == bundle.bDepthTest) {
             ref = v;
             return true;
@@ -19,7 +19,7 @@ bool DepthStencilStateBundle::Get(const DepthStencilStateBundle & bundle, DepthS
     return false;
 }
 
-DepthStencilState::SharedPtr DepthStencilStateBundle::Get(const DepthStencilStateBundle & bundle)
+DepthStencilState::SharedPtr DepthStencilStateBundle::Get(const DepthStencilStateBundle& bundle)
 {
     DepthStencilState::SharedPtr r;
     if (Get(bundle, r))return r;
@@ -51,8 +51,9 @@ BlendState::SharedPtr MaterialInstance::pBlenderState_Transparent = nullptr;
 
 const Gui::DropdownList MaterialInstance::kBlendModeDropDownList = { {uint32_t(EBlendMode::Opaque),"Opaque"}, {uint32_t(EBlendMode::Transparent),"Transparent"} };
 const Gui::DropdownList MaterialInstance::kRasterizeModeDropDownList = { {uint32_t(ERasterizeMode::Wire),"Wire"},  {uint32_t(ERasterizeMode::CullNone),"CullNone"},  {uint32_t(ERasterizeMode::CullBack),"CullBack"}, {uint32_t(ERasterizeMode::Wire),"CullFront"} };
+const Gui::DropdownList MaterialInstance::kDepthTestFuncDropDownList = { {uint32_t(ComparisonFunc::Disabled),"Disabled"},  {uint32_t(ComparisonFunc::Never),"Never"},  {uint32_t(ComparisonFunc::Always),"Always"}, {uint32_t(ComparisonFunc::Less),"Less"},  {uint32_t(ComparisonFunc::Equal),"Equal"},  {uint32_t(ComparisonFunc::NotEqual),"NotEqual"},  {uint32_t(ComparisonFunc::LessEqual),"LessEqual"},  {uint32_t(ComparisonFunc::Greater),"Greater"},  {uint32_t(ComparisonFunc::GreaterEqual),"GreaterEqual"} };
 
-MaterialInstance::SharedPtr MaterialInstance::create(const std::string & shader, const Program::DefineList & programDefines, const std::string& _name)
+MaterialInstance::SharedPtr MaterialInstance::create(const std::string& shader, const Program::DefineList& programDefines, const std::string& _name)
 {
     return std::make_shared<MaterialInstance>(shader, programDefines, _name);
 }
@@ -63,7 +64,7 @@ bool MaterialInstance::ComaparsionQueue(const MaterialInstance* rhs)const
     return this->renderQueue < rhs->renderQueue;
 }
 
-MaterialInstance::MaterialInstance(const std::string & shader, const Program::DefineList& programDefines, const std::string& _name) :mName(_name)
+MaterialInstance::MaterialInstance(const std::string & shader, const Program::DefineList & programDefines, const std::string & _name) :mName(_name)
 {
     mResId = ModelResource::getModelCount();
     loadStaticData();
@@ -80,7 +81,7 @@ MaterialInstance::MaterialInstance(const std::string & shader, const Program::De
 
 }
 
-MaterialInstance::MaterialInstance(const std::string& _name, const  Material::SharedPtr& material) : mName(_name), mpMaterial(material)
+MaterialInstance::MaterialInstance(const std::string & _name, const  Material::SharedPtr & material) : mName(_name), mpMaterial(material)
 {
     mResId = ModelResource::getModelCount();
     loadStaticData();
@@ -122,7 +123,7 @@ inline ConstantBuffer::SharedPtr MaterialInstance::get_constantbuffer(ECBType t)
     }
     return mpProgramVars["DCB"];
 };
-void MaterialInstance::onMaterialGui(Gui *p)
+void MaterialInstance::onMaterialGui(Gui * p)
 {
     int i = 0;
 #define PRE_INDEX_NAME  (v.first + ":" + get_resName())
@@ -153,16 +154,30 @@ void MaterialInstance::onMaterialGui(Gui *p)
         rasterizeMode = ERasterizeMode(rastModeUint);
         set_rasterizeMode(rasterizeMode);
     }
+    bool dirty = false;
+    std::string depthTestS = get_resName() + std::string("-Depth Test");
+    if (p->addCheckBox(depthTestS.c_str(), depthStencilBundle.bDepthTest)) dirty = true;
+    std::string writeDepthS = get_resName() + std::string("-Write Depth");
+    if(p->addCheckBox(writeDepthS.c_str(), depthStencilBundle.bWriteDepth)) dirty = true;
+    std::string depthTestFuncS = get_resName() + std::string("-DepthTest Func");
+    uint32_t depthTestFuncUint = uint32_t(depthStencilBundle.eDepthTestFunc);
+    if (p->addDropdown(depthTestFuncS.c_str(), kDepthTestFuncDropDownList, depthTestFuncUint)) {
+        depthStencilBundle.eDepthTestFunc = ComparisonFunc(depthTestFuncUint);
+        dirty = true;
+    }
+    if (dirty) {
+        set_depthStencilTest(depthStencilBundle);
+    }
     ADD_GUI_VEC(float, Float);
     ADD_GUI_VEC(vec2, Float2);
     //ADD_GUI_VEC(vec3, Float3);
     //ADD_GUI_VEC(vec4, Float4);
-    for (auto&v : param_vec3) {
+    for (auto& v : param_vec3) {
         std::string a = PRE_INDEX_NAME + std::string("(vec3)");
         p->addFloat3Var(a.c_str(), v.second);
         p->addRgbColor((a + ":color").c_str(), v.second);
     }
-    for (auto&v : param_vec4) {
+    for (auto& v : param_vec4) {
         std::string a = PRE_INDEX_NAME + std::string("(vec4)");
         p->addFloat4Var(a.c_str(), v.second);
         p->addRgbaColor((a + ":color").c_str(), v.second);
@@ -175,13 +190,13 @@ void MaterialInstance::onMaterialGui(Gui *p)
     ADD_GUI_MAT(mat3);
     ADD_GUI_MAT(mat4);
 
-    for (auto &v : param_bool) {
+    for (auto& v : param_bool) {
         p->addCheckBox(PRE_INDEX_NAME.c_str(), v.second);
     }
 
     std::string filename;
     FileDialogFilterVec filters = { {"bmp"}, {"jpg"}, {"jpeg"}, {"dds"}, {"png"}, {"tiff"}, {"tif"}, {"tga"},{"gif"} };
-    for (auto&v : param_texture2D) {
+    for (auto& v : param_texture2D) {
         if (p->addImageButton("", v.second == nullptr ? WhiteTexture : v.second, glm::vec2(32, 32), false)) {
             if (openFileDialog(filters, filename))
             {
@@ -219,13 +234,13 @@ void MaterialInstance::onMaterialGui(Gui *p)
     }
 }
 
-void MaterialInstance::onRender(RenderContext* pRenderContext)
+void MaterialInstance::onRender(RenderContext * pRenderContext)
 {
     //mpState->setBlendState(pRenderContext->getGraphicsState()->getBlendState());
     //mpState->setRasterizerState(pRenderContext->getGraphicsState()->getRasterizerState());
     //mpState->setDepthStencilState(pRenderContext->getGraphicsState()->getDepthStencilState());
 
-    for (auto&v : param_texture2D) {
+    for (auto& v : param_texture2D) {
         mpProgramVars->setTexture(v.first, v.second);
     }
     auto& cb = get_constantbuffer(ECBType::PerFrame);
@@ -296,13 +311,15 @@ void MaterialInstance::loadStaticData()
     }
 }
 
-MaterialInstance& MaterialInstance::set_program(const GraphicsProgram::SharedPtr & prog, bool use_default_material, bool resetState)
+MaterialInstance& MaterialInstance::set_program(const GraphicsProgram::SharedPtr & prog, const std::string & shaderName, bool use_default_material, uint32_t shaderModel, bool resetState)
 {
     if (!use_default_material) { bUseMaterial = false; }
     clear(); mpProgram = prog;
+    mShaderName = shaderName;
     mpProgramVars = GraphicsVars::create(mpProgram->getReflector());
     if (use_default_material && mpMaterial) {
         bUseMaterial = use_default_material;
+        mpMaterial->setShadingModel(shaderModel);
     }
     if (resetState) {
         //在添加了DepthStencil的面板之后就不需要这些了
