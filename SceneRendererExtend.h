@@ -27,12 +27,12 @@ protected:
     GraphicsProgram::SharedPtr mpDefaultProgram;
     GraphicsVars::SharedPtr mpDefaultProgramVars;
     Fbo::SharedPtr mpFbo;
-    struct MaterialInstanceBuffer{
-        MaterialInstance*  pMaterialInstance;
-        ObjectInstance<Model> * pModelInstance;
+    struct MaterialInstanceBuffer {
+        MaterialInstance* pMaterialInstance;
+        ObjectInstance<Model>* pModelInstance;
         uint32_t meshId;
         CurrentWorkingData data;
-        MaterialInstanceBuffer(MaterialInstance* materialInst, ObjectInstance<Model> * model, uint32_t id,const CurrentWorkingData&d) {
+        MaterialInstanceBuffer(MaterialInstance* materialInst, ObjectInstance<Model>* model, uint32_t id, const CurrentWorkingData& d) {
             pMaterialInstance = materialInst;
             pModelInstance = model;
             meshId = id;

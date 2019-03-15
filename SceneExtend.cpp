@@ -6,8 +6,10 @@
 #include <fstream>
 #include "Utils/Platform/OS.h"
 #include "Graphics/Scene/Editor/SceneEditor.h"
+#include "rapidjson/error/en.h"
 
 #define SCENE_EXPORTER
+#define SCENE_IMPORTER
 #include "Graphics/Scene/SceneExportImportCommon.h"
 SceneExtend::SceneExtend(const std::string& filename) :Scene(filename)
 {
@@ -74,14 +76,61 @@ void addVector(rapidjson::Value& jval, rapidjson::Document::AllocatorType& jallo
 
     jval.AddMember(jkey, jvec, jallocator);
 }
+
+template<uint32_t VecSize>
+bool SceneExtend::getFloatVec(const rapidjson::Value& jsonVal, const std::string& desc, float vec[VecSize])
+{
+    if (jsonVal.IsArray() == false)
+    {
+        error("Trying to load a vector for " + desc + ", but JValue is not an array");
+        return false;
+    }
+
+    if (jsonVal.Size() != VecSize)
+    {
+        return error("Trying to load a vector for " + desc + ", but vector size mismatches. Required size is " + std::to_string(VecSize) + ", array size is " + std::to_string(jsonVal.Size()));
+    }
+
+    for (uint32_t i = 0; i < jsonVal.Size(); i++)
+    {
+        if (jsonVal[i].IsNumber() == false)
+        {
+            return error("Trying to load a vector for " + desc + ", but one the elements is not a number.");
+        }
+
+        vec[i] = (float)(jsonVal[i].GetDouble());
+    }
+    return true;
+}
+
+bool SceneExtend::getFloatVecAnySize(const rapidjson::Value & jsonVal, const std::string & desc, std::vector<float> & vec)
+{
+    if (jsonVal.IsArray() == false)
+    {
+        return error("Trying to load a vector for " + desc + ", but JValue is not an array");
+    }
+
+    vec.resize(jsonVal.Size());
+    for (uint32_t i = 0; i < jsonVal.Size(); i++)
+    {
+        if (jsonVal[i].IsNumber() == false)
+        {
+            return error("Trying to load a vector for " + desc + ", but one the elements is not a number.");
+        }
+
+        vec[i] = (float)(jsonVal[i].GetDouble());
+    }
+    return true;
+}
+
 void SceneExtend::addModelResource(const ModelResource& pModel, const std::string& instanceName, const glm::vec3& translation, const glm::vec3& yawPitchRoll, const glm::vec3& scaling)
 {
     std::string name = instanceName;
     if (instanceName.empty()) {
         name = pModel.mpModel->getName();
     }
+    mModelRes.emplace_back(pModel);
     addModelInstance(pModel.mpModel, name, translation, yawPitchRoll, scaling);
-    modelsRes.emplace_back(pModel);
 }
 
 bool SceneExtend::save(const std::string& filename)
@@ -104,7 +153,7 @@ bool SceneExtend::save(const std::string& filename)
     //if (exportOptions & ExportCameras)           writeCameras();
     //if (exportOptions & ExportUserDefined)       writeUserDefinedSection();
     //if (exportOptions & ExportPaths)             writePaths();
-    writeModels();
+    writeModelsJson();
     // Get the output string
     rapidjson::StringBuffer buffer;
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
@@ -127,6 +176,338 @@ bool SceneExtend::save(const std::string& filename)
 
 bool SceneExtend::load(const std::string & filename)
 {
+    std::string fullpath;
+    mFilename = filename;
+
+    if (findFileInDataDirectories(filename, fullpath))
+    {
+        // Load the file
+        std::string jsonData = readFile(fullpath);
+        rapidjson::StringStream JStream(jsonData.c_str());
+
+        // Get the file directory
+        auto last = fullpath.find_last_of("/\\");
+        mDirectory = fullpath.substr(0, last);
+
+        // create the DOM
+        mJDoc.ParseStream(JStream);
+
+        if (mJDoc.HasParseError())
+        {
+            size_t line;
+            line = std::count(jsonData.begin(), jsonData.begin() + mJDoc.GetErrorOffset(), '\n');
+            return error(std::string("JSON Parse error in line ") + std::to_string(line) + ". " + rapidjson::GetParseError_En(mJDoc.GetParseError()));
+        }
+
+        if (topLevelLoop() == false)
+        {
+            return false;
+        }
+
+        return true;
+    }
+    else
+    {
+        return error("File not found.");
+    }
+    return false;
+}
+const SceneExtend::FuncValue SceneExtend::kFunctionTable[] =
+{
+    //// The order matters here.
+    //{SceneKeys::kVersion, &SceneExtend::parseVersion},
+    //{SceneKeys::kSceneUnit, &SceneExtend::parseSceneUnit},
+    //{SceneKeys::kEnvMap, &SceneExtend::parseEnvMap},
+    //{SceneKeys::kAmbientIntensity, &SceneExtend::parseAmbientIntensity},
+    //{SceneKeys::kLightingScale, &SceneExtend::parseLightingScale},
+    //{SceneKeys::kCameraSpeed, &SceneExtend::parseCameraSpeed},
+
+    {SceneKeys::kModels, &SceneExtend::parseModels},
+    //{SceneKeys::kLights, &SceneExtend::parseLights},
+    //{SceneKeys::kLightProbes, &SceneExtend::parseLightProbes},
+    //{SceneKeys::kCameras, &SceneExtend::parseCameras},
+    //{SceneKeys::kActiveCamera, &SceneExtend::parseActiveCamera},  // Should come after ParseCameras
+    //{SceneKeys::kUserDefined, &SceneExtend::parseUserDefinedSection},
+
+    //{SceneKeys::kPaths, &SceneExtend::parsePaths},
+    //{SceneKeys::kActivePath, &SceneExtend::parseActivePath}, // Should come after ParsePaths
+    //{SceneKeys::kInclude, &SceneExtend::parseIncludes}
+};
+bool SceneExtend::validateSceneFile()
+{
+    // Make sure the top-level is valid
+    for (auto it = mJDoc.MemberBegin(); it != mJDoc.MemberEnd(); it++)
+    {
+        bool found = false;
+        const std::string name(it->name.GetString());
+
+        for (uint32_t i = 0; i < arraysize(kFunctionTable); i++)
+        {
+            // Check that we support this value
+            if (kFunctionTable[i].token == name)
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if (found == false)
+        {
+            return error("Invalid key found in top-level object. Key == " + std::string(it->name.GetString()) + ".");
+        }
+    }
+    return true;
+}
+bool SceneExtend::parseModels(const rapidjson::Value& jsonVal)
+{
+    if (jsonVal.IsArray() == false)
+    {
+        return error("models section should be an array of objects.");
+    }
+
+    // Loop over the array
+    for (uint32_t i = 0; i < jsonVal.Size(); i++)
+    {
+        if (createModel(jsonVal[i]) == false)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+bool SceneExtend::createModel(const rapidjson::Value& jsonModel)
+{
+    // Model must have at least a filename
+    if (jsonModel.HasMember(SceneKeys::kFilename) == false)
+    {
+        return error("Model must have a filename");
+    }
+
+    // Get Model name
+    const auto& modelFile = jsonModel[SceneKeys::kFilename];
+    if (modelFile.IsString() == false)
+    {
+        return error("Model filename must be a string");
+    }
+
+    std::string file = mDirectory + '/' + modelFile.GetString();
+    if (doesFileExist(file) == false)
+    {
+        file = modelFile.GetString();
+    }
+
+    // Parse additional properties that affect loading
+    Model::LoadFlags modelFlags = mModelLoadFlags;
+    if (jsonModel.HasMember(SceneKeys::kMaterial))
+    {
+        const auto& materialSettings = jsonModel[SceneKeys::kMaterial];
+        if (materialSettings.IsObject() == false)
+        {
+            return error("Material properties for \"" + file + "\" must be a JSON object");
+        }
+
+        for (auto m = materialSettings.MemberBegin(); m != materialSettings.MemberEnd(); m++)
+        {
+            if (m->name == SceneKeys::kShadingModel)
+            {
+                if (m->value == SceneKeys::kShadingSpecGloss)
+                {
+                    modelFlags |= Model::LoadFlags::UseSpecGlossMaterials;
+                }
+                else if (m->value == SceneKeys::kShadingMetalRough)
+                {
+                    modelFlags |= Model::LoadFlags::UseMetalRoughMaterials;
+                }
+                else
+                {
+                    return error("Invalid value found in " + std::string(SceneKeys::kShadingModel) + ". Value == " + std::string(m->value.GetString()) + ".");
+                }
+            }
+        }
+    }
+
+    // Load the model
+    auto pModel = Model::createFromFile(file.c_str(), modelFlags);
+    if (pModel == nullptr)
+    {
+        return error("Could not load model: " + file);
+    }
+
+    bool instanceAdded = false;
+
+    // Loop over the other members
+    for (auto jval = jsonModel.MemberBegin(); jval != jsonModel.MemberEnd(); jval++)
+    {
+        std::string keyName(jval->name.GetString());
+        if (keyName == SceneKeys::kFilename)
+        {
+            // Already handled
+        }
+        else if (keyName == SceneKeys::kName)
+        {
+            if (jval->value.IsString() == false)
+            {
+                return error("Model name should be a string value.");
+            }
+            pModel->setName(std::string(jval->value.GetString()));
+        }
+        else if (keyName == SceneKeys::kModelInstances)
+        {
+            if (createModelInstances(jval->value, pModel) == false)
+            {
+                return false;
+            }
+
+            instanceAdded = true;
+        }
+        else if (keyName == SceneKeys::kActiveAnimation)
+        {
+            if (jval->value.IsUint() == false)
+            {
+                return error("Model active animation should be an unsigned integer");
+            }
+            uint32_t activeAnimation = jval->value.GetUint();
+            if (activeAnimation >= pModel->getAnimationsCount())
+            {
+                std::string msg = "Warning when parsing scene file \"" + mFilename + "\".\nModel " + pModel->getName() + " was specified with active animation " + std::to_string(activeAnimation);
+                msg += ", but model only has " + std::to_string(pModel->getAnimationsCount()) + " animations. Ignoring field";
+                logWarning(msg);
+            }
+            else
+            {
+                pModel->setActiveAnimation(activeAnimation);
+            }
+        }
+        else if (keyName == SceneKeys::kMaterial)
+        {
+            // Existing parameters already handled
+        }
+        else
+        {
+            return error("Invalid key found in models array. Key == " + keyName + ".");
+        }
+    }
+
+    // If no instances for the model were loaded from the scene file
+    if (instanceAdded == false)
+    {
+        addModelInstance(pModel, "Instance 0");
+    }
+
+    return true;
+}
+
+bool SceneExtend::isNameDuplicate(const std::string& name, const ObjectMap& objectMap, const std::string& objectType) const
+{
+    if (objectMap.find(name) != objectMap.end())
+    {
+        const std::string msg = "Multiple " + objectType + " found the same name: " + name + ".\nObjects may not attach to paths correctly.\n\nContinue anyway?";
+
+        // If user pressed ok, return false to ignore duplicate
+        return msgBox(msg, MsgBoxType::OkCancel) == MsgBoxButton::Ok ? false : true;
+    }
+
+    return false;
+}
+bool SceneExtend::createModelInstances(const rapidjson::Value& jsonVal, const Model::SharedPtr& pModel)
+{
+    if (jsonVal.IsArray() == false)
+    {
+        return error("Model instances should be an array of objects");
+    }
+
+    for (uint32_t i = 0; i < jsonVal.Size(); i++)
+    {
+        const auto& instance = jsonVal[i];
+        glm::vec3 scaling(1, 1, 1);
+        glm::vec3 translation(0, 0, 0);
+        glm::vec3 rotation(0, 0, 0);
+        std::string name = "Instance " + std::to_string(i);
+
+        for (auto m = instance.MemberBegin(); m < instance.MemberEnd(); m++)
+        {
+            std::string key(m->name.GetString());
+            if (key == SceneKeys::kName)
+            {
+                if (m->value.IsString() == false)
+                {
+                    return error("Model instance name should be a string value.");
+                }
+                name = std::string(m->value.GetString());
+            }
+            else if (key == SceneKeys::kTranslationVec)
+            {
+                if (getFloatVec<3>(m->value, "Model instance translation vector", &translation[0]) == false)
+                {
+                    return false;
+                }
+            }
+            else if (key == SceneKeys::kScalingVec)
+            {
+                if (getFloatVec<3>(m->value, "Model instance scale vector", &scaling[0]) == false)
+                {
+                    return false;
+                }
+            }
+            else if (key == SceneKeys::kRotationVec)
+            {
+                if (getFloatVec<3>(m->value, "Model instance rotation vector", &rotation[0]) == false)
+                {
+                    return false;
+                }
+
+                rotation = glm::radians(rotation);
+            }
+            else
+            {
+                return error("Unknown key \"" + key + "\" when parsing model instance");
+            }
+        }
+
+        if (isNameDuplicate(name, mInstanceMap, "model instances"))
+        {
+            return false;
+        }
+        else
+        {
+            auto pInstance = Scene::ModelInstance::create(pModel, translation, rotation, scaling, name);
+            mInstanceMap[pInstance->getName()] = pInstance;
+            addModelInstance(pInstance);
+        }
+    }
+
+    return true;
+}
+bool SceneExtend::topLevelLoop()
+{
+    if (validateSceneFile() == false)
+    {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < arraysize(kFunctionTable); i++)
+    {
+        const auto& jsonMember = mJDoc.FindMember(kFunctionTable[i].token.c_str());
+        if (jsonMember != mJDoc.MemberEnd())
+        {
+            auto a = kFunctionTable[i].func;
+            if ((this->*a)(jsonMember->value) == false)
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+bool SceneExtend::error(const std::string& msg)
+{
+    std::string err = "Error when parsing scene file \"" + mFilename + "\".\n" + msg;
+#if _LOG_ENABLED
+    logError(err);
+#else
+    msgBox(err);
+#endif
     return false;
 }
 
@@ -134,7 +515,7 @@ void SceneExtend::createModelValue(uint32_t modelID, rapidjson::Document::Alloca
 {
     jmodel.SetObject();
 
-    auto& modelRes = modelsRes.at(modelID);
+    auto& modelRes = mModelRes.at(modelID);
     const Model* pModel = modelRes.mpModel.get();
 
     // Export model properties
@@ -240,7 +621,7 @@ void SceneExtend::createModelValue(uint32_t modelID, rapidjson::Document::Alloca
     addJsonValue(jmodel, allocator, SceneKeys::kModelInstances, jsonInstanceArray);
 }
 
-void SceneExtend::writeModels()
+void SceneExtend::writeModelsJson()
 {
     if (getModelCount() == 0)
     {

@@ -95,7 +95,7 @@ void ModelViewer::onLoad(SampleCallbacks* ppSample, RenderContext* pRenderContex
     mpScene = std::make_shared<SceneExtend>("");
     mpScene->addLight(mpDirLight);
     mpScene->addLight(mpPointLight);
-    
+
     loadSkyBox();
     loadShaderProgram();
     loadMaterialFunctions();
@@ -230,18 +230,21 @@ void ModelViewer::onGuiRender(SampleCallbacks * pSample, Gui * pGui)
 
     pGui->addDropdown("Camera Type", cameraDropdown, (uint32_t&)mCameraType);
     auto& mModels = mpScene->getModels();
+    bool dirty = false;
     for (auto& v = mModels.begin(); v != mModels.end(); v++) {
         if (pGui->addButton(("Remove " + v->getModelResName()).c_str())) {
             mModels.erase(v);
+            dirty = true;
             mpScene->reset();
             break;
         }
         v->onGui(pGui);
     }
+    //if(dirty)
     pGui->popWindow();
 }
 
-void ModelViewer::loadModel(const std::string& Filename, ResourceFormat fboFormat, bool animation, bool useLinearFilter)
+void ModelViewer::loadModel(const std::string & Filename, ResourceFormat fboFormat, bool animation, bool useLinearFilter)
 {
     ModelResource res;
     if (loadModelFromFile(res, Filename, fboFormat)) {
@@ -320,6 +323,7 @@ void ModelViewer::openDialogLoadModel(ResourceFormat fboFormat)
         ModelResource res;
         if (loadModelFromFile(res, Filename, fboFormat)) {
             mpScene->addModelResource(res);
+            mpScene->reset();
             resetCamera();
         }
     }

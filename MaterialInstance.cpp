@@ -158,7 +158,7 @@ void MaterialInstance::onMaterialGui(Gui * p)
     std::string depthTestS = get_resName() + std::string("-Depth Test");
     if (p->addCheckBox(depthTestS.c_str(), depthStencilBundle.bDepthTest)) dirty = true;
     std::string writeDepthS = get_resName() + std::string("-Write Depth");
-    if(p->addCheckBox(writeDepthS.c_str(), depthStencilBundle.bWriteDepth)) dirty = true;
+    if (p->addCheckBox(writeDepthS.c_str(), depthStencilBundle.bWriteDepth)) dirty = true;
     std::string depthTestFuncS = get_resName() + std::string("-DepthTest Func");
     uint32_t depthTestFuncUint = uint32_t(depthStencilBundle.eDepthTestFunc);
     if (p->addDropdown(depthTestFuncS.c_str(), kDepthTestFuncDropDownList, depthTestFuncUint)) {
@@ -223,7 +223,11 @@ void MaterialInstance::onMaterialGui(Gui * p)
         if (p->addButton("Red",true)) { mpMaterial->set##FunctionName(RedTexture); return;}\
         if (p->addButton("Green",true)) { mpMaterial->set##FunctionName(GreenTexture); return;}\
         if (p->addButton("Blue",true)) { mpMaterial->set##FunctionName(BlueTexture);  return;}*/
-
+        std::string a = get_resName() + std::string("Shader Model Spec");
+        bool isSpecGloss = mpMaterial->getShadingModel() == ShadingModelSpecGloss;
+        if (p->addCheckBox(a.c_str(), isSpecGloss)) {
+            mpMaterial->setShadingModel(isSpecGloss ? ShadingModelSpecGloss : ShadingModelMetalRough);
+        }
         ADD_MATERIAL_TEXTURE(Albedo, BaseColorTexture, WhiteTexture);
         ADD_MATERIAL_TEXTURE(Specular, SpecularTexture, BlackTexture);
         ADD_MATERIAL_TEXTURE(NormalMap, NormalMap, WhiteTexture);
