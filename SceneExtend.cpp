@@ -123,7 +123,7 @@ bool SceneExtend::getFloatVecAnySize(const rapidjson::Value & jsonVal, const std
     return true;
 }
 
-void SceneExtend::addModelResource(const ModelResource& pModel, const std::string& instanceName, const glm::vec3& translation, const glm::vec3& yawPitchRoll, const glm::vec3& scaling)
+void SceneExtend::addModelResource(const ModelResource & pModel, const std::string & instanceName, const glm::vec3 & translation, const glm::vec3 & yawPitchRoll, const glm::vec3 & scaling)
 {
     std::string name = instanceName;
     if (instanceName.empty()) {
@@ -133,7 +133,7 @@ void SceneExtend::addModelResource(const ModelResource& pModel, const std::strin
     addModelInstance(pModel.mpModel, name, translation, yawPitchRoll, scaling);
 }
 
-bool SceneExtend::save(const std::string& filename)
+bool SceneExtend::save(const std::string & filename)
 {
     //mExportOptions = exportOptions;
     mFilename = filename;
@@ -199,11 +199,11 @@ bool SceneExtend::load(const std::string & filename)
             return error(std::string("JSON Parse error in line ") + std::to_string(line) + ". " + rapidjson::GetParseError_En(mJDoc.GetParseError()));
         }
 
+        clearModels();
         if (topLevelLoop() == false)
         {
             return false;
         }
-
         return true;
     }
     else
@@ -258,7 +258,7 @@ bool SceneExtend::validateSceneFile()
     }
     return true;
 }
-bool SceneExtend::parseModels(const rapidjson::Value& jsonVal)
+bool SceneExtend::parseModels(const rapidjson::Value & jsonVal)
 {
     if (jsonVal.IsArray() == false)
     {
@@ -275,7 +275,7 @@ bool SceneExtend::parseModels(const rapidjson::Value& jsonVal)
     }
     return true;
 }
-bool SceneExtend::createModel(const rapidjson::Value& jsonModel)
+bool SceneExtend::createModel(const rapidjson::Value & jsonModel)
 {
     // Model must have at least a filename
     if (jsonModel.HasMember(SceneKeys::kFilename) == false)
@@ -314,16 +314,15 @@ bool SceneExtend::createModel(const rapidjson::Value& jsonModel)
                 {
                     modelFlags |= Model::LoadFlags::UseSpecGlossMaterials;
                 }
-                else if (m->value == SceneKeys::kShadingMetalRough)
+                else
                 {
                     modelFlags |= Model::LoadFlags::UseMetalRoughMaterials;
                 }
-                else
-                {
-                    return error("Invalid value found in " + std::string(SceneKeys::kShadingModel) + ". Value == " + std::string(m->value.GetString()) + ".");
-                }
             }
         }
+    }
+    else {
+        modelFlags |= Model::LoadFlags::UseSpecGlossMaterials;
     }
 
     // Load the model
@@ -397,7 +396,7 @@ bool SceneExtend::createModel(const rapidjson::Value& jsonModel)
     return true;
 }
 
-bool SceneExtend::isNameDuplicate(const std::string& name, const ObjectMap& objectMap, const std::string& objectType) const
+bool SceneExtend::isNameDuplicate(const std::string & name, const ObjectMap & objectMap, const std::string & objectType) const
 {
     if (objectMap.find(name) != objectMap.end())
     {
@@ -409,12 +408,14 @@ bool SceneExtend::isNameDuplicate(const std::string& name, const ObjectMap& obje
 
     return false;
 }
-bool SceneExtend::createModelInstances(const rapidjson::Value& jsonVal, const Model::SharedPtr& pModel)
+bool SceneExtend::createModelInstances(const rapidjson::Value & jsonVal, const Model::SharedPtr & pModel)
 {
     if (jsonVal.IsArray() == false)
     {
         return error("Model instances should be an array of objects");
     }
+    ModelResource modelRes(pModel);
+    modelRes.init();
 
     for (uint32_t i = 0; i < jsonVal.Size(); i++)
     {
@@ -458,10 +459,40 @@ bool SceneExtend::createModelInstances(const rapidjson::Value& jsonVal, const Mo
 
                 rotation = glm::radians(rotation);
             }
+            else if (key == SceneExtendKeys::kMaterials) {
+                auto& mats = m->value.GetArray();
+                for (auto mm = mats.Begin(); mm < mats.End(); mm++)
+                {
+                    std::string MaterialName = (*mm)[SceneExtendKeys::kMaterialName].GetString();
+                    for (auto mmx = mm->MemberBegin(); mmx < mm->MemberEnd(); mmx++) {
+                        std::string mkey(mmx->name.GetString());
+                        //if (mkey == SceneExtendKeys::kMaterialName) {
+                        //    MaterialName =mmx->value.GetString();
+                        //}
+                        if (mkey == SceneExtendKeys::kShader) {
+                            std::string Shader(mmx->value.GetString());
+                            modelRes.setProgram(MaterialName, Shader);
+                        }
+                        if (mkey == SceneExtendKeys::kRenderQueue) {
+                            uint32_t RenderQueue(mmx->value.GetInt());
+                            modelRes.sharedMaterials[MaterialName]->setRenderQueue(RenderQueue);
+                        }
+                        if (mkey == SceneExtendKeys::kBlendMode) {
+                            uint32_t BlendMode(mmx->value.GetInt());
+                            modelRes.sharedMaterials[MaterialName]->set_blendMode(MaterialInstance::EBlendMode(BlendMode));
+                        }
+                        if (mkey == SceneExtendKeys::kRasterizeMode) {
+                            uint32_t RasterizeMode(mmx->value.GetInt());
+                            modelRes.sharedMaterials[MaterialName]->set_rasterizeMode(MaterialInstance::ERasterizeMode(RasterizeMode));
+                        }
+                    }
+                }
+            }
             else
             {
                 return error("Unknown key \"" + key + "\" when parsing model instance");
             }
+            modelRes.setTRS(translation, rotation, scaling);
         }
 
         if (isNameDuplicate(name, mInstanceMap, "model instances"))
@@ -470,9 +501,11 @@ bool SceneExtend::createModelInstances(const rapidjson::Value& jsonVal, const Mo
         }
         else
         {
-            auto pInstance = Scene::ModelInstance::create(pModel, translation, rotation, scaling, name);
-            mInstanceMap[pInstance->getName()] = pInstance;
-            addModelInstance(pInstance);
+
+            //auto pInstance = Scene::ModelInstance::create(pModel, translation, rotation, scaling, name);
+            //mInstanceMap[pInstance->getName()] = pInstance;
+            //addModelInstance(pInstance);
+            addModelResource(modelRes, "", translation, rotation, scaling);
         }
     }
 
@@ -480,11 +513,6 @@ bool SceneExtend::createModelInstances(const rapidjson::Value& jsonVal, const Mo
 }
 bool SceneExtend::topLevelLoop()
 {
-    if (validateSceneFile() == false)
-    {
-        return false;
-    }
-
     for (uint32_t i = 0; i < arraysize(kFunctionTable); i++)
     {
         const auto& jsonMember = mJDoc.FindMember(kFunctionTable[i].token.c_str());
@@ -500,7 +528,7 @@ bool SceneExtend::topLevelLoop()
 
     return true;
 }
-bool SceneExtend::error(const std::string& msg)
+bool SceneExtend::error(const std::string & msg)
 {
     std::string err = "Error when parsing scene file \"" + mFilename + "\".\n" + msg;
 #if _LOG_ENABLED
@@ -609,12 +637,14 @@ void SceneExtend::createModelValue(uint32_t modelID, rapidjson::Document::Alloca
             }
             //todo : mat 写入
             jsonMaterialArray.PushBack(jsonMaterial, allocator);
-            
+
             //const auto& shaderName = ;
         }
-
+        rapidjson::Value jkey;
+        std::string k(SceneExtendKeys::kMaterials);
+        jkey.SetString(k.c_str(), rapidjson::SizeType(k.size()), allocator);
+        jsonInstance.AddMember(jkey, jsonMaterialArray, allocator);
         jsonInstanceArray.PushBack(jsonInstance, allocator);
-        jsonInstanceArray.PushBack(jsonMaterialArray, allocator);
 
     }
 

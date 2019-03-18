@@ -175,6 +175,7 @@ void ModelViewer::onGuiRender(SampleCallbacks * pSample, Gui * pGui)
         if (openFileDialog(Scene::kFileExtensionFilters, Filename))
         {
             mpScene->load(Filename); //Scene::loadFromFile(Filename, Model::LoadFlags::None, Scene::LoadFlags::None);
+            resetCamera();
         }
     }
     // Load Model
@@ -230,17 +231,14 @@ void ModelViewer::onGuiRender(SampleCallbacks * pSample, Gui * pGui)
 
     pGui->addDropdown("Camera Type", cameraDropdown, (uint32_t&)mCameraType);
     auto& mModels = mpScene->getModels();
-    bool dirty = false;
     for (auto& v = mModels.begin(); v != mModels.end(); v++) {
         if (pGui->addButton(("Remove " + v->getModelResName()).c_str())) {
             mModels.erase(v);
-            dirty = true;
             mpScene->reset();
             break;
         }
         v->onGui(pGui);
     }
-    //if(dirty)
     pGui->popWindow();
 }
 

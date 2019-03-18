@@ -8,7 +8,7 @@ class ModelResource {
 public:
     ModelResource();
     ~ModelResource() = default;
-    ModelResource(const Model::SharedPtr& pModel);
+    explicit ModelResource(const Model::SharedPtr& pModel);
 public:
     std::string mModelString;
     uint64_t mResId;
