@@ -7,7 +7,7 @@
 #include "Utils/Platform/OS.h"
 #include "Graphics/Scene/Editor/SceneEditor.h"
 #include "rapidjson/error/en.h"
-
+#include "TextureHelperExtend.h"
 #define SCENE_EXPORTER
 #define SCENE_IMPORTER
 #include "Graphics/Scene/SceneExportImportCommon.h"
@@ -99,6 +99,32 @@ bool SceneExtend::getFloatVec(const rapidjson::Value& jsonVal, const std::string
         }
 
         vec[i] = (float)(jsonVal[i].GetDouble());
+    }
+    return true;
+}
+
+template<uint32_t VecSize>
+bool SceneExtend::getIntVec(const rapidjson::Value & jsonVal, const std::string & desc, int vec[VecSize])
+{
+    if (jsonVal.IsArray() == false)
+    {
+        error("Trying to load a vector for " + desc + ", but JValue is not an array");
+        return false;
+    }
+
+    if (jsonVal.Size() != VecSize)
+    {
+        return error("Trying to load a vector for " + desc + ", but vector size mismatches. Required size is " + std::to_string(VecSize) + ", array size is " + std::to_string(jsonVal.Size()));
+    }
+
+    for (uint32_t i = 0; i < jsonVal.Size(); i++)
+    {
+        if (jsonVal[i].IsNumber() == false)
+        {
+            return error("Trying to load a vector for " + desc + ", but one the elements is not a number.");
+        }
+
+        vec[i] = (jsonVal[i].GetInt());
     }
     return true;
 }
@@ -464,6 +490,7 @@ bool SceneExtend::createModelInstances(const rapidjson::Value & jsonVal, const M
                 for (auto mm = mats.Begin(); mm < mats.End(); mm++)
                 {
                     std::string MaterialName = (*mm)[SceneExtendKeys::kMaterialName].GetString();
+                    DepthStencilStateBundle bundle;
                     for (auto mmx = mm->MemberBegin(); mmx < mm->MemberEnd(); mmx++) {
                         std::string mkey(mmx->name.GetString());
                         //if (mkey == SceneExtendKeys::kMaterialName) {
@@ -485,7 +512,79 @@ bool SceneExtend::createModelInstances(const rapidjson::Value & jsonVal, const M
                             uint32_t RasterizeMode(mmx->value.GetInt());
                             modelRes.sharedMaterials[MaterialName]->set_rasterizeMode(MaterialInstance::ERasterizeMode(RasterizeMode));
                         }
+                        {
+                            if (mkey == SceneExtendKeys::kDepthTest) {
+                                bundle.bDepthTest = mmx->value.GetBool();
+                            }
+                            if (mkey == SceneExtendKeys::kWriteDepth) {
+                                bundle.bWriteDepth = mmx->value.GetBool();
+                            }
+                            if (mkey == SceneExtendKeys::kDepthTestFunc) {
+                                auto DepthTestFunc = mmx->value.GetInt();
+                                bundle.eDepthTestFunc = Falcor::ComparisonFunc(DepthTestFunc);
+                            }
+                        }
+                        if (mkey == SceneExtendKeys::kParameter) {
+                            auto& jmp = mmx->value;
+                            for (auto mmxp = jmp.MemberBegin(); mmxp < jmp.MemberEnd(); mmxp++) {
+                                std::string pkey = mmxp->name.GetString();
+                                std::string prefix(pkey.substr(0, 4));
+                                std::string parameter(pkey.substr(4));
+                                if (prefix == ParameterPrefix::kBool) {
+                                    auto val = mmxp->value.GetBool();
+                                    modelRes.sharedMaterials[MaterialName]->insert_bool(parameter, val);
+                                }
+                                if (prefix == ParameterPrefix::kFloat) {
+                                    auto val = mmxp->value.GetFloat();
+                                    modelRes.sharedMaterials[MaterialName]->insert_float(parameter, val);
+                                }
+                                if (prefix == ParameterPrefix::kFloat2) {
+                                    glm::vec2 val;
+                                    getFloatVec<2>(mmxp->value, ParameterPrefix::kFloat2, &val[0]);
+                                    modelRes.sharedMaterials[MaterialName]->insert_vec2(parameter, val);
+                                }
+                                if (prefix == ParameterPrefix::kFloat3) {
+                                    glm::vec3 val;
+                                    getFloatVec<3>(mmxp->value, ParameterPrefix::kFloat3, &val[0]);
+                                    modelRes.sharedMaterials[MaterialName]->insert_vec3(parameter, val);
+                                }
+                                if (prefix == ParameterPrefix::kFloat4) {
+                                    glm::vec4 val;
+                                    getFloatVec<4>(mmxp->value, ParameterPrefix::kFloat4, &val[0]);
+                                    modelRes.sharedMaterials[MaterialName]->insert_vec4(parameter, val);
+                                }
+
+                                if (prefix == ParameterPrefix::kInt) {
+                                    auto val = mmxp->value.GetInt();
+                                    modelRes.sharedMaterials[MaterialName]->insert_int(parameter, val);
+                                }
+                                if (prefix == ParameterPrefix::kInt2) {
+                                    glm::ivec2 val;
+                                    getIntVec<2>(mmxp->value, ParameterPrefix::kInt2, &val[0]);
+                                    modelRes.sharedMaterials[MaterialName]->insert_ivec2(parameter, val);
+                                }
+                                if (prefix == ParameterPrefix::kInt3) {
+                                    glm::ivec3 val;
+                                    getIntVec<3>(mmxp->value, ParameterPrefix::kInt3, &val[0]);
+                                    modelRes.sharedMaterials[MaterialName]->insert_ivec3(parameter, val);
+                                }
+                                if (prefix == ParameterPrefix::kInt4) {
+                                    glm::ivec4 val;
+                                    getIntVec<4>(mmxp->value, ParameterPrefix::kInt4, &val[0]);
+                                    modelRes.sharedMaterials[MaterialName]->insert_ivec4(parameter, val);
+                                }
+
+                                if (prefix == ParameterPrefix::kTexture2D) {
+                                    std::string texName = mmxp->value.GetString();
+                                    if (!texName.empty()) {
+                                        auto pTexture = createTextureFromFile(texName.c_str(), false, true);
+                                        if (pTexture)modelRes.sharedMaterials[MaterialName]->set_texture2D(parameter, pTexture);
+                                    }
+                                }
+                            }
+                        }
                     }
+                    modelRes.sharedMaterials[MaterialName]->set_depthStencilTest(bundle);
                 }
             }
             else
@@ -604,37 +703,39 @@ void SceneExtend::createModelValue(uint32_t modelID, rapidjson::Document::Alloca
             addBool(jsonMaterial, allocator, SceneExtendKeys::kWriteDepth, mat->depthStencilBundle.bWriteDepth);
             addInt(jsonMaterial, allocator, SceneExtendKeys::kDepthTestFunc, UINT64(mat->depthStencilBundle.eDepthTestFunc));
 
+            rapidjson::Value jsonMaterialParams;
+            jsonMaterialParams.SetObject();
             for (auto& v : mat->param_bool) {
-                addFloat(jsonMaterial, allocator, v.first, v.second);
+                addFloat(jsonMaterialParams, allocator, ParameterPrefix::kBool + v.first, v.second);
             }
             for (auto& v : mat->param_float) {
-                addFloat(jsonMaterial, allocator, v.first, v.second);
+                addFloat(jsonMaterialParams, allocator, ParameterPrefix::kFloat + v.first, v.second);
             }
             for (auto& v : mat->param_vec2) {
-                addVector(jsonMaterial, allocator, v.first, v.second);
+                addVector(jsonMaterialParams, allocator, ParameterPrefix::kFloat2 + v.first, v.second);
             }
             for (auto& v : mat->param_vec3) {
-                addVector(jsonMaterial, allocator, v.first, v.second);
+                addVector(jsonMaterialParams, allocator, ParameterPrefix::kFloat3 + v.first, v.second);
             }
             for (auto& v : mat->param_vec4) {
-                addVector(jsonMaterial, allocator, v.first, v.second);
+                addVector(jsonMaterialParams, allocator, ParameterPrefix::kFloat4 + v.first, v.second);
             }
             for (auto& v : mat->param_int) {
-                addInt(jsonMaterial, allocator, v.first, v.second);
+                addInt(jsonMaterialParams, allocator, ParameterPrefix::kInt + v.first, v.second);
             }
             for (auto& v : mat->param_ivec2) {
-                addVector(jsonMaterial, allocator, v.first, v.second);
+                addVector(jsonMaterialParams, allocator, ParameterPrefix::kInt2 + v.first, v.second);
             }
             for (auto& v : mat->param_ivec3) {
-                addVector(jsonMaterial, allocator, v.first, v.second);
+                addVector(jsonMaterialParams, allocator, ParameterPrefix::kInt3 + v.first, v.second);
             }
             for (auto& v : mat->param_ivec4) {
-                addVector(jsonMaterial, allocator, v.first, v.second);
+                addVector(jsonMaterialParams, allocator, ParameterPrefix::kInt4 + v.first, v.second);
             }
-
             for (auto& v : mat->param_texture2D) {
-                addString(jsonMaterial, allocator, v.first, v.second->getSourceFilename());
+                addString(jsonMaterialParams, allocator, ParameterPrefix::kTexture2D + v.first, v.second->getSourceFilename());
             }
+            addJsonValue(jsonMaterial, allocator, SceneExtendKeys::kParameter, jsonMaterialParams);
             //todo : mat 写入
             jsonMaterialArray.PushBack(jsonMaterial, allocator);
 

@@ -14,6 +14,23 @@ namespace SceneExtendKeys {
     static const char* kBlendMode = "BlendMode";
     static const char* kRasterizeMode = "RasterizeMode";
     static const char* kRenderQueue = "RenderQueue";
+    static const char* kParameter = "Parameter";
+}
+
+namespace ParameterPrefix {
+    static const char* kBool = "(b1)";
+    static const char* kFloat = "(f1)";
+    static const char* kFloat2 = "(f2)";
+    static const char* kFloat3 = "(f3)";
+    static const char* kFloat4 = "(f4)";
+    static const char* kInt = "(i1)";
+    static const char* kInt2 = "(i2)";
+    static const char* kInt3 = "(i3)";
+    static const char* kInt4 = "(i4)";
+    static const char* kMat2 = "(m2)";
+    static const char* kMat3 = "(m3)";
+    static const char* kMat4 = "(m4)";
+    static const char* kTexture2D = "(t2)";
 }
 class SceneExtend :
     public Scene
@@ -62,6 +79,8 @@ private:
     bool error(const std::string& msg);
     template<uint32_t VecSize>
     bool getFloatVec(const rapidjson::Value& jsonVal, const std::string& desc, float vec[VecSize]);
+    template<uint32_t VecSize>
+    bool getIntVec(const rapidjson::Value& jsonVal, const std::string& desc, int vec[VecSize]);
     bool getFloatVecAnySize(const rapidjson::Value& jsonVal, const std::string& desc, std::vector<float>& vec);
     std::vector<ModelResource> mModelRes;
     rapidjson::Document mJDoc;
