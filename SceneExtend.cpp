@@ -450,7 +450,7 @@ bool SceneExtend::createModelInstances(const rapidjson::Value & jsonVal, const M
         glm::vec3 translation(0, 0, 0);
         glm::vec3 rotation(0, 0, 0);
         std::string name = "Instance " + std::to_string(i);
-
+        auto shadingModel = ShadingModelMetalRough;
         for (auto m = instance.MemberBegin(); m < instance.MemberEnd(); m++)
         {
             std::string key(m->name.GetString());
@@ -485,6 +485,16 @@ bool SceneExtend::createModelInstances(const rapidjson::Value & jsonVal, const M
 
                 rotation = glm::radians(rotation);
             }
+            else if (key == SceneKeys::kShadingModel)
+            {
+                std::string sVal = m->value.GetString();
+                if (sVal == SceneKeys::kShadingSpecGloss)
+                {
+                    shadingModel = ShadingModelSpecGloss;
+                }
+
+                rotation = glm::radians(rotation);
+            }
             else if (key == SceneExtendKeys::kMaterials) {
                 auto& mats = m->value.GetArray();
                 for (auto mm = mats.Begin(); mm < mats.End(); mm++)
@@ -496,6 +506,7 @@ bool SceneExtend::createModelInstances(const rapidjson::Value & jsonVal, const M
                         //if (mkey == SceneExtendKeys::kMaterialName) {
                         //    MaterialName =mmx->value.GetString();
                         //}
+                        modelRes.sharedMaterials[MaterialName]->mpMaterial->setShadingModel(shadingModel);
                         if (mkey == SceneExtendKeys::kShader) {
                             std::string Shader(mmx->value.GetString());
                             modelRes.setProgram(MaterialName, Shader);
@@ -578,7 +589,31 @@ bool SceneExtend::createModelInstances(const rapidjson::Value & jsonVal, const M
                                     std::string texName = mmxp->value.GetString();
                                     if (!texName.empty()) {
                                         auto pTexture = createTextureFromFile(texName.c_str(), false, true);
-                                        if (pTexture)modelRes.sharedMaterials[MaterialName]->set_texture2D(parameter, pTexture);
+                                        if (pTexture) {
+                                            if (parameter == ParameterDefault::kBaseColor) {
+                                                modelRes.sharedMaterials[MaterialName]->mpMaterial->setBaseColorTexture(pTexture);
+                                                modelRes.sharedMaterials[MaterialName]->bUseMaterial = true;
+                                            }
+                                            else if (parameter == ParameterDefault::kSpecular) {
+                                                modelRes.sharedMaterials[MaterialName]->mpMaterial->setSpecularTexture(pTexture);
+                                                modelRes.sharedMaterials[MaterialName]->bUseMaterial = true;
+                                            }
+                                            else if (parameter == ParameterDefault::kNormalMap) {
+                                                modelRes.sharedMaterials[MaterialName]->mpMaterial->setNormalMap(pTexture);
+                                                modelRes.sharedMaterials[MaterialName]->bUseMaterial = true;
+                                            }
+                                            else if (parameter == ParameterDefault::kEmissive) {
+                                                modelRes.sharedMaterials[MaterialName]->mpMaterial->setEmissiveTexture(pTexture);
+                                                modelRes.sharedMaterials[MaterialName]->bUseMaterial = true;
+                                            }
+                                            else if (parameter == ParameterDefault::kOcclusionMap) {
+                                                modelRes.sharedMaterials[MaterialName]->mpMaterial->setOcclusionMap(pTexture);
+                                                modelRes.sharedMaterials[MaterialName]->bUseMaterial = true;
+                                            }
+                                            else {
+                                                modelRes.sharedMaterials[MaterialName]->set_texture2D(parameter, pTexture);
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -654,21 +689,6 @@ void SceneExtend::createModelValue(uint32_t modelID, rapidjson::Document::Alloca
         addLiteral(jmodel, allocator, SceneKeys::kActiveAnimation, pModel->getActiveAnimation());
     }
 
-    // Export model material properties
-    rapidjson::Value materialValue;
-    materialValue.SetObject();
-    switch (pModel->getMesh(0)->getMaterial()->getShadingModel())
-    {
-    case ShadingModelMetalRough:
-        addString(materialValue, allocator, SceneKeys::kShadingModel, SceneKeys::kShadingMetalRough);
-        break;
-    case ShadingModelSpecGloss:
-        addString(materialValue, allocator, SceneKeys::kShadingModel, SceneKeys::kShadingSpecGloss);
-        break;
-    default:
-        logWarning("SceneExporter: Unknown shading model found on model " + pModel->getName() + ", ignoring value");
-    }
-    addJsonValue(jmodel, allocator, SceneKeys::kMaterial, materialValue);
 
     // Export model instances
     rapidjson::Value jsonInstanceArray;
@@ -681,11 +701,24 @@ void SceneExtend::createModelValue(uint32_t modelID, rapidjson::Document::Alloca
 
         addString(jsonInstance, allocator, SceneKeys::kName, pInstance->getName());
         addVector(jsonInstance, allocator, SceneKeys::kTranslationVec, pInstance->getTranslation());
-        addVector(jsonInstance, allocator, SceneKeys::kScalingVec, pInstance->getScaling());
-
         // Translate rotation to degrees
         glm::vec3 rotation = glm::degrees(pInstance->getRotation());
         addVector(jsonInstance, allocator, SceneKeys::kRotationVec, rotation);
+        addVector(jsonInstance, allocator, SceneKeys::kScalingVec, pInstance->getScaling());
+
+        // Export model material properties
+
+        switch (pModel->getMesh(0)->getMaterial()->getShadingModel())
+        {
+        case ShadingModelMetalRough:
+            addString(jsonInstance, allocator, SceneKeys::kShadingModel, SceneKeys::kShadingMetalRough);
+            break;
+        case ShadingModelSpecGloss:
+            addString(jsonInstance, allocator, SceneKeys::kShadingModel, SceneKeys::kShadingSpecGloss);
+            break;
+        default:
+            logWarning("SceneExporter: Unknown shading model found on model " + pModel->getName() + ", ignoring value");
+        }
 
         rapidjson::Value jsonMaterialArray;
         jsonMaterialArray.SetArray();
@@ -694,6 +727,7 @@ void SceneExtend::createModelValue(uint32_t modelID, rapidjson::Document::Alloca
             rapidjson::Value jsonMaterial;
             jsonMaterial.SetObject();
             auto& mat = modelRes.getMaterialInstance(meshID);
+
             addString(jsonMaterial, allocator, SceneExtendKeys::kMaterialName, mat->mName);
             addString(jsonMaterial, allocator, SceneExtendKeys::kShader, mat->mShaderName);
             addInt(jsonMaterial, allocator, SceneExtendKeys::kRenderQueue, mat->renderQueue);
@@ -705,6 +739,17 @@ void SceneExtend::createModelValue(uint32_t modelID, rapidjson::Document::Alloca
 
             rapidjson::Value jsonMaterialParams;
             jsonMaterialParams.SetObject();
+
+            if (mat->bUseMaterial) {
+                auto& pMat = mat->mpMaterial;
+                const std::string sTex2d(ParameterPrefix::kTexture2D);
+                addString(jsonMaterialParams, allocator, sTex2d + ParameterDefault::kBaseColor, pMat->getBaseColorTexture()->getSourceFilename());
+                addString(jsonMaterialParams, allocator, sTex2d + ParameterDefault::kSpecular, pMat->getSpecularTexture()->getSourceFilename());
+                addString(jsonMaterialParams, allocator, sTex2d + ParameterDefault::kNormalMap, pMat->getNormalMap()->getSourceFilename());
+                addString(jsonMaterialParams, allocator, sTex2d + ParameterDefault::kEmissive, pMat->getEmissiveTexture()->getSourceFilename());
+                addString(jsonMaterialParams, allocator, sTex2d + ParameterDefault::kOcclusionMap, pMat->getOcclusionMap()->getSourceFilename());
+            }
+
             for (auto& v : mat->param_bool) {
                 addFloat(jsonMaterialParams, allocator, ParameterPrefix::kBool + v.first, v.second);
             }

@@ -79,7 +79,7 @@ private:
     DepthStencilState::SharedPtr mpDepthTestGreaterDS = nullptr;
     DepthStencilState::SharedPtr mpDepthTestAlways = nullptr;
 
-    DirectionalLight::SharedPtr mpDirLight;
+   std::vector<DirectionalLight::SharedPtr> mpDirLight;
     PointLight::SharedPtr mpPointLight;
 
     GraphicsProgram::SharedPtr mpProgram = nullptr;

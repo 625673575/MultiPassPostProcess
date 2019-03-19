@@ -9,7 +9,7 @@ const Gui::DropdownList ModelViewer::kSkyBoxDropDownList = { { HdrImage::Evening
                                                     { HdrImage::DayTime, "Day Time" },
                                                     { HdrImage::Rathaus, "Rathaus" } };
 
-ModelViewer::ModelViewer() : mNearZ(0.1f), mFarZ(1000.0f)
+ModelViewer::ModelViewer() : mNearZ(0.1f), mFarZ(10000.0f)
 {
 }
 
@@ -88,13 +88,18 @@ void ModelViewer::onLoad(SampleCallbacks* ppSample, RenderContext* pRenderContex
     samplerDesc.setFilterMode(Sampler::Filter::Linear, Sampler::Filter::Linear, Sampler::Filter::Linear);
     mpLinearSampler = Sampler::create(samplerDesc);
 
-    mpDirLight = DirectionalLight::create();
-    mpPointLight = PointLight::create();
-    mpDirLight->setWorldDirection(glm::vec3(0.13f, 0.27f, -0.9f));
-
     mpScene = std::make_shared<SceneExtend>("");
-    mpScene->addLight(mpDirLight);
+    for (int i = 0; i < 2; i++) {
+        auto l = DirectionalLight::create();
+        l->setIntensity(glm::vec3(5.0f));
+        mpDirLight.push_back(l);
+        mpScene->addLight(l);
+    }
+    mpDirLight[0]->setWorldDirection(glm::vec3(-0.195f, -0.706f, -0.681f));
+    mpDirLight[1]->setWorldDirection(glm::vec3(-0.640f, -0.488f, -0.594f));
+    mpPointLight = PointLight::create();
     mpScene->addLight(mpPointLight);
+
 
     loadSkyBox();
     loadShaderProgram();
@@ -213,7 +218,8 @@ void ModelViewer::onGuiRender(SampleCallbacks * pSample, Gui * pGui)
     {
         if (pGui->beginGroup("Directional Light"))
         {
-            mpDirLight->renderUI(pGui);
+            for (auto& v : mpDirLight)
+                v->renderUI(pGui);
             pGui->endGroup();
         }
         if (pGui->beginGroup("Point Light"))

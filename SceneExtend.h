@@ -32,6 +32,13 @@ namespace ParameterPrefix {
     static const char* kMat4 = "(m4)";
     static const char* kTexture2D = "(t2)";
 }
+namespace ParameterDefault {
+    static const char* kBaseColor = "Albedo";
+    static const char* kSpecular = "Specular";
+    static const char* kNormalMap = "NormalMap";
+    static const char* kEmissive = "Emissive";
+    static const char* kOcclusionMap = "OcclusionMap";
+}
 class SceneExtend :
     public Scene
 {

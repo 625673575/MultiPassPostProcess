@@ -104,7 +104,7 @@ void ModelResource::onGui(Gui* p)
         p->addFloat3Var((modelName + "-Rotation").c_str(), Rotation);
         p->addFloat3Var((modelName + "-Scale").c_str(), Scale);
         for (auto&v : sharedMaterials) {
-            if (p->beginGroup(v.first, true)) {
+            if (p->beginGroup(v.first, false)) {
                 auto dropDownName = modelName + v.first + "-shader";
                 if (p->addDropdown(dropDownName.c_str(), programDropDownList, programDropDownIndex[v.first])) {
                     auto i = 0;

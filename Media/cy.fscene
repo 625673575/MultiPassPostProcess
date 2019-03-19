@@ -1,0 +1,1297 @@
+{
+    "models": [
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationMedium\\VegetationMedium04_02.fbx",
+            "name": "VegetationMedium04_02",
+            "instances": [
+                {
+                    "name": "VegetationMedium04_02",
+                    "translation": [
+                        -180.0,
+                        30.0,
+                        380.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "metal_rough",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationmedium04_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium04_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium04_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium04_Normals.tif",
+                                "(t2)Emissive": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium04_Emissive.tif",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium04_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationMedium\\VegetationMedium02.fbx",
+            "name": "VegetationMedium02",
+            "instances": [
+                {
+                    "name": "VegetationMedium02",
+                    "translation": [
+                        -350.0,
+                        20.0,
+                        100.0
+                    ],
+                    "rotation": [
+                        -37.06975555419922,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "metal_rough",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationmedium02_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium02_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium02_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium02_Normals.tif",
+                                "(t2)Emissive": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium02_Emission.tif",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium02_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationMedium\\VegetationMedium02_02.fbx",
+            "name": "VegetationMedium02_02",
+            "instances": [
+                {
+                    "name": "VegetationMedium02_02",
+                    "translation": [
+                        50.0,
+                        20.0,
+                        150.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "metal_rough",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationmedium02_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium02_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium02_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium02_Normals.tif",
+                                "(t2)Emissive": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium02_Emission.tif",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium02_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationMedium\\VegetationMedium03.fbx",
+            "name": "VegetationMedium03",
+            "instances": [
+                {
+                    "name": "VegetationMedium03",
+                    "translation": [
+                        380.0,
+                        0.0,
+                        200.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "metal_rough",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationmedium03_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium03_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium03_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium03_Normals.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium03_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationMedium\\VegetationMedium05.fbx",
+            "name": "VegetationMedium05",
+            "instances": [
+                {
+                    "name": "VegetationMedium05",
+                    "translation": [
+                        0.0,
+                        50.0,
+                        -380.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "spec_gloss",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationmedium05_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium05_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium05_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium05_Normal.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationMedium\\VegetationMedium05_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationSmall\\VegetationSmall01.fbx",
+            "name": "VegetationSmall01",
+            "instances": [
+                {
+                    "name": "VegetationSmall01",
+                    "translation": [
+                        200.0,
+                        60.0,
+                        390.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "metal_rough",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationsmall01_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationSmall\\VegetationSmall01_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationSmall\\VegetationSmall01_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationSmall\\VegetationSmall01_Normals.tif",
+                                "(t2)Emissive": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationSmall\\VegetationSmall01_Emission.tif",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationSmall\\VegetationSmall01_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationSmall\\VegetationSmall02.fbx",
+            "name": "VegetationSmall02",
+            "instances": [
+                {
+                    "name": "VegetationSmall02",
+                    "translation": [
+                        10.0,
+                        60.0,
+                        30.0
+                    ],
+                    "rotation": [
+                        -81.64645385742188,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "spec_gloss",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationsmall02_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationSmall\\VegetationSmall02_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationSmall\\VegetationSmall02_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationSmall\\VegetationSmall02_Normals.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationSmall\\VegetationSmall02_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Dropship\\Dropship.fbx",
+            "name": "Dropship",
+            "instances": [
+                {
+                    "name": "Dropship",
+                    "translation": [
+                        -1000.0,
+                        0.0,
+                        -300.0
+                    ],
+                    "rotation": [
+                        -65.16131591796875,
+                        -165.5515594482422,
+                        -158.4741668701172
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "metal_rough",
+                    "Materials": [
+                        {
+                            "MaterialName": "dropship_05_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_03_Normal.tif",
+                                "(t2)Emissive": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_02_Emission.tif",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        },
+                        {
+                            "MaterialName": "dropship_05_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_03_Normal.tif",
+                                "(t2)Emissive": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_02_Emission.tif",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        },
+                        {
+                            "MaterialName": "dropship_05_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_03_Normal.tif",
+                                "(t2)Emissive": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_02_Emission.tif",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        },
+                        {
+                            "MaterialName": "dropship_05_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_03_Normal.tif",
+                                "(t2)Emissive": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_02_Emission.tif",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        },
+                        {
+                            "MaterialName": "dropship_05_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_03_Normal.tif",
+                                "(t2)Emissive": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_02_Emission.tif",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        },
+                        {
+                            "MaterialName": "dropship_05_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_03_Normal.tif",
+                                "(t2)Emissive": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_02_Emission.tif",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Dropship\\Dropship_04_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\Monuments\\Monument01.fbx",
+            "name": "Monument01",
+            "instances": [
+                {
+                    "name": "Monument01",
+                    "translation": [
+                        -500.0,
+                        -5000.0,
+                        -5000.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "spec_gloss",
+                    "Materials": [
+                        {
+                            "MaterialName": "monument01_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\Monument01_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\Monument01_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\Monument01_Normal.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\Monument01_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\Rock\\CliffBig01.fbx",
+            "name": "CliffBig01",
+            "instances": [
+                {
+                    "name": "CliffBig01",
+                    "translation": [
+                        3500.0,
+                        -3000.0,
+                        -5000.0
+                    ],
+                    "rotation": [
+                        -25.076047897338868,
+                        -180.0,
+                        180.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "metal_rough",
+                    "Materials": [
+                        {
+                            "MaterialName": "cliffbig01_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\CliffBig01_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\CliffBig01_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\CliffBig01_Normals.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\CliffBig01_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\Rock\\Ridge01.fbx",
+            "name": "Ridge01",
+            "instances": [
+                {
+                    "name": "Ridge01",
+                    "translation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        16.042818069458009,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "metal_rough",
+                    "Materials": [
+                        {
+                            "MaterialName": "ridge01_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\Ridge01_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\Ridge01_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\Ridge01_Normals.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\Ridge02_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Skybox\\DistantTerrain.fbx",
+            "name": "DistantTerrain",
+            "instances": [
+                {
+                    "name": "DistantTerrain",
+                    "translation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "spec_gloss",
+                    "Materials": [
+                        {
+                            "MaterialName": "distantterrain_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\DistantTerrain_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\DistantTerrain_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\DistantTerrain_Normal.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\DistantTerrain_DetailMask.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\Rock\\CliffBig03.fbx",
+            "name": "CliffBig03",
+            "instances": [
+                {
+                    "name": "CliffBig03",
+                    "translation": [
+                        1000.0,
+                        -1500.0,
+                        -4000.0
+                    ],
+                    "rotation": [
+                        -77.63644409179688,
+                        -0.2613244354724884,
+                        -0.25526323914527895
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "metal_rough",
+                    "Materials": [
+                        {
+                            "MaterialName": "cliffbig03_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\CliffBig03_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\CliffBig03_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\CliffBig03_Normals.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\CliffBig03_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\Rock\\CliffBig02.fbx",
+            "name": "CliffBig02",
+            "instances": [
+                {
+                    "name": "CliffBig02",
+                    "translation": [
+                        3000.0,
+                        0.0,
+                        -3000.0
+                    ],
+                    "rotation": [
+                        11.164411544799805,
+                        -172.87359619140626,
+                        178.95652770996095
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "spec_gloss",
+                    "Materials": [
+                        {
+                            "MaterialName": "cliffbig02_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 1882,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": false,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\CliffBig02_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\CliffBig02_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\CliffBig02_Normals.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\CliffBig02_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\Rock\\RockChunk01.fbx",
+            "name": "RockChunk01",
+            "instances": [
+                {
+                    "name": "RockChunk01",
+                    "translation": [
+                        -1500.0009765625,
+                        0.0,
+                        -2000.0
+                    ],
+                    "rotation": [
+                        -22.978181838989259,
+                        -0.0,
+                        -1.8907607793807984
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "spec_gloss",
+                    "Materials": [
+                        {
+                            "MaterialName": "rockchunk01_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\RockChunk01_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\RockChunk01_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\Rock\\RockChunk01_Normal.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationLarge\\VegetationLarge01.fbx",
+            "name": "VegetationLarge01",
+            "instances": [
+                {
+                    "name": "VegetationLarge01",
+                    "translation": [
+                        2000.0,
+                        0.0,
+                        -2000.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "metal_rough",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationlarge01_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge01_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge01_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge01_Normals.tif",
+                                "(t2)Emissive": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge01_Emission.tif",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge01_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationLarge\\VegetationLarge02.fbx",
+            "name": "VegetationLarge02",
+            "instances": [
+                {
+                    "name": "VegetationLarge02",
+                    "translation": [
+                        350.0,
+                        10.0,
+                        -100.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "spec_gloss",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationlarge02_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge02_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge02_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge02_Normals.tif",
+                                "(t2)Emissive": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge02_Emission.tif",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge02_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationLarge\\VegetationLarge03.fbx",
+            "name": "VegetationLarge03",
+            "instances": [
+                {
+                    "name": "VegetationLarge03",
+                    "translation": [
+                        1000.0,
+                        -200.0,
+                        -3000.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "metal_rough",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationlarge03_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge03_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge03_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge03_Normals.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge03_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationLarge\\VegetationLarge04.fbx",
+            "name": "VegetationLarge04",
+            "instances": [
+                {
+                    "name": "VegetationLarge04",
+                    "translation": [
+                        1200.0,
+                        0.0,
+                        -2000.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "metal_rough",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationlarge04_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge04_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge04_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge04_Normals.tif",
+                                "(t2)Emissive": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge04_Emission.tif",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge04_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationLarge\\VegetationLarge05.fbx",
+            "name": "VegetationLarge05",
+            "instances": [
+                {
+                    "name": "VegetationLarge05",
+                    "translation": [
+                        -1500.0009765625,
+                        800.0,
+                        -2000.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "spec_gloss",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationlarge05_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge05_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge05_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge05_Normals.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge05_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationLarge\\VegetationLarge05_02.fbx",
+            "name": "VegetationLarge05_02",
+            "instances": [
+                {
+                    "name": "VegetationLarge05_02",
+                    "translation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "spec_gloss",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationlarge05_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge05_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge05_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge05_Normals.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge05_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationLarge\\VegetationLarge06.fbx",
+            "name": "VegetationLarge06",
+            "instances": [
+                {
+                    "name": "VegetationLarge06",
+                    "translation": [
+                        3000.0,
+                        2000.0,
+                        -2500.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "metal_rough",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationlarge06_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge06_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge06_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge06_Normals.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge06_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "file": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Models\\Environment\\VegetationLarge\\VegetationLarge07.fbx",
+            "name": "VegetationLarge07",
+            "instances": [
+                {
+                    "name": "VegetationLarge07",
+                    "translation": [
+                        4000.0,
+                        2000.0,
+                        -2100.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "scaling": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "shading_model": "spec_gloss",
+                    "Materials": [
+                        {
+                            "MaterialName": "vegetationlarge07_mat",
+                            "Shader": "Diffuse",
+                            "RenderQueue": 2000,
+                            "BlendMode": 0,
+                            "RasterizeMode": 2,
+                            "DepthTest": true,
+                            "WriteDepth": true,
+                            "DepthTestFunc": 6,
+                            "Parameter": {
+                                "(t2)Albedo": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge07_Albedo.tif",
+                                "(t2)Specular": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge07_MetallicSmooth.tif",
+                                "(t2)NormalMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge07_Normals.tif",
+                                "(t2)Emissive": "",
+                                "(t2)OcclusionMap": "E:\\UnityProject\\Biscro\\Assets\\3DGamekit\\Art\\Textures\\Environment\\VegetationLarge\\VegetationLarge07_Occlusion.tif",
+                                "(b1)gConstColor": 0.0,
+                                "(f4)gBaseColor": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
