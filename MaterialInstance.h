@@ -6,10 +6,10 @@ struct DepthStencilStateBundle {
     bool bWriteDepth = true;
     bool bDepthTest = true;
     ComparisonFunc eDepthTestFunc = ComparisonFunc::LessEqual;
-    bool operator ==(const DepthStencilStateBundle&rhs);
+    bool operator ==(const DepthStencilStateBundle& rhs);
     static std::vector<DepthStencilState::SharedPtr> state;
-    static bool Get(const DepthStencilStateBundle & bundle, DepthStencilState::SharedPtr& ref);
-    static DepthStencilState::SharedPtr Get(const DepthStencilStateBundle & bundle);
+    static bool Get(const DepthStencilStateBundle& bundle, DepthStencilState::SharedPtr& ref);
+    static DepthStencilState::SharedPtr Get(const DepthStencilStateBundle& bundle);
 };
 
 enum class ERenderQueue :int32_t {
@@ -109,8 +109,9 @@ private:
     Material::SharedPtr mpMaterial = nullptr;
     bool bUseMaterial = false;
     std::string mName;
-    std::string mShaderName; 
+    std::string mShaderName;
     uint64_t mResId;
+    bool renderOutline = false;
     DepthStencilStateBundle depthStencilBundle;
     EBlendMode blendMode;
     ERasterizeMode rasterizeMode;
@@ -120,10 +121,12 @@ public:
     const GraphicsProgram::SharedPtr& get_program() { return mpProgram; }
     const GraphicsState::SharedPtr& get_state() { return mpState; }
     const GraphicsVars::SharedPtr& get_programVars() { return mpProgramVars; }
-    MaterialInstance& set_program(const  GraphicsProgram::SharedPtr& prog,const std::string& shaderName, bool use_default_material = false, uint32_t shaderModel = ShadingModelSpecGloss, bool resetState = true);
+    MaterialInstance& set_program(const  GraphicsProgram::SharedPtr& prog, const std::string& shaderName, bool use_default_material = false, uint32_t shaderModel = ShadingModelSpecGloss, bool resetState = true);
     MaterialInstance& set_blendMode(EBlendMode mode);
     MaterialInstance& set_rasterizeMode(ERasterizeMode mode);
     MaterialInstance& set_depthStencilTest(const DepthStencilStateBundle& bundle);
+    void set_renderOutline(bool render) { renderOutline = render; }
+    bool get_renderOutline() { return renderOutline; }
     DEF_INSERT_FUNC(bool);
     DEF_INSERT_FUNC(int);
     DEF_INSERT_FUNC(ivec2);
@@ -143,7 +146,7 @@ public:
     Texture::SharedPtr& get_textureCube(const std::string& var_name) { return param_textureCube[var_name]; }
 
     ConstantBuffer::SharedPtr get_constantbuffer(ECBType t);
-    void onMaterialGui(Gui *p);
+    void onMaterialGui(Gui* p);
     void onRender(RenderContext* pRenderContext);
     const std::string& getName() { return mName; }
     const std::string& getInstanceName() { return mName; }

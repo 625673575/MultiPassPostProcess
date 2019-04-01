@@ -18,19 +18,21 @@ public:
     void onGuiRender(SampleCallbacks* pSample, Gui* pGui);
     bool hasModel() { return !mpScene->empty(); }
     void loadModel(const std::string& Filename, ResourceFormat fboFormat, bool animation = false, bool useLinearFilter = true);
+    static ModelViewer* getCurrentViewer() { return mCurrentViewer; }
 private:
     void openDialogLoadModel(ResourceFormat fboFormat);
     void deleteCulledMeshes(ModelResource& mesh);
 
     void initDepthPass();
     bool loadModelFromFile(ModelResource& r, const std::string& Filename, ResourceFormat fboFormat, bool animation = false, bool useLinearFilter = true);
-    void resetCamera();
+    void resetCamera(const Model::SharedPtr& model = nullptr, float distance = 5.0f);
     void renderModelUI(Gui* pGui);
     void loadSkyBox();
     void loadShaderProgram();
     void loadMaterialFunctions();
     void loadModelResources();
     SampleCallbacks* pSample;
+    static ModelViewer* mCurrentViewer;
     std::shared_ptr<SceneExtend> mpScene;
     SceneRendererExtend::SharedPtr pSceneRenderer;
     ModelViewCameraController mModelViewCameraController;
@@ -58,6 +60,10 @@ private:
     Texture::SharedPtr mHdrImage;
     SkyBox::SharedPtr mpSkyBox;
 
+    Picking::UniquePtr mpScenePicker;
+    std::set<const Scene::ModelInstance*> mSelectedInstances;
+    CpuTimer mMouseHoldTimer;
+
     Camera::SharedPtr mpCamera;
     CameraController& getActiveCameraController();
     float mNearZ;
@@ -79,7 +85,7 @@ private:
     DepthStencilState::SharedPtr mpDepthTestGreaterDS = nullptr;
     DepthStencilState::SharedPtr mpDepthTestAlways = nullptr;
 
-   std::vector<DirectionalLight::SharedPtr> mpDirLight;
+    std::vector<DirectionalLight::SharedPtr> mpDirLight;
     PointLight::SharedPtr mpPointLight;
 
     GraphicsProgram::SharedPtr mpProgram = nullptr;

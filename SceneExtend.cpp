@@ -441,8 +441,7 @@ bool SceneExtend::createModelInstances(const rapidjson::Value & jsonVal, const M
         return error("Model instances should be an array of objects");
     }
     ModelResource modelRes(pModel);
-    modelRes.init();
-
+    modelRes.init("Diffuse");
     for (uint32_t i = 0; i < jsonVal.Size(); i++)
     {
         const auto& instance = jsonVal[i];
@@ -503,14 +502,8 @@ bool SceneExtend::createModelInstances(const rapidjson::Value & jsonVal, const M
                     DepthStencilStateBundle bundle;
                     for (auto mmx = mm->MemberBegin(); mmx < mm->MemberEnd(); mmx++) {
                         std::string mkey(mmx->name.GetString());
-                        //if (mkey == SceneExtendKeys::kMaterialName) {
-                        //    MaterialName =mmx->value.GetString();
-                        //}
                         modelRes.sharedMaterials[MaterialName]->mpMaterial->setShadingModel(shadingModel);
-                        if (mkey == SceneExtendKeys::kShader) {
-                            std::string Shader(mmx->value.GetString());
-                            modelRes.setProgram(MaterialName, Shader);
-                        }
+
                         if (mkey == SceneExtendKeys::kRenderQueue) {
                             uint32_t RenderQueue(mmx->value.GetInt());
                             modelRes.sharedMaterials[MaterialName]->setRenderQueue(RenderQueue);

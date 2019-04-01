@@ -27,6 +27,7 @@ protected:
     GraphicsProgram::SharedPtr mpDefaultProgram;
     GraphicsVars::SharedPtr mpDefaultProgramVars;
     Fbo::SharedPtr mpFbo;
+    MaterialInstance::SharedPtr mpOutlineMaterial;
     struct MaterialInstanceBuffer {
         MaterialInstance* pMaterialInstance;
         ObjectInstance<Model>* pModelInstance;

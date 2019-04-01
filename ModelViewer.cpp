@@ -3,6 +3,7 @@
 
 std::map<std::string, std::function<void(MaterialInstance::SharedPtr&)>> ModelViewer::mMaterialFuncMap;
 std::map<std::string, GraphicsProgram::SharedPtr> ModelViewer::mProgramMap;
+ModelViewer* ModelViewer::mCurrentViewer = nullptr;
 const Gui::DropdownList ModelViewer::kSkyBoxDropDownList = { { HdrImage::EveningSun, "Evening Sun" },
                                                     { HdrImage::AtTheWindow, "Window" },
                                                     { HdrImage::OvercastDay, "Overcast Day" },
@@ -11,6 +12,7 @@ const Gui::DropdownList ModelViewer::kSkyBoxDropDownList = { { HdrImage::Evening
 
 ModelViewer::ModelViewer() : mNearZ(0.1f), mFarZ(10000.0f)
 {
+    mCurrentViewer = this;
 }
 
 
@@ -100,11 +102,12 @@ void ModelViewer::onLoad(SampleCallbacks* ppSample, RenderContext* pRenderContex
     mpPointLight = PointLight::create();
     mpScene->addLight(mpPointLight);
 
+    mpScenePicker = Picking::create(mpScene, w, h);
 
     loadSkyBox();
     loadShaderProgram();
     loadMaterialFunctions();
-    loadModelResources();
+    //loadModelResources();
 }
 
 void ModelViewer::onFrameRender(SampleCallbacks * pSample, RenderContext * pRenderContext, const Fbo::SharedPtr & pTargetFbo)
@@ -243,6 +246,14 @@ void ModelViewer::onGuiRender(SampleCallbacks * pSample, Gui * pGui)
             mpScene->reset();
             break;
         }
+        bool hasSelected = v->getSelected();
+        std::string selText = !hasSelected ? "Select " : "UnSelect ";
+        if (pGui->addButton((selText + v->getModelResName()).c_str(), true)) {
+            if (!hasSelected) {
+                resetCamera(v->mpModel);
+            }
+            v->setSelected(!hasSelected);
+        }
         v->onGui(pGui);
     }
     pGui->popWindow();
@@ -282,6 +293,29 @@ bool ModelViewer::onKeyEvent(SampleCallbacks * pSample, const KeyboardEvent & ke
 
 bool ModelViewer::onMouseEvent(SampleCallbacks * pSample, const MouseEvent & mouseEvent)
 {
+    // Update mouse hold timer
+    if (mouseEvent.type == MouseEvent::Type::LeftButtonDown || mouseEvent.type == MouseEvent::Type::LeftButtonUp)
+    {
+        mMouseHoldTimer.update();
+    }
+    switch (mouseEvent.type)
+    {
+    case MouseEvent::Type::LeftButtonUp:
+        // Scene Object Selection
+        if (mMouseHoldTimer.getElapsedTime() < 0.2f)
+        {
+            if (mpScenePicker->pick(pSample->getRenderContext(), mouseEvent.pos, mpCamera))
+            {
+                //select(mpScenePicker->getPickedModelInstance(), mpScenePicker->getPickedMeshInstance());
+            }
+            else
+            {
+                //deselect();
+            }
+        }
+        break;
+    }
+
     return getActiveCameraController().onMouseEvent(mouseEvent);
 }
 
@@ -361,15 +395,20 @@ CameraController& ModelViewer::getActiveCameraController()
 }
 
 
-void ModelViewer::resetCamera()
+void ModelViewer::resetCamera(const Model::SharedPtr & model, float distance)
 {
     if (!mpScene->empty())
     {
+        Model::SharedPtr mpModel;
+        if (model == nullptr)
+            mpModel = mpScene->getModel(0);
+        else
+            mpModel = model;
         // update the camera position
-        float Radius = mpScene->getModel(0)->getRadius();
-        const glm::vec3& ModelCenter = mpScene->getModel(0)->getCenter();
+        float Radius = mpModel->getRadius();
+        const glm::vec3 & ModelCenter = mpModel->getCenter();
         glm::vec3 CamPos = ModelCenter;
-        CamPos.z += Radius * 5;
+        CamPos.z += Radius * distance;
 
         mpCamera->setPosition(CamPos);
         mpCamera->setTarget(ModelCenter);
@@ -416,6 +455,7 @@ void ModelViewer::loadShaderProgram()
 {
     const char* psEntry = "frag";
     const char* vsEntry = "vert";
+    mProgramMap.emplace("OutlinePass", GraphicsProgram::createFromFile("OutlinePass.hlsl", vsEntry, psEntry));
     mProgramMap.emplace("Standard", GraphicsProgram::createFromFile("Standard.hlsl", "", psEntry));
     mProgramMap.emplace("Diffuse", GraphicsProgram::createFromFile("Diffuse.hlsl", "", psEntry));
     mProgramMap.emplace("ConstColor", GraphicsProgram::createFromFile("ConstColor.hlsl", "", psEntry));
@@ -428,6 +468,12 @@ void ModelViewer::loadShaderProgram()
 void ModelViewer::loadMaterialFunctions()
 {
 #define INPUT_SHADER(x) mProgramMap[#x],#x
+    mMaterialFuncMap.emplace("OutlinePass", [this](MaterialInstance::SharedPtr & m) {
+        m->set_program(INPUT_SHADER(OutlinePass));
+        m->set_rasterizeMode(MaterialInstance::ERasterizeMode::Wire);
+        m->insert_vec4("gOutlineColor", glm::vec4(1.0f, 1.0f, 0.0f, 1.0f));
+        m->insert_float("gWidth", 2.0f);
+    });
     mMaterialFuncMap.emplace("Standard", [this](MaterialInstance::SharedPtr & m) {
         m->set_program(INPUT_SHADER(Standard));
         m->set_texture2D("gAlbedoTexture", MaterialInstance::WhiteTexture);

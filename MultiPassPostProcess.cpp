@@ -94,7 +94,7 @@ void MultiPassPostProcess::onLoad(SampleCallbacks* pSample, RenderContext* pRend
     mpProgVars = GraphicsVars::create(mpBlit->getProgram()->getReflector());
 
     //loadShaderToy();
-    //loadPostProcess();
+    loadPostProcess();
 
     for (auto& v : postProcessor) {
         v->loadProgram(pSample, pRenderContext, pSample->getGui());
@@ -132,7 +132,6 @@ void MultiPassPostProcess::loadImageFromFile(SampleCallbacks * pSample, std::str
 
     Fbo::Desc fboDesc;
     fboDesc.setColorTarget(0, pTextureSelectedFromFile->getFormat());
-    mpTempFB = FboHelper::create2D(pTextureSelectedFromFile->getWidth(), pTextureSelectedFromFile->getHeight() / 2, fboDesc);
 
     pSample->resizeSwapChain(pTextureSelectedFromFile->getWidth(), pTextureSelectedFromFile->getHeight());
 }
@@ -221,6 +220,10 @@ void MultiPassPostProcess::onFrameRender(SampleCallbacks * pSample, RenderContex
 
         if (mEnableGaussianBlur)
         {
+            if(mpTempFB==nullptr){
+                auto& currentFbo = pContext->getGraphicsState()->getFbo();
+                mpTempFB = FboHelper::create2D(currentFbo->getWidth(), currentFbo->getHeight() / 2, currentFbo->getDesc());
+            }
             mpGaussianBlur->execute(pContext, pSrcTex, mpTempFB);
             mpProgVars->setTexture("gTexture", mpTempFB->getColorTexture(0));
             const FullScreenPass* pFinalPass = mpBlit.get();

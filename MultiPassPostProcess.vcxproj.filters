@@ -185,6 +185,9 @@
     <None Include="DepthToLiner01.hlsl">
       <Filter>Data</Filter>
     </None>
+    <None Include="Data\OutlinePass.hlsl">
+      <Filter>Data</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MultiPassPostProcess.rc" />

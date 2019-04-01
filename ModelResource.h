@@ -19,7 +19,6 @@ public:
     bool mAnimate = false;
     bool mUseTriLinearFiltering = false;
     std::map<std::string, MaterialInstance::SharedPtr> sharedMaterials;
-    
     std::string getModelDesc(bool isAfterCull, float loadTime);
     void setProgram(const std::string& materialName, const std::string& programName);
     uint32_t getProgramIndex(const GraphicsProgram::SharedPtr&);
@@ -29,11 +28,14 @@ public:
     MaterialInstance::SharedPtr& getMaterialInstance(uint32_t meshID);
     void resetMaterialGui();
     static bool hasInitGui;
-    void init(const std::string& default_shader="");
+    void init(const std::string& default_shader="Diffuse");
     void onGui(Gui* p);
     void setTRS(const glm::vec3& translation, const glm::vec3& rotation, const glm::vec3& scale);
     std::string getModelResName();
+    void setSelected(bool selected);
+    bool getSelected() { return mSelected; }
 private:
+    bool mSelected;
     void initMaterials(const std::string& default_shader = "");
     std::map<std::string,uint32_t> programDropDownIndex;
     static Gui::DropdownList programDropDownList;

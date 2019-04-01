@@ -4,11 +4,11 @@
 Gui::DropdownList ModelResource::programDropDownList = {};
 bool ModelResource::hasInitGui = false;
 uint64_t ModelResource::count = 0;
-ModelResource::ModelResource() :Translation(0), Rotation(0), Scale(1)
+ModelResource::ModelResource() :Translation(0), Rotation(0), Scale(1), mSelected(false)
 {
 }
 
-ModelResource::ModelResource(const Model::SharedPtr& pModel) : Translation(0), Rotation(0), Scale(1)
+ModelResource::ModelResource(const Model::SharedPtr& pModel) : Translation(0), Rotation(0), Scale(1), mSelected(false)
 {
     mpModel = pModel;
 }
@@ -28,17 +28,17 @@ std::string ModelResource::getModelDesc(bool isAfterCull, float loadTime)
     return mModelString;
 }
 
-void ModelResource::setProgram(const std::string & materialName, const std::string & programName)
+void ModelResource::setProgram(const std::string& materialName, const std::string& programName)
 {
     auto& material = sharedMaterials[materialName];
     ModelViewer::getMaterialFuncMap().at(programName)(material);
     resetMaterialGui();
 }
 
-uint32_t ModelResource::getProgramIndex(const GraphicsProgram::SharedPtr & pProgram)
+uint32_t ModelResource::getProgramIndex(const GraphicsProgram::SharedPtr& pProgram)
 {
     uint32_t i = 0;
-    for (auto & p : ModelViewer::getProgramMap()) {
+    for (auto& p : ModelViewer::getProgramMap()) {
         if (p.second == pProgram) {
             return i;
         }
@@ -50,7 +50,7 @@ uint32_t ModelResource::getProgramIndex(const GraphicsProgram::SharedPtr & pProg
 std::vector<std::string> ModelResource::getMaterialsName()
 {
     std::vector<std::string> r;
-    for (auto&v : sharedMaterials)
+    for (auto& v : sharedMaterials)
         r.emplace_back(v.first);
     return r;
 }
@@ -65,7 +65,7 @@ size_t ModelResource::getMaterialCount()
     return sharedMaterials.size();
 }
 
-MaterialInstance::SharedPtr & ModelResource::getMaterialInstance(uint32_t meshID)
+MaterialInstance::SharedPtr& ModelResource::getMaterialInstance(uint32_t meshID)
 {
     auto& pMat = mpModel->getMesh(meshID)->getMaterial();
     return sharedMaterials[pMat->getName()];
@@ -73,18 +73,18 @@ MaterialInstance::SharedPtr & ModelResource::getMaterialInstance(uint32_t meshID
 
 void ModelResource::resetMaterialGui()
 {
-    for (auto&inst : sharedMaterials) {
+    for (auto& inst : sharedMaterials) {
         auto initProgramIndex = getProgramIndex(inst.second->get_program());
         programDropDownIndex.emplace(inst.first, initProgramIndex);
     }
 }
 
-void ModelResource::init(const std::string& default_shader)
+void ModelResource::init(const std::string & default_shader)
 {
     if (!hasInitGui) {
         uint32_t i = 0;
         auto& materialFuncMap = ModelViewer::getMaterialFuncMap();
-        for (auto&v : materialFuncMap) {
+        for (auto& v : materialFuncMap) {
             programDropDownList.push_back({ i++, v.first });
         }
         hasInitGui = true;
@@ -94,21 +94,21 @@ void ModelResource::init(const std::string& default_shader)
 }
 
 
-void ModelResource::onGui(Gui* p)
+void ModelResource::onGui(Gui * p)
 {
     p->addSeparator();
     auto modelName = getModelResName();
-    if (p->beginGroup(modelName, true)) {
+    if (p->beginGroup(modelName, false)) {
         p->addText("Transform ");
         p->addFloat3Var((modelName + "-Translation").c_str(), Translation);
         p->addFloat3Var((modelName + "-Rotation").c_str(), Rotation);
         p->addFloat3Var((modelName + "-Scale").c_str(), Scale);
-        for (auto&v : sharedMaterials) {
-            if (p->beginGroup(v.first, false)) {
+        for (auto& v : sharedMaterials) {
+            if (p->beginGroup(v.first, true)) {
                 auto dropDownName = modelName + v.first + "-shader";
                 if (p->addDropdown(dropDownName.c_str(), programDropDownList, programDropDownIndex[v.first])) {
                     auto i = 0;
-                    for (auto & func : getProgramMapFunc()) {
+                    for (auto& func : getProgramMapFunc()) {
                         if (i++ == programDropDownIndex[v.first]) {
                             func.second(v.second);
                         }
@@ -131,16 +131,28 @@ void ModelResource::setTRS(const glm::vec3 & translation, const glm::vec3 & rota
 
 std::string ModelResource::getModelResName()
 {
-    return  mpModel->getName() + "res id:"+std::to_string(mResId);
+    return  mpModel->getName() + "res id:" + std::to_string(mResId);
 }
 
-void ModelResource::initMaterials(const std::string& default_shader)
+void ModelResource::setSelected(bool selected)
+{
+    mSelected = selected;
+    //if selected ,then set render outline
+    for (auto& v : sharedMaterials) {
+        v.second->set_renderOutline(selected);
+    }
+}
+
+void ModelResource::initMaterials(const std::string & default_shader)
 {
     for (uint32_t i = 0; i < mpModel->getMeshCount(); i++) {
-        auto& mat = mpModel->getMesh(i)->getMaterial();
-        const auto& matName = mat->getName();
-        if (sharedMaterials.find(matName) != sharedMaterials.end())
-            continue;
+        auto mat = mpModel->getMesh(i)->getMaterial();
+        auto matName = mat->getName();
+        if (sharedMaterials.find(matName) != sharedMaterials.end()) {
+            matName = matName + "_" + std::to_string(i);
+            mat = Material::create(matName);
+            mpModel->getMesh(i)->setMaterial(mat);
+        }
         auto inst = std::make_shared<MaterialInstance>(matName, mat);
         sharedMaterials.emplace(matName, inst);
         if (default_shader.size() > 0) {

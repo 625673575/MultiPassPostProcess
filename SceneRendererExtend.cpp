@@ -1,12 +1,14 @@
 #include "SceneRendererExtend.h"
 #include "ModelResource.h"
-
+#include "ModelViewer.h"
 
 SceneRendererExtend::SceneRendererExtend(const Scene::SharedPtr& pScene) :SceneRenderer(pScene)
 {
+    mpOutlineMaterial = std::make_shared<MaterialInstance>("OutlinePass");
+    ModelViewer::getMaterialFuncMap().at("OutlinePass")(mpOutlineMaterial);
 }
 
-void SceneRendererExtend::renderScene(RenderContext * pContext, const Fbo::SharedPtr& fbo, const Camera * pCamera, bool renderDepth)
+void SceneRendererExtend::renderScene(RenderContext* pContext, const Fbo::SharedPtr& fbo, const Camera* pCamera, bool renderDepth)
 {
     mpFbo = fbo;
     mSetShaderForEachMaterial = renderDepth;
@@ -21,7 +23,7 @@ void SceneRendererExtend::renderScene(RenderContext * pContext, const Fbo::Share
     render(currentData);
 }
 
-void SceneRendererExtend::setPerFrameData(const CurrentWorkingData & currentData)
+void SceneRendererExtend::setPerFrameData(const CurrentWorkingData& currentData)
 {
     ConstantBuffer* pCB = currentData.pContext->getGraphicsVars()->getConstantBuffer(kPerFrameCbName).get();
     if (pCB)
@@ -179,13 +181,23 @@ void SceneRendererExtend::render(CurrentWorkingData & currentData)
         }
     }
     if (mSetShaderForEachMaterial) {
-        std::sort(mSavedInstance.begin(), mSavedInstance.end(), [](const MaterialInstanceBuffer&l, const MaterialInstanceBuffer&r)->bool {
+        std::sort(mSavedInstance.begin(), mSavedInstance.end(), [](const MaterialInstanceBuffer & l, const MaterialInstanceBuffer & r)->bool {
             return l.pMaterialInstance->ComaparsionQueue(r.pMaterialInstance);
         });
         for (auto& mat : mSavedInstance) {
+            if (mat.pMaterialInstance->get_renderOutline()) {
+                //ModelViewer::getMaterialFunc("OutlinePass")();
+                mat.data.pState = mpOutlineMaterial->get_state().get();
+                mat.data.pVars = mpOutlineMaterial->get_programVars().get();
+                mat.data.pState->setFbo(mpFbo);
+                mpOutlineMaterial->onRender(mat.data.pContext);
+                updateVariableOffsets(mpOutlineMaterial->get_programVars()->getReflection().get());
+                setPerFrameData(mat.data);
+                renderMeshInstances(mat.data, mat.pModelInstance, mat.meshId);
+            }
+
             mat.data.pState->setFbo(mpFbo);
             mat.pMaterialInstance->onRender(mat.data.pContext);
-
             updateVariableOffsets(mat.data.pVars->getReflection().get());
             setPerFrameData(mat.data);
             renderMeshInstances(mat.data, mat.pModelInstance, mat.meshId);
